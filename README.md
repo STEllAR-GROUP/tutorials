@@ -1,2 +1,3 @@
-# tutorials
-This repository contains material for tutorials given by members of the STE||AR-Group
+# STE||AR-Group Tutorials
+
+* [Task based Programming with HPX - September 29-30 2016, CSCS Lugano](cscs2016)
