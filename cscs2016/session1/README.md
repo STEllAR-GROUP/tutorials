@@ -1,10 +1,10 @@
-.middle
 # Hello World
 
 * Buuh
 * YAya
 
-.middle
+---
+
 # More
 
 ```
