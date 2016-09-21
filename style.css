@@ -1,5 +1,34 @@
+@import url(https://fonts.googleapis.com/css?family=Droid+Serif);
+@import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+
+body {
+    font-family: 'Droid Serif';
+}
+h1, h2, h3 {
+    font-family: 'Yanone Kaffeesatz';
+    font-weight: 400;
+    margin-bottom: 0;
+}
+
+img {
+    width: 100%;;
+}
+
 .remark-slide-content {
     background-image: url(./stellar.svg);
     background-position: 10% 98%;
     background-size: 155pt 20pt;
+}
+
+/* Two-column layout */
+.left-column {
+color: #777;
+width: 50%;
+height: 92%;
+float: left;
+}
+.right-column {
+width: 50%;
+float: right;
+padding-top: 1em;
 }
