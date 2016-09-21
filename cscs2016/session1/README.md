@@ -7,7 +7,8 @@
 
 # More
 
-```
+```cpp
 int main()
 {}
 ```
+
