@@ -1,6 +1,6 @@
 # Task based Programming with HPX Workshop
 
-## Contents
+# Agenda
 1. [Introduction to HPX - Part 1](#900-to-1030-introduction-to-hpx---part-1)
 2. [Introduction to HPX - Part 2](#1045-to-1215-introduction-to-hpx---part-2)
 3. [Building HPX - CMake Options and Dependencies](#1315-to-1445-building-hpx---cmake-options-and-dependencies)
@@ -10,7 +10,7 @@
 7. [Debugging HPX Applications - Part 1](#1315-to-1445-debugging-hpx-applications---part-1)
 8. [Debugging HPX Applications - Part 2](#1500-to-1630-debugging-hpx-applications---part-2)
 
-## Basic Information
+# Basic Information
 
 [Event Details](http://www.cscs.ch/events/event_detail/index.html?tx_seminars_pi1%5BshowUid%5D=143)
 
@@ -24,17 +24,9 @@ Thursday, September 29 and Friday, September 30, 2016
 * John Biddiscombe, Swiss National Supercomputing Centre (CSCS)
 * Thomas Heller, Chair of Computer Architecture, Friedrich-Alexander University
 
-### Abstract
-The aim of this course is to introduce students to the HPX library and demonstrate how it can be used to write task based programs. The HPX library implements a lightweight threading model that allows both concurrent, asynchronous, parallel and distributed programming constructs to coexist within the same application with a consistent API based on C++ standards and using futures to synchronize between tasks.
+# Thursday, September 29, 2016
 
-The course is aimed at students with a good understanding of C++ and may be considered as an extension of the “Advanced C++ for HPC” course held during the first part of the same week. The material covered will include an introduction to the HPX programming model; asynchronous programming concepts, execution policies and executors; parallel algorithms using tasks (including the parallel STL); writing distributed applications with HPX; profiling and debugging and a final section
-introducing heterogeneous programming using targets for GPU devices.
-
-Attendees are required to bring their own laptops.
-
-## Thursday, September 29, 2016
-
-### 9:00 to 10:30: Introduction to HPX - Part 1
+ 9:00 to 10:30: Introduction to HPX - Part 1
 **Presenter**: John
 
 **Topics Covered**:
