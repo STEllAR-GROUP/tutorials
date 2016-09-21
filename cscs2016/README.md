@@ -44,7 +44,7 @@ Attendees are required to bring their own laptops.
 
 ### Tea Break, 15 Minutes
 
-### 10:45 to 12:15: Introdction to HPX - Part 2
+### 10:45 to 12:15: Introduction to HPX - Part 2
 **Presenter**: Thomas
 
 **Topics Covered**:
