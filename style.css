@@ -6,29 +6,52 @@ body {
 }
 h1, h2, h3 {
     font-family: 'Yanone Kaffeesatz';
-    font-weight: 400;
-    margin-bottom: 0;
+    /*font-weight: 400;*/
+    margin-bottom: 50px;
+    margin-top: 20px;
+    color: gray;
 }
 
 img {
     width: 100%;;
 }
 
+a {
+    color: gray;
+}
+
+/*
 .remark-slide-content {
     background-image: url(./stellar.svg);
     background-position: 10% 98%;
     background-size: 155pt 20pt;
 }
+/*
 
 /* Two-column layout */
 .left-column {
-color: #777;
 width: 50%;
-height: 92%;
 float: left;
 }
 .right-column {
 width: 50%;
 float: right;
-padding-top: 1em;
+}
+
+.logo {
+    position: absolute;
+    left: 0;
+    bottom: 10pt;
+    width: 100%;
+    height: 20pt;
+    /*float: left;*/
+    margin: 0px;
+    padding: 0px;
+}
+
+.logo-img {
+    margin-left: 20px;
+    display: inline-block;
+    position: relative;
+    width: 20%;
 }
