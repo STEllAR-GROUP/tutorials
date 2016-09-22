@@ -76,3 +76,12 @@ float: right;
     height: 30pt;
     width: 60pt;
 }
+
+.crop {
+    overflow: hidden;
+}
+
+.crop img {
+    margin: -60px 0 0 0;
+}
+
