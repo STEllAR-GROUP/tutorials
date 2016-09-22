@@ -14,7 +14,7 @@ do
             PREFIX="${PREFIX}../"
             N=$(($N - 1))
         done
-        cat <<EOF >> $i/index.html
+        cat <<EOF > $i/index.html
 <html>
     <head>
         <link rel="stylesheet" type="text/css" href="${PREFIX}style.css">
