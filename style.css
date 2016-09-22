@@ -67,3 +67,11 @@ float: right;
     position: relative;
     width: 20%;
 }
+
+.logo-img-cscs {
+    margin-left: 20px;
+    display: inline-block;
+    position: relative;
+    height: 20pt;
+    width: 40pt;
+}
