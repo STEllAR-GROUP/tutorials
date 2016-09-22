@@ -1,6 +1,12 @@
-\documentclass[beamer, crop=true]{standalone}
+\documentclass[beamer]{standalone}
 \usepackage{listings}
 \usepackage{tikz}
+
+\setbeamerfont{aaa}{size*={15.00}{14.00}}
+
+\setbeamertemplate{frametitle}{\insertframetitle\\\usebeamerfont{framesubtitle}\hspace*{1em}\insertframesubtitle}
+
+\setbeamerfont{framesubtitle}{size=\Large}
 %\usetikzlibrary{shapes,calc,backgrounds,shadows, arrows, positioning, snake}
 \usetikzlibrary{shapes,calc,backgrounds,shadows, arrows, snakes, decorations.pathmorphing}
 
@@ -15,7 +21,7 @@
 % Settings for the lstlistings environment
 \lstset{
 language=C++,                       % choose the language of the code
-basicstyle=\normalsize\ttfamily,  % the size of the fonts that are used for the
+basicstyle=\ttfamily,  % the size of the fonts that are used for the
                                     % code
 numbers=none,                       % where to put the line-numbers
 numberstyle=\tiny,                  % the size of the fonts that are used for the
@@ -60,7 +66,9 @@ xleftmargin=0.1cm,
 \definecolor{darkgreen}{rgb}{0,.6,0}
 \definecolor{red}{rgb}{.98,0,0}
 \begin{standaloneframe}[fragile]
+    \flushleft
     \begin{tikzpicture}[overlay]
+        \begin{scope}[shift={(-0.5,0)}]
     \tikzstyle{box}=[minimum width = 4em, color = faublue, line width = 0.5mm, draw, node distance = 5em, text=black];
     \tikzstyle{line}=[thick, color = faublue, line width=0.5mm];
 
@@ -252,20 +260,21 @@ xleftmargin=0.1cm,
     \path<5> (id4_3) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend right] node {} (comp4_3);
     \path<5> (id5_3) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend right] node {} (comp5_3);
 
+    \end{scope}
     \end{tikzpicture}
     \begin{onlyenv}<4>
-        \hspace*{7em}
+        \hspace*{5em}
         \begin{minipage}{26.5em}
             \vspace*{-7em}
-            \begin{lstlisting}[basicstyle=\ttfamily\small]
+            \begin{lstlisting}[basicstyle=\ttfamily\tiny]
     future<id_type> id =
         new_<Component>(locality, ...);
             \end{lstlisting}
         \end{minipage}
-        \hspace*{7em}
+        \hspace*{5em}
         \begin{minipage}{26.5em}
-            \vspace*{-4em}
-            \begin{lstlisting}[basicstyle=\ttfamily\small]
+            \vspace*{-3.9em}
+            \begin{lstlisting}[basicstyle=\ttfamily\tiny]
     future<R> result =
         async(id.get(), action, ...);
             \end{lstlisting}

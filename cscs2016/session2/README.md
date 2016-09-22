@@ -33,27 +33,27 @@ HPX represents an innovative mixture of
 ---
 ## The HPX Programming Model
 
-![The HPX Programming Model](images/model_0.svg)
+![The HPX Programming Model](images/model-0.png)
 
 ---
 ## The HPX Programming Model
 
-![The HPX Programming Model](images/model_1.svg)
+![The HPX Programming Model](images/model-1.png)
 
 ---
 ## The HPX Programming Model
 
-![The HPX Programming Model](images/model_2.svg)
+![The HPX Programming Model](images/model-2.png)
 
 ---
 ## The HPX Programming Model
 
-![The HPX Programming Model](images/model_3.svg)
+![The HPX Programming Model](images/model-3.png)
 
 ---
 ## The HPX Programming Model
 
-.left[![The HPX Programming Model](images/model_4.svg)]
+![The HPX Programming Model](images/model-4.png)
 
 ---
 ## What is a (the) future?
