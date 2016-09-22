@@ -61,7 +61,7 @@ HPX represents an innovative mixture of
 A future is an object representing a result which has not been calculated yet
 
 .left-column[
-![...](images/future.svg)
+![...](images/future.png)
 ]
 
 .right-column[
