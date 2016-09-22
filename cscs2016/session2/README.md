@@ -56,6 +56,44 @@ HPX represents an innovative mixture of
 ![The HPX Programming Model](images/model-4.png)
 
 ---
+## The HPX API
+### Borrowed from the C++ Standard
+
+Class                           | Description
+--------------------------------|-----------------------------------
+`hpx::thread`                   | Low level thread of control
+`hpx::mutex`                    | Low level synchronization facility
+`hpx::lcos::local::condition_variable`      | Signal a condition
+`hpx::future`                   | Asynchronous result transport (receiving end)
+`hpx::promise`, `hpx::lcos::local::promise` | Asynchronous result transport (producing end)
+`hpx::lcos::packaged_task`      | Asynchronous result transport (producing end)
+`hpx::async`                    | Spawning tasks (returns a future)
+`hpx::bind`                     | Binding Parameters to callables
+`hpx::function`                 | Type erased function object
+`hpx::tuple`                    | Tuple
+`hpx::any`                      | Type erased object (similar to `void*`)
+`hpx::parallel::for_each`, etc. | Parallel Algorithms
+`hpx::compute::vector`          | Continous storage for N elements
+
+Extensions to the standards APIs where necessary, maintaining full compatibility.
+
+---
+## The HPX API
+### Lightweight Control Objects (LCOs)
+
+ * Objects to synchronize between different threads of execution.
+ * Ability to suspend and reactivate Tasks
+ * Examples:
+    * `mutex`
+    * `condition_variable`
+    * `channel`
+    * `promise`
+    * `future`
+    * `when_all`, `when_any`
+    * ...
+ * More on those later
+
+---
 ## What is a (the) future?
 
 A future is an object representing a result which has not been calculated yet
@@ -71,6 +109,108 @@ A future is an object representing a result which has not been calculated yet
 * Allows for composition of several asynchronous operations
 * Turns concurrency into parallelism
 ]
+---
+## Diving into the Future -- The (basic) API
+
+Functionality:
+
+```
+template <typename R>
+class future
+{
+    // future constructors
+    // Query the state
+    // Waiting on the result
+};
+
+template <typename R>
+class shared_future
+{
+    // Future constructors
+    // Query the state
+    // Waiting on the result
+};
+```
+---
+## Diving into the Future -- The (basic) API
+
+Querying the state of the future
+
+```
+template <typename R>
+class future
+{
+    // Future constructors
+    // Construct an empty future.
+    future();
+
+    // Move a future to a new one
+    future(future&& f);
+
+    // Unwrap a future. The new future becomes ready when
+    // the inner, and outer future are ready.
+    explicit future(future<future>&& f);
+    explicit future(shared_future<future>&& f);
+
+    // Turn this future into a shared_future. Invalidates
+    // the future!
+    shared_future<T> share();
+
+    // Query the state
+    // Waiting on the result
+};
+```
+
+---
+## Diving into the Future -- The (basic) API
+
+Querying the state of the future
+
+```
+template <typename R>
+class future
+{
+    // Future constructors
+
+    // Query the state
+
+    // Check if the future is ready yet.
+    bool is_ready();
+
+    // Check if the future has a value
+    bool has_value();
+
+    // Check if the future has an exception
+    bool has_exception();
+
+    // Waiting on the result
+};
+```
+
+---
+## Diving into the Future -- The (basic) API
+
+Waiting for the future to become ready
+```
+template <typename R>
+class future
+{
+    // Future constructors
+    // Query the state
+
+    // Waiting on the result
+
+    // Get the result. This function might block if the result has
+    // not been computed yet. Invalidates the future!
+    R get();
+
+    // Attach a continuation. The function f gets called with
+    // the (ready) future. Returns a new future with the result of
+    // the invocation of f. Invalidates the future!
+    template <typename F>
+    auto then(F&& f);
+};
+```
 
 ---
 ## Example: SAXPY - The HPX Way

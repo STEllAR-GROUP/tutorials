@@ -7,19 +7,31 @@ body {
 h1, h2, h3 {
     font-family: 'Yanone Kaffeesatz';
     /*font-weight: 400;*/
-    margin-bottom: 50px;
-    margin-top: 20px;
+    margin-bottom: 10pt;
+    margin-top: 0;
     color: gray;
 }
 
 img {
-    width: 100%;;
+    width: 100%;
 }
 
 a {
     color: gray;
 }
 
+thead tr th {
+    /*background-color: lightgray;*/
+    border-bottom: 2px solid lightgray;
+}
+
+tbody tr td:first-child {
+    padding-right: 10px;
+}
+
+tbody tr:last-child td {
+    border-bottom: 2px solid lightgray;
+}
 /*
 .remark-slide-content {
     background-image: url(./stellar.svg);
