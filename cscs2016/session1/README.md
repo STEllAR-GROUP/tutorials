@@ -78,21 +78,46 @@ as quickly as possible as soon as anything
 * Similar to OpenMP/TBB, but ...
 
     * OpenMP has parallel regions where a thread pool exeutes your loops/tasks
-    * Outside those regions, code runs as usual (on normal 'OS threads')
+    * outside those regions, code runs as usual (on normal 'OS threads')
     
 * With HPX, the runtime is always active
 
+    * the runtime is started on program startup     
+    * it stays active until program termination
     * there are no parallel regions
-    * everything is part of a task
     * everything is running on an HPX thread
+    * everything is part of a task
     
 * Disclaimer
 
-    * you can manually start/stop the HPX rutime
-    * but the idea is not to need to
-            
+    * you can manually start/stop the runtime (if you really want to)
+
+---
+## HPX is a (only a) library
+* It's implemented as a C++ library/framework
+
+    * provides threads/futures/locks/schedulers/etc
+    * allows the user to ignore the threads/schedulers/locks
+    * gives the user control over them too
+    
+* The user doesn't manage threads directly
+
+    * user creates tasks
+    * synchronizes between/amongst them
+    * shouldn't need to worry about low level synchronization primitives
+    * (but sometimes needs to)
+    
+* The runtime does it best to schedule tasks
+
+    * but it can be abused easily
+    * either by accident (careless programming)
+    * or deliberately 
+    
+* A good understanding of how it all works really helps          
+---
+## More stuff
 ---
 class: center, middle
 ## Next 
 
-[Introduction to HPX : Part 2](../session2/index.html)
+[Introduction to HPX : Part 2](../session2)
