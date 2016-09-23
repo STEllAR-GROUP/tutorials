@@ -466,10 +466,54 @@ future<double> f3 = hpx::dataflow(
 
 ---
 ## Concepts of Parallelism
+### Types of Parallelism
 
+* Data parallelism
+    * Parallel Algorithms
+    * GPUs
+* Task based asynchronous and continuation style parallelism
+    * `future<R>`, `async`, etc...
+* Instruction Level Parallelism
+    * SIMD instructions
 
 ---
-## Concepts and Types of Parallelism
+## Concepts of Parallelism
+### Parallel Execution Properties
+
+* The ***execution restrictions*** applicable for work items
+* In what ***sequence*** work items have to be executed
+* ***Where*** work items should be executed
+* The ***parameters*** of the execution environment
+
+---
+## Concepts of Parallelism
+### Bringin it all together
+![Bringing it all together](images/parallelism-0.png)
+
+---
+## Concepts of Parallelism
+### Bringin it all together
+![Bringing it all together](images/parallelism-1.png)
+
+---
+## Concepts of Parallelism
+### Bringin it all together
+![Bringing it all together](images/parallelism-2.png)
+
+---
+## Concepts of Parallelism
+### Bringin it all together
+![Bringing it all together](images/parallelism-3.png)
+
+---
+## Concepts of Parallelism
+### Bringin it all together
+![Bringing it all together](images/parallelism-4.png)
+
+---
+## Concepts of Parallelism
+### Bringin it all together
+![Bringing it all together](images/parallelism-5.png)
 
 ---
 ## Execution Policies
