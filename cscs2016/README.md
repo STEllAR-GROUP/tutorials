@@ -9,8 +9,8 @@ CSCS in Lugano, Switzerland
 Thursday, September 29 and Friday, September 30, 2016
 
 ### Presenters
-* John Biddiscombe, Swiss National Supercomputing Centre (CSCS)
-* Thomas Heller, Chair of Computer Architecture, Friedrich-Alexander University
+* **John Biddiscombe**, Swiss National Supercomputing Centre (CSCS)
+* **Thomas Heller**, Computer Architecture, Friedrich-Alexander-University Erlangen-Nuremberg
 
 ???
 [Click here to view the Presentation](https://stellar-group.github.io/tutorials/cscs2016)
