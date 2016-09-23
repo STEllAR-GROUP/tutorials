@@ -114,10 +114,9 @@ A future is an object representing a result which has not been calculated yet
 * Allows for composition of several asynchronous operations
 * Turns concurrency into parallelism
 ]
----
-## Diving into the Future -- The (basic) API
 
-Functionality:
+---
+## Diving into the Future - The (basic) API
 
 ```
 template <typename R>
@@ -136,10 +135,11 @@ class shared_future
     // Waiting on the result
 };
 ```
----
-## Diving into the Future -- The (basic) API
 
-Querying the state of the future
+---
+## Diving into the Future - The (basic) API
+
+Constructing a `hpx::future<R>`
 
 ```
 template <typename R>
@@ -167,7 +167,7 @@ class future
 ```
 
 ---
-## Diving into the Future -- The (basic) API
+## Diving into the Future - The (basic) API
 
 Querying the state of the future
 
@@ -193,7 +193,7 @@ class future
 ```
 
 ---
-## Diving into the Future -- The (basic) API
+## Diving into the Future - The (basic) API
 
 Waiting for the future to become ready
 ```
@@ -204,6 +204,7 @@ class future
     // Query the state
 
     // Waiting on the result
+    void wait();
 
     // Get the result. This function might block if the result has
     // not been computed yet. Invalidates the future!
@@ -216,6 +217,274 @@ class future
     auto then(F&& f);
 };
 ```
+
+---
+## Diving into the Future - The (basic) API
+
+Constructing a `hpx::shared_future<R>`
+
+```
+template <typename R>
+class shared_future
+{
+    // Future constructors
+    // Construct an empty future.
+    shared_future();
+
+    // Move a future to a new one
+    shared_future(shared_future&& f);
+
+    // Share ownership between two futures
+    shared_future(shared_future&& f);
+
+    // Unwrap a future. The new future becomes ready when
+    // the inner, and outer future are ready.
+    explicit future(shared_future<future>&& f);
+
+    // Query the state
+    // Waiting on the result
+};
+```
+
+---
+## Diving into the Future - The (basic) API
+
+Waiting for the future to become ready
+```
+template <typename R>
+class future
+{
+    // Future constructors
+    // Query the state
+
+    // Waiting on the result
+    void wait();
+
+    // Get the result. This function might block if the result has
+    // not been computed yet.
+    R const& get();
+
+    // Attach a continuation. The function f gets called with
+    // the (ready) future. Returns a new future with the result of
+    // the invocation of f.
+    template <typename F>
+    auto then(F&& f) const;
+};
+```
+
+---
+## Producing Futures
+### `hpx::async`
+
+```
+template <typename F, typename...Ts>
+auto async(F&& f, Ts...&&ts)
+ -> future<decltpype(f(std::forward<Ts>(ts)...)>;
+```
+
+* `F` is anything callable with the passed arguments (actions are callable)
+
+
+```
+template <typename F, typename...Ts>
+auto async(launch_policy, F&& f, Ts...&&ts)
+ -> future<decltpype(f(std::forward<Ts>(ts)...)>;
+```
+
+* `launch_policy` can be `async`, `sync`, `fork`, `deferred`
+
+
+```
+template <typename Executor typename F, typename...Ts>
+auto async(Executor&&, F&& f, Ts...&&ts)
+ -> future<decltpype(f(std::forward<Ts>(ts)...)>;
+```
+
+* `Executor` is a concept to be introduced [later](#executors)
+
+---
+## Producing Futures
+### `hpx::lcos::local::promise`
+
+```
+hpx::lcos::local::promise<int> p;
+hpx::future<int> f = p.get_future();
+// f.is_ready() == false, f.get(); would lead to a deadlock
+p.set_value(42);
+
+// Print 42
+std::cout << f.get() << std::endl;
+```
+
+---
+## Producing Futures
+### `hpx::lcos::promise`
+
+```
+hpx::lcos::promise<int> p;
+hpx::future<int> f = p.get_future();
+// f.is_ready() == false, f.get(); would lead to a deadlock
+hpx::async(
+    [](hpx::id_type promise_id)
+    {
+        hpx::set_lco_value(promise_id, 42);
+    }
+  , p.get_id());
+
+// Print 42
+std::cout << f.get() << std::endl;
+
+```
+
+---
+## Producing Futures
+### `hpx::make_ready_future`
+
+* Producing futures that are ready at construction
+
+```
+template <typename T>
+future<typename decay<T>::type> make_ready_future(T&& t);
+
+future<void> make_ready_future();
+```
+
+---
+## Producing Futures
+### And beyond ...
+
+* Futures are the main interface to express asynchrony
+* Most API functions in HPX return futures
+* This was just an excerpt ... let's see more!
+
+
+---
+## Composing Futures
+### Sequential Composition
+
+```
+future<int> f1 = hpx::async(...);
+
+// Call continuation once f1 is ready. f2 will become ready once
+// the continuation has been run.
+future<double> f2 = f1.then(
+    [](future<int>&& f) { return f.get() + 0.0; });
+```
+
+--
+
+* The continuation needs to take the future as parameter to allow
+  for exception handling. Exceptions happening in asynchronous calls
+  will get rethrown on `.get()`
+* `then` accepts launch policies as well as [executors](#executors)
+* `f1` will get invalidated.
+--
+ No invalidation:
+
+```
+shared_future<int> f1 = hpx::async(...);
+
+// Call continuation once f1 is ready. f2 will become ready once
+// the continuation has been run.
+future<double> f2 = f1.then(
+    [](future<int>&& f) { return f.get() + 0.0; });
+```
+
+---
+## Composing Futures
+### And Composition
+
+```
+future<int> f1 = hpx::async(...);
+future<std::string> f2 = hpx::async(...);
+
+auto all_f = hpx::when_all(f1, f2);
+
+future<std::vector<float>> result = all_f.then(
+    [](auto f) -> std::vector<float>
+    {
+        // ...
+    });
+```
+
+--
+* Allows for attaching continuations to more than one future
+* `f1` and `f2` will get invalidated. (Use `shared_future` if you need them afterwards)
+* Also accepts a `std::vector<future<T>>` or a pair of iterators
+
+---
+## Composing Futures
+### Or Composition
+
+```
+std::vector<future<int>> fs = ...;
+
+future<std::vector<future<int>>> ffs = hpx::when_any(fs).then(
+    [](auto f)
+    {
+        auto res = f.get();
+        return res.sequence;
+    });
+```
+
+--
+* Allows for waiting on *any* of the input futures
+* Returns a `future<when_any_result<Sequence>>`:
+
+```
+template <typename Sequence>
+struct when_any_result
+{
+   std::size_t index; // Index to a future that became ready
+   Sequence futures;  // Sequence of futures
+};
+```
+
+
+---
+## Composing Futures
+### Dataflow
+
+* Shortcut to `when_all(...).then(...)`
+
+```
+future<int> f1 = hpx::async(...);
+future<std::string> f2 = hpx::async(...);
+
+future<double> f3 = hpx::dataflow(
+    [](future<int>, future<std::string>) -> double
+    {
+        // ...
+    });
+
+```
+
+--
+* Calls the passed function whenever all arguments that were futures are ready
+* Returns a future that becomes ready once the function has finished execution
+* Accepts launch policies as well as [executors](#executors) as the first parameter
+
+---
+## Concepts of Parallelism
+
+
+---
+## Concepts and Types of Parallelism
+
+---
+## Execution Policies
+
+---
+
+name: executors
+
+## Executors
+
+---
+## Data Placement
+
+---
+## Targets
 
 ---
 ## Example: SAXPY - The HPX Way
