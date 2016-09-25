@@ -24,7 +24,7 @@ HPX uses Boost extensively throughout the code
 
 ---
 ## Dependencies #1
-### Installing Boost
+### Installing Boost (on Daint)
 * Boost is not nearly as hard to install as people think
 
 ```
@@ -61,7 +61,7 @@ cd boost_1_61_0
     
 ---
 ## Dependencies #2
-### Installing hwloc
+### Installing hwloc (on Daint)
 
 ```
 # download a tarball (version 1.11.4 latest @ Sep 2016)
@@ -98,7 +98,7 @@ make -j8 install
     
 ---
 ## Dependencies #3
-### Installing jemalloc
+### Installing jemalloc (on Daint)
 
 * jemalloc can be downloaded via github and there isn't a direct link
 
@@ -117,7 +117,7 @@ make -j8 -k install
 * It takes a couple of minutes and you just need to pass the path into your HPX CMake
 
 ---
-## CMake settings for Release + papi + APEX + OTF2
+## HPX CMake: Release + papi + APEX + OTF2 (on Daint)
 ```
 cmake \
  -DCMAKE_BUILD_TYPE=Release \
@@ -147,7 +147,23 @@ cmake \
  /apps/daint/hpx/src/hpx
 ```
 ---
-## More stuff
+## Building tips
+
+* Building _all_ of HPX can take a long time
+
+* On your first build, enable `HPX_WITH_EXAMPLES`
+    * `make -j8 hello_world_exe`
+    * check it compiles
+    * check it runs
+* if hello world is ok, then build the rest
+
+* Note : `make -j8 xxx` can cause problems
+    * HPX uses a _lot_ of templates and the compiler can use all your memory
+    * if disk swapping starts during compiling ues `make -j2` (or `j4` etc)
+    
+* use `make help` to dump out a list of targets
+* be warned that the CMake `add_hpx_executable` command appends `_exe` to your binaries
+    * so if you make a test called `my_test` you need to `make -j8 my_test_exe`    
 ---
 class: center, middle
 ## Next 
