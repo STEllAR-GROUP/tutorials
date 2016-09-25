@@ -22,8 +22,8 @@ find_package(HPX REQUIRED NO_CMAKE_PACKAGE_REGISTRY)
 #--------------------------------------------------
 # On the cray we need the following flags
 #--------------------------------------------------
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fPIC)
-set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -dynamic)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -dynamic")
 
 #--------------------------------------------------
 # Each example goes into its own subdir
