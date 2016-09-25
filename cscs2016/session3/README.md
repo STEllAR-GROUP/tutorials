@@ -1,7 +1,7 @@
 
 class: center, middle
 
-# Building HPX
+# Building HPX (on Daint)
 ## CMake, Options, Dependencies 
 
 ---
@@ -65,7 +65,7 @@ cd boost_1_61_0
 
 ```
 # download a tarball (version 1.11.4 latest @ Sep 2016)
-wget --no-check-certificate 
+wget --no-check-certificate \
 https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.4.tar.gz
 
 # untar
@@ -129,41 +129,104 @@ cmake \
  -DJEMALLOC_INCLUDE_DIR:PATH=/apps/daint/jemalloc/4.2.1/gnu_530/include \
  -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
  -DBOOST_ROOT=$BOOST_ROOT \
- -DHPX_WITH_TESTS:BOOL=ON \
- -DHPX_WITH_TESTS_BENCHMARKS:BOOL=ON \
- -DHPX_WITH_TESTS_EXTERNAL_BUILD:BOOL=OFF \
- -DHPX_WITH_TESTS_HEADERS:BOOL=OFF \
- -DHPX_WITH_TESTS_REGRESSIONS:BOOL=ON \
- -DHPX_WITH_TESTS_UNIT:BOOL=ON \
- -DHPX_WITH_EXAMPLES:BOOL=ON \
- -DHPX_WITH_HWLOC:BOOL=ON \
- -DHPX_WITH_PARCELPORT_MPI:BOOL=ON \
- -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED:BOOL=ON \
- -DHPX_WITH_PAPI:BOOL=ON \
- -DHPX_WITH_APEX:BOOL=ON \
- -DAPEX_WITH_OTF2:BOOL=ON \
+ -DHPX_WITH_TESTS=ON \
+ -DHPX_WITH_TESTS_BENCHMARKS=ON \
+ -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
+ -DHPX_WITH_TESTS_HEADERS=OFF \
+ -DHPX_WITH_TESTS_REGRESSIONS=ON \
+ -DHPX_WITH_TESTS_UNIT=ON \
+ -DHPX_WITH_EXAMPLES=ON \
+ -DHPX_WITH_HWLOC=ON \
+ -DHPX_WITH_PARCELPORT_MPI=ON \
+ -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
+ -DHPX_WITH_PAPI=ON \
+ -DHPX_WITH_APEX=ON \
+ -DAPEX_WITH_OTF2=ON \
  -DOTF2_ROOT=/apps/daint/otf2/2.0/gnu_530 \
- -DHPX_WITH_THREAD_IDLE_RATES:BOOL=ON \
+ -DHPX_WITH_THREAD_IDLE_RATES=ON \
  /apps/daint/hpx/src/hpx
 ```
 ---
-## Building tips
+## Debug build
+```
+cmake \
+ -DCMAKE_BUILD_TYPE=Debug \
+ -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/rel \
+ -DCMAKE_CXX_FLAGS=-std=c++11 \
+ -DCMAKE_EXE_LINKER_FLAGS=-dynamic \
+ -DHWLOC_ROOT=/apps/daint/hwloc/1.11.4/gnu_530 \
+ -DHPX_WITH_MALLOC=JEMALLOC \
+ -DJEMALLOC_INCLUDE_DIR:PATH=/apps/daint/jemalloc/4.2.1/gnu_530/include \
+ -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
+ -DBOOST_ROOT=$BOOST_ROOT \
+ -DHPX_WITH_TESTS=ON \
+ -DHPX_WITH_TESTS_BENCHMARKS=ON \
+ -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
+ -DHPX_WITH_TESTS_HEADERS=OFF \
+ -DHPX_WITH_TESTS_REGRESSIONS=ON \
+ -DHPX_WITH_TESTS_UNIT=ON \
+ -DHPX_WITH_EXAMPLES=ON \
+ -DHPX_WITH_HWLOC=ON \
+ -DHPX_WITH_PARCELPORT_MPI=ON \
+ -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
+ -DHPX_WITH_THREAD_IDLE_RATES=ON \
+ /apps/daint/hpx/src/hpx \
+```
+---
+## Building tips #1
 
 * Building _all_ of HPX can take a long time
 
-* On your first build, enable `HPX_WITH_EXAMPLES`
+* On your first build, enable `HPX_WITH_EXAMPLES` and `HPX_WITH_TESTS`
     * `make -j8 hello_world_exe`
     * check it compiles
     * check it runs
-* if hello world is ok, then build the rest
+    
+* if hello world is ok, then build the rest (at your discretion)
+    ```
+    make tests.unit tests.regression examples
+    ```
+* use `make help` to dump out a list of targets
 
+---
+## Building tips #2
 * Note : `make -j8 xxx` can cause problems
     * HPX uses a _lot_ of templates and the compiler can use all your memory
-    * if disk swapping starts during compiling ues `make -j2` (or `j4` etc)
+    * if disk swapping starts during compiling use `make -j2` (or `j4` etc)
     
-* use `make help` to dump out a list of targets
-* be warned that the CMake `add_hpx_executable` command appends `_exe` to your binaries
+* be warned that the CMake `add_hpx_executable` command appends `_exe` to binaries
     * so if you make a test called `my_test` you need to `make -j8 my_test_exe`    
+
+* in your own CMakeLists.txt you can
+```
+    add_target(my_test ${MY_SRSC})
+    hpx_setup_target(my_test)
+```
+---
+## Environment setup (on Daint)
+```
+module unload PrgEnv-cray
+module load PrgEnv-gnu
+#
+module unload gcc
+module load gcc/5.3.0
+#
+module load boost/1.61.0
+#
+export LDFLAGS=-dynamic
+export CFLAGS=-fPIC
+export CXXFLAGS=-fPIC
+export CC=/opt/cray/craype/default/bin/cc
+export CXX=/opt/cray/craype/default/bin/CC
+```
+* Or you can just use ... 
+```
+module load hpx/0.9.99/gnu_530-release
+```
+* A debug build ... 
+```
+module load hpx/0.9.99/gnu_530-debug
+```
 ---
 class: center, middle
 ## Next 
