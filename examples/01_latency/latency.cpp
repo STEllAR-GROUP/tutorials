@@ -27,8 +27,7 @@
 #endif
 
 // ---------------------------------------------------------------------------------
-#define LOOP_LARGE  100
-#define SKIP_LARGE  10
+#define SKIP_LARGE  100
 
 // ---------------------------------------------------------------------------------
 char* align_buffer (char* ptr, unsigned long align_size)
@@ -66,11 +65,58 @@ typedef std::unique_lock<mutex_type>         unique_lock;
 typedef hpx::lcos::local::condition_variable condition_var_type;
 
 // ---------------------------------------------------------------------------------
+// Send a message and receives the reply using a vector<future> to track
+// messages in flight. Guaranteed to wait correctly after each batch of
+// 'window_size' messages, but needs more effort to maintain 'window_size' messages
+// in flight all the time.
+double receive_v1(
+    hpx::naming::id_type dest,
+    char * send_buffer,
+    std::size_t size,
+    std::size_t loop,
+    std::size_t window_size)
+{
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+    buffer_type recv_buffer;
+
+    message_action            msg;
+    std::atomic<unsigned int> counter;
+    // vector to store returns in
+    std::vector<hpx::future<hpx::serialization::serialize_buffer<char>>> messages;
+    messages.reserve(window_size);
+    //
+    std::size_t skip = SKIP_LARGE;
+    std::size_t parcel_count = 0;
+    
+    // warm up
+    for (int s=0; s<skip; ++s) {
+        msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
+    }
+    //
+    hpx::util::high_resolution_timer t;
+    //    
+    for (std::size_t i = 0; i<loop; ++i) {
+        for (std::size_t j = 0; j<window_size; ++j) {
+            // launch a message to the remote node
+            messages.push_back(hpx::async(msg, dest,
+                buffer_type(send_buffer, size, buffer_type::reference)));
+            //
+            parcel_count++;
+        }
+        hpx::wait_all(messages);
+        messages.clear();
+    }    
+    double d = (static_cast<double>(parcel_count));
+    double elapsed = t.elapsed();
+    return 0.5*(elapsed * 1e6) / d;    
+}
+
+// ---------------------------------------------------------------------------------
 // Send a message and receives the reply with a simple
 // atomic counter being used to check how many messages have been returned
 // the last message to return wakes up a condition variable that was waiting
 // in the main task
-double receive_v1(
+double receive_v2(
     hpx::naming::id_type dest,
     char * send_buffer,
     std::size_t size,
@@ -86,15 +132,16 @@ double receive_v1(
     condition_var_type        cv;
     mutex_type                mutex_;
     std::atomic<unsigned int> counter;
+
+    // warm up
+    for (int s=0; s<skip; ++s) {
+        msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
+    }
     //
     hpx::util::high_resolution_timer t;
     //
-    for (std::size_t i = 0; i < loop + skip; ++i)
+    for (std::size_t i = 0; i < loop; ++i)
     {
-        // do not measure warm up phase
-        if (i == skip)
-            t.restart();
-        //
         counter = 0;
         //
         for (std::size_t i=0; i< window_size; ++i) {
@@ -127,7 +174,7 @@ double receive_v1(
 // messages are really in flight, but we get close. Also when the loop terminates
 // there may be one or more messages still uncompleted, so we wait for them at the end
 // to avoid destroying the CV before it is done with
-double receive_v2(
+double receive_v3(
     hpx::naming::id_type dest,
     char * send_buffer,
     std::size_t size,
@@ -145,15 +192,18 @@ double receive_v2(
 
     hpx::lcos::local::sliding_semaphore sem(window_size-1, -1);
     //
-    std::size_t divisor = (window_size>1) ? (window_size/2) : 1;
-    std::size_t max_signal = 0;
-    std::size_t skip = 100;
+    std::size_t skip = SKIP_LARGE;
     std::size_t parcel_count = 0;
     counter = 0;
+
+    // warm up
+    for (int s=0; s<skip; ++s) {
+        msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
+    }
     //
     hpx::util::high_resolution_timer t;
     //
-    for (std::size_t i = 0; i < (loop*window_size) + skip; ++i) {
+    for (std::size_t i = 0; i < (loop*window_size); ++i) {
         // launch a message to the remote node
         hpx::async(msg, dest,
             buffer_type(send_buffer, size, buffer_type::reference)).then(
@@ -163,7 +213,7 @@ double receive_v2(
                     // so that N are always in flight
                     sem.signal(parcel_count);
                     //
-                    if (++counter == (loop*window_size) + skip) {
+                    if (++counter == (loop*window_size)) {
                         cv.notify_one();
                     }
                 }
@@ -175,42 +225,17 @@ double receive_v2(
         parcel_count++;
     }
     unique_lock lk(mutex_);
-    cv.wait(lk, [&]{return counter == (loop*window_size) + skip;});
-
-    // we skipped some at the start, so take that into account in our
-    // calculation of speed/latency
-    double d = (static_cast<double>(parcel_count) - skip);
+    cv.wait(lk, [&]{return counter == (loop*window_size);});
+    //
+    double d = (static_cast<double>(parcel_count));
     double elapsed = t.elapsed();
     return 0.5*(elapsed * 1e6) / d;
 }
 
 // ---------------------------------------------------------------------------------
-// Send a message and receives the reply using a vector<future> to track
-// messages in flight. Guaranteed to wait correctly after each batch of
-// 'window_size' messages, but needs more effort to maintain 'window_size' messages
-// in flight all the time.
-double receive_v3(
-    hpx::naming::id_type dest,
-    char * send_buffer,
-    std::size_t size,
-    std::size_t loop,
-    std::size_t window_size)
+void print_header(const std::string &method)
 {
-    typedef hpx::serialization::serialize_buffer<char> buffer_type;
-    buffer_type recv_buffer;
-
-    message_action            msg;
-    condition_var_type        cv;
-    mutex_type                mutex_;
-    std::atomic<unsigned int> counter;
-    // we want N messages in flight at once, so we must wait
-  return 0;
-}
-
-// ---------------------------------------------------------------------------------
-void print_header()
-{
-    hpx::cout << "# OSU HPX Latency Test\n"
+    hpx::cout << "# Latency Test : " << method << "\n"
               << "# Size    Latency (microsec)"
               << std::endl;
 }
@@ -238,33 +263,41 @@ void run_benchmark(boost::program_options::variables_map & vm)
     char* send_buffer = align_buffer(send_buffer_orig.get(), align_size);
 
     // perform actual measurements
+    print_header("Vector of futures");
     hpx::util::high_resolution_timer timer;
-
     for (std::size_t size = min_size; size <= max_size; size *= 2)
     {
         double latency = receive_v1(there, send_buffer, size, loop, window_size);
         hpx::cout << std::left << std::setw(10) << size
                   << latency << hpx::endl << hpx::flush;
     }
-
     hpx::cout << "Total time: " << timer.elapsed_nanoseconds() << std::endl;
+    
+    print_header("Atomic counter");    
     timer.restart();
-
     for (std::size_t size = min_size; size <= max_size; size *= 2)
     {
         double latency = receive_v2(there, send_buffer, size, loop, window_size);
         hpx::cout << std::left << std::setw(10) << size
                   << latency << hpx::endl << hpx::flush;
     }
-
     hpx::cout << "Total time: " << timer.elapsed_nanoseconds() << std::endl;
+    
+    print_header("Sliding semaphore");
+    timer.restart();
+    for (std::size_t size = min_size; size <= max_size; size *= 2)
+    {
+        double latency = receive_v3(there, send_buffer, size, loop, window_size);
+        hpx::cout << std::left << std::setw(10) << size
+                  << latency << hpx::endl << hpx::flush;
+    }
+
 
 }
 
 // ---------------------------------------------------------------------------------
 int hpx_main(boost::program_options::variables_map & vm)
 {
-    print_header();
     run_benchmark(vm);
     return hpx::finalize();
 }
@@ -295,5 +328,4 @@ int main(int argc, char* argv[])
 
     return hpx::init(desc, argc, argv);
 }
-
 
