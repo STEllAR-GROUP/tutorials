@@ -41,30 +41,36 @@ void output(std::string file_base, data_type const& data)
 
 int hpx_main(boost::program_options::variables_map& vm)
 {
+    std::size_t Nx = vm["Nx"].as<std::size_t>();
+    std::size_t Ny = vm["Ny"].as<std::size_t>();
+    std::size_t steps = vm["steps"].as<std::size_t>();
 
-    std::size_t N = vm["N"].as<std::size_t>();
     double h = 1.0/16.0;
     std::array<data_type, 2> U;
     std::size_t curr  = 0;
     std::size_t next = 1;
 
-    std::size_t steps = vm["steps"].as<std::size_t>();
 
-    U[0] = data_type(N, row_type(N, 1.0));
-    U[1] = data_type(N, row_type(N, 1.0));
+    U[curr] = data_type(Nx);
+    U[next] = data_type(Nx);
 
-    // Initialize
-    std::for_each(U[curr].begin() + 1, U[curr].begin() + N-1,
-        [](row_type& r)
+    // Initialize: Boundaries are set to 1, interior is 0
+    U[curr].front() = row_type(Ny, 1.0);
+    std::for_each(U[curr].begin() + 1, U[curr].begin() + Nx - 1,
+        [Ny](row_type& r)
         {
-            std::for_each(r.begin() + 1, r.begin() + r.size()-1,
-                [](double& y) { y = 0.0; });
+            r = row_type(Ny, 0.0);
+            r.front() = 1.0;
+            r.back() = 1.0;
         });
+    U[curr].back() = row_type(Ny, 1.0);
+    // Make sure our output carries along the same...
+    U[next] = U[curr];
 
     auto start = std::chrono::steady_clock::now();
     for (std::size_t t = 0; t < steps; ++t)
     {
-        for (std::size_t x = 1; x < N - 1; ++x)
+        for (std::size_t x = 1; x < Nx - 1; ++x)
         {
             row_type& up = U[curr][x + 1];
             row_type& middle = U[curr][x];
@@ -74,7 +80,8 @@ int hpx_main(boost::program_options::variables_map& vm)
         std::swap(curr, next);
     }
     auto end = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
+    auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(
+        end - start).count();
 
     std::cout << "Elapsed time: " << duration << "\n";
 
@@ -89,9 +96,11 @@ int main(int argc, char* argv[])
 
     options_description desc_commandline;
     desc_commandline.add_options()
-        ("N", value<std::uint64_t>()->default_value(1024),
-         "Construct a NxN grid")
-        ("steps", value<std::uint64_t>()->default_value(10),
+        ("Nx", value<std::uint64_t>()->default_value(1024),
+         "Elements in the x direction")
+        ("Ny", value<std::uint64_t>()->default_value(1024),
+         "Elements in the y direction")
+        ("steps", value<std::uint64_t>()->default_value(100),
          "Number of steps to apply the stencil")
     ;
 

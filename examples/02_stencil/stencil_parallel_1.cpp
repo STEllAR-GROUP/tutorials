@@ -44,44 +44,57 @@ void output(std::string file_base, data_type const& data)
 
 int hpx_main(boost::program_options::variables_map& vm)
 {
+    std::size_t Nx = vm["Nx"].as<std::size_t>();
+    std::size_t Ny = vm["Ny"].as<std::size_t>();
+    std::size_t steps = vm["steps"].as<std::size_t>();
 
-    std::size_t N = vm["N"].as<std::size_t>();
     double h = 1.0/16.0;
     std::array<future_data_type, 2> U;
     std::size_t curr  = 0;
     std::size_t next = 1;
 
-    std::size_t steps = vm["steps"].as<std::size_t>();
+    U[0] = future_data_type(Nx);
+    U[1] = future_data_type(Nx);
 
-    U[0] = future_data_type(N, hpx::make_ready_future(row_type(N, 1.0)).share());
-    U[1] = future_data_type(N, hpx::make_ready_future(row_type(N, 1.0)).share());
+    // Initialize: Boundaries are set to 1, interior is 0
+    auto boundary = hpx::make_ready_future(row_type(Ny, 1.0)).share();
+    row_type interior_row(Ny, 0.0);
+    interior_row.front() = 1.0;
+    interior_row.back() = 1.0;
+    auto interior = hpx::make_ready_future(std::move(interior_row)).share();
 
-    // Initialize
-//     std::for_each(U[curr].begin() + 1, U[curr].begin() + N-1,
-//         [](hpx::shared_future<row_type>& r)
-//         {
-//             std::for_each(r.begin() + 1, r.begin() + r.size()-1,
-//                 [](double& y) { y = 0.0; });
-//         });
+    U[curr].front() = boundary;
+    std::for_each(U[curr].begin() + 1, U[curr].begin() + Nx - 1,
+        [&interior](hpx::shared_future<row_type>& r)
+        {
+            r = interior;
+        });
+    U[curr].back() = boundary;
+    // Make sure our output carries along the same...
+    U[next] = U[curr];
 
     auto start = std::chrono::steady_clock::now();
     for (std::size_t t = 0; t < steps; ++t)
     {
-        auto policy = hpx::parallel::par;
-        for (std::size_t x = 1; x < N - 1; ++x)
+        for (std::size_t x = 1; x < Nx - 1; ++x)
         {
             hpx::shared_future<row_type> up = U[curr][x + 1];
             hpx::shared_future<row_type> middle = U[curr][x];
             hpx::shared_future<row_type> down = U[curr][x - 1];
 
             U[next][x] = hpx::dataflow(
-                hpx::util::unwrapped(line_update),
+                //hpx::util::unwrapped(line_update),
+                [](hpx::shared_future<row_type> const& up,
+                    hpx::shared_future<row_type> const& middle,
+                    hpx::shared_future<row_type> const& down)
+                {
+                    return line_update(up.get(), middle.get(), down.get());
+                },
                 up, middle, down);
         }
 
         std::swap(curr, next);
     }
-    hpx::when_all(U[curr]).get();
     hpx::when_all(U[next]).get();
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
@@ -99,9 +112,11 @@ int main(int argc, char* argv[])
 
     options_description desc_commandline;
     desc_commandline.add_options()
-        ("N", value<std::uint64_t>()->default_value(1024),
-         "Construct a NxN grid")
-        ("steps", value<std::uint64_t>()->default_value(10),
+        ("Nx", value<std::uint64_t>()->default_value(1024),
+         "Elements in the x direction")
+        ("Ny", value<std::uint64_t>()->default_value(1024),
+         "Elements in the y direction")
+        ("steps", value<std::uint64_t>()->default_value(100),
          "Number of steps to apply the stencil")
     ;
 
