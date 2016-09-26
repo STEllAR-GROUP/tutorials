@@ -219,14 +219,107 @@ export CXXFLAGS=-fPIC
 export CC=/opt/cray/craype/default/bin/cc
 export CXX=/opt/cray/craype/default/bin/CC
 ```
+
 * Or you can just use ... 
+
 ```
 module load hpx/0.9.99/gnu_530-release
 ```
+
 * A debug build ... 
+
 ```
 module load hpx/0.9.99/gnu_530-debug
 ```
+
+---
+## Build tutorial examples (on Daint)
+
+* get tutorial material (if you didn't already)
+
+```
+git clone git@github.com:STEllAR-GROUP/tutorials.git
+```
+
+* create a build dir (on scratch if using daint)
+
+```
+mkdir tut
+cd tut
+```
+
+* make sure you have the hpx module loaded
+
+```
+module load hpx/0.9.99/gnu_530-release
+```
+
+* invoke CMake with the tutorial examples path
+
+```
+cmake ${path_to}/tutorials/examples
+```
+
+* ...and set a build going
+
+```
+make -j4
+```
+
+---
+## Build tutorial on laptop etc
+
+* Clone tutorial repo as before
+
+* Create build dir
+
+* invoke CMake with PATH to HPX (build tree or install tree)
+
+```
+cmake -DHPX_DIR=${path_to_hpx_install} ${path_to_tutorials}/examples
+cmake -DHPX_DIR=${path_to_hpx_build}   ${path_to_tutorials}/examples
+```
+* note that for a build tree you might want
+ 
+```
+cmake -DDHPX_DIR=${path_to_hpx_build}/lib/cmake/HPX
+  ${path_to_tutorials}/examples
+```
+
+* ...and set a build going
+
+```
+make -j4
+```
+
+---
+## CMakeLists.txt for a set of test projects 
+
+Follow this link to see the toplevel 
+[CMakeLists for Tutorial](../../examples/CMakeLists.txt)
+
+Main requirement of CMakeLists is 
+
+`find_package(HPX REQUIRED)`
+
+and for targets
+ 
+`hpx_setup_target(target COMPONENTS maybe_iostreams)`
+
+* Note that `NO_CMAKE_PACKAGE_REGISTRY` is there to stop CMake from looking in
+user build/install dirs in preference to module paths etc.
+    * if you build a lot of versions, CMake tries to help by creating a registry
+    that can cause the wrong one to be chosen (despite any overiding options you use)
+   
+* Top level CMakeLists calls `find_package` once to save each example dir finding again
+    * recall that scope of vars by default in CMake is directory based
+    * and subdirs inherit from parents
+
+---
+## CMakeLists.txt for a simple test project
+Follow this link to see the CMakeLists file for one of the examples 
+[CMakeLists for Stencil](../../examples/02_stencil/CMakeLists.txt)
+         
 ---
 class: center, middle
 ## Next 

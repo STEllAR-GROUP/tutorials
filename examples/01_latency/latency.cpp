@@ -99,7 +99,7 @@ double receive_v0(
     //    
     double elapsed = t.elapsed();
     double d = (static_cast<double>(window_size*num_loops));
-//    std::cout << "Elapsed time " << elapsed << "\t" 
+//    hpx::cout << "Elapsed time " << elapsed << "\t" 
 //        << " loops " << static_cast<int>(num_loops) << "\t";
     return (elapsed * 1e6) / (2.0*d);    
 }
@@ -145,7 +145,7 @@ double receive_v1(
     //    
     double elapsed = t.elapsed();
     double d = (static_cast<double>(window_size*num_loops));
-//    std::cout << "Elapsed time " << elapsed << "\t" 
+//    hpx::cout << "Elapsed time " << elapsed << "\t" 
 //        << " loops " << static_cast<int>(num_loops) << "\t";
     return (elapsed * 1e6) / (2.0*d);    
 }
@@ -199,7 +199,7 @@ double receive_v2(
     //    
     double elapsed = t.elapsed();
     double d = (static_cast<double>(window_size*num_loops));
-//    std::cout << "Elapsed time " << elapsed << "\t" 
+//    hpx::cout << "Elapsed time " << elapsed << "\t" 
 //        << " loops " << static_cast<int>(num_loops) << "\t";
     return (elapsed * 1e6) / (2.0*d);    
 }
@@ -270,7 +270,7 @@ double receive_v3(
     //    
     double elapsed = t.elapsed();
     double d = (static_cast<double>(window_size*num_loops));
-//    std::cout << "Elapsed time " << elapsed << "\t" 
+//    hpx::cout << "Elapsed time " << elapsed << "\t" 
 //        << " loops " << static_cast<int>(num_loops) << "\t";
     return (elapsed * 1e6) / (2.0*d);    
 }
@@ -314,7 +314,7 @@ void run_benchmark(boost::program_options::variables_map & vm)
         hpx::cout << std::left << std::setw(10) << size
                   << latency << hpx::endl << hpx::flush;
     }
-    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << std::endl;
+    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     
     print_header("Vector of futures");
     timer.restart();
@@ -324,7 +324,7 @@ void run_benchmark(boost::program_options::variables_map & vm)
         hpx::cout << std::left << std::setw(10) << size
                   << latency << hpx::endl << hpx::flush;
     }
-    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << std::endl;
+    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     
     print_header("Atomic counter");    
     timer.restart();
@@ -334,7 +334,7 @@ void run_benchmark(boost::program_options::variables_map & vm)
         hpx::cout << std::left << std::setw(10) << size
                   << latency << hpx::endl << hpx::flush;
     }
-    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << std::endl;
+    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     
     print_header("Sliding semaphore");
     timer.restart();
@@ -344,7 +344,7 @@ void run_benchmark(boost::program_options::variables_map & vm)
         hpx::cout << std::left << std::setw(10) << size
                   << latency << hpx::endl << hpx::flush;
     }
-    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << std::endl;
+    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
 }
 
 // ---------------------------------------------------------------------------------
