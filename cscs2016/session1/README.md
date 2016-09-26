@@ -77,7 +77,7 @@ as quickly as possible as soon as anything
 ## HPX runtime
 * Similar to OpenMP/TBB, but ...
 
-    * OpenMP has parallel regions where a thread pool exeutes your loops/tasks
+    * OpenMP has parallel regions where a thread pool executes your loops/tasks
     * outside those regions, code runs as usual (on normal 'OS threads')
     
 * With HPX, the runtime is always active
@@ -107,7 +107,7 @@ as quickly as possible as soon as anything
     * shouldn't need to worry about low level synchronization primitives
     * (but sometimes needs to)
     
-* The runtime does it best to schedule tasks
+* The runtime does its best to schedule tasks
 
     * but it can be abused easily
     * either by accident (careless programming)

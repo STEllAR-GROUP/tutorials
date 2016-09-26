@@ -279,7 +279,7 @@ class future
 ```
 template <typename F, typename...Ts>
 auto async(F&& f, Ts...&&ts)
- -> future<decltpype(f(std::forward<Ts>(ts)...)>;
+ -> future<decltype(f(std::forward<Ts>(ts)...)>;
 ```
 
 * `F` is anything callable with the passed arguments (actions are callable)
@@ -288,7 +288,7 @@ auto async(F&& f, Ts...&&ts)
 ```
 template <typename F, typename...Ts>
 auto async(launch_policy, F&& f, Ts...&&ts)
- -> future<decltpype(f(std::forward<Ts>(ts)...)>;
+ -> future<decltype(f(std::forward<Ts>(ts)...)>;
 ```
 
 * `launch_policy` can be `async`, `sync`, `fork`, `deferred`
