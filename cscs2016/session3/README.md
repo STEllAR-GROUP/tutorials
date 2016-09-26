@@ -146,6 +146,7 @@ cmake \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
  /apps/daint/hpx/src/hpx
 ```
+
 ---
 ## Debug build
 ```
@@ -172,6 +173,7 @@ cmake \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
  /apps/daint/hpx/src/hpx \
 ```
+
 ---
 ## Building tips #1
 
@@ -202,6 +204,7 @@ cmake \
     add_target(my_test ${MY_SRSC})
     hpx_setup_target(my_test)
 ```
+
 ---
 ## Environment setup (on Daint)
 ```
@@ -295,8 +298,8 @@ make -j4
 ---
 ## CMakeLists.txt for a set of test projects 
 
-Follow this link to see the toplevel 
-[CMakeLists for Tutorial](../../examples/CMakeLists.txt)
+Follow this link to see the
+[CMakeLists for (top level) tutorial superproject](../../examples/CMakeLists.txt)
 
 Main requirement of CMakeLists is 
 
@@ -304,7 +307,7 @@ Main requirement of CMakeLists is
 
 and for targets
  
-`hpx_setup_target(target COMPONENTS maybe_iostreams)`
+`hpx_setup_target(target [COMPONENTS iostreams])`
 
 * Note that `NO_CMAKE_PACKAGE_REGISTRY` is there to stop CMake from looking in
 user build/install dirs in preference to module paths etc.
@@ -317,8 +320,84 @@ user build/install dirs in preference to module paths etc.
 
 ---
 ## CMakeLists.txt for a simple test project
-Follow this link to see the CMakeLists file for one of the examples 
-[CMakeLists for Stencil](../../examples/02_stencil/CMakeLists.txt)
+Follow this link [CMakeLists for Stencil](../../examples/02_stencil/CMakeLists.txt) 
+to see the CMakeLists file for one of the examples 
+
+This example contains multiple binaries, all are added using the same simple syntax
+
+```
+add_executable(stencil_serial stencil_serial.cpp)
+hpx_setup_target(stencil_serial)
+```
+
+`hpx_setup_target` should get all the link dirs/lib and dependencies that you need
+
+Occasionally you might need to add additional components such as the hpx iostreams 
+library, but in this example, `hpx::cout` is not being used and it is therefore not 
+needed. See [CMakeLists for Hello World](../../examples/00_hello_world/CMakeLists.txt) for
+an example of how it is used
+
+If you require other links to be added, you can continue to use
+```
+target_link_libraries(solver_reference
+    solver_mini_lib
+    ${ALGEBRA_LIBS}
+)
+```
+
+---
+## Building tips #3
+
+* HPX is a changing target as many commits are being made daily
+
+* You may find bugs [cue laughter] and submit issues to the github tracker
+ 
+* When they are fixed (often quickly) you will want to pull the changes
+
+* You need to maintain a good synchronization between your HPX build and your 
+test project build
+
+* You can setup a top level CMakeLists.txt containing subdirs, one for 
+your test project, and allow CMake to create a subdir for HPX too
+    
+* You can build HPX and your test code in a single CMake based setup
+    * Like a git submodule, but managed by CMake rather than git
+    * you can work on an HPX branch ...
+    * ... merge fixes in, make local changes freely
+    * push and pull from the origin
+
+---
+## Building tips #3 : An HPX superproject
+* Add an option to download and build HPX as a subproject in a top level CMakeLists.txt 
+as follows
+
+```
+option(HPX_DOWNLOAD_AS_SUBPROJECT OFF) # default is no
+if (HPX_DOWNLOAD_AS_SUBPROJECT)
+  list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+  include(hpx_download)
+  add_subproject(HPX hpx)
+endif()
+```
+* The contents of the [hpx_download](../../examples/cmake/hpx_download.cmake) 
+make use of two additional script/macro files
+[GitExternal](../../examples/cmake/GitExternal.cmake), 
+[SubProject](../../examples/cmake/SubProject.cmake)
+    * Note that SHALLOW and VERBOSE are options that may be removed
+* These helper scripts allow us to add HPX as a subdirectory in our top level source tree, 
+build HPX and set HPX\_DIR to the binary location so that later when our example projects
+do `find_package(HPX)` everything points to our _in tree_ copy of HPX.
+    * No need to worry about Release/Debug incompatibility
+    * No need to worry about wrong versions of boost/hwloc/jemalloc
+    * No need to worry about wrong compiler flags
+    * `make -j8 my_example` will build libhpx etc automatically
+    * any changes to HPX after pull/merge automatically trigger a rebuild
+    
+---
+    
+```
+make  
+
          
 ---
 class: center, middle
