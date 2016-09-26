@@ -1,3 +1,4 @@
+//  Copyright (c) 2016 John Biddiscombe
 //  Copyright (c) 2013-2015 Hartmut Kaiser
 //  Copyright (c) 2013 Thomas Heller
 //
@@ -27,7 +28,7 @@
 #endif
 
 // ---------------------------------------------------------------------------------
-#define SKIP_LARGE  100
+#define SKIP 100
 
 // ---------------------------------------------------------------------------------
 char* align_buffer (char* ptr, unsigned long align_size)
@@ -69,46 +70,84 @@ typedef hpx::lcos::local::condition_variable condition_var_type;
 // messages in flight. Guaranteed to wait correctly after each batch of
 // 'window_size' messages, but needs more effort to maintain 'window_size' messages
 // in flight all the time.
-double receive_v1(
+double receive_v0(
     hpx::naming::id_type dest,
     char * send_buffer,
     std::size_t size,
-    std::size_t loop,
+    std::size_t test_time,
     std::size_t window_size)
 {
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
     buffer_type recv_buffer;
+    //
+    message_action msg;
+    
+    // warm up, estimate timing
+    hpx::util::high_resolution_timer t;
+    for (int s=0; s<SKIP; ++s) {
+        recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
+    }
+    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP)); 
+    //
+    t.restart();
+    for (std::size_t i = 0; i<num_loops; ++i) {
+        for (std::size_t j = 0; j<window_size; ++j) {
+            // launch a message to the remote node and wait for reply
+          recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
+        }
+    }
+    //    
+    double elapsed = t.elapsed();
+    double d = (static_cast<double>(window_size*num_loops));
+//    std::cout << "Elapsed time " << elapsed << "\t" 
+//        << " loops " << static_cast<int>(num_loops) << "\t";
+    return (elapsed * 1e6) / (2.0*d);    
+}
 
-    message_action            msg;
-    std::atomic<unsigned int> counter;
+// ---------------------------------------------------------------------------------
+// Send a message and receives the reply using a vector<future> to track
+// messages in flight. Guaranteed to wait correctly after each batch of
+// 'window_size' messages, but needs more effort to maintain 'window_size' messages
+// in flight all the time.
+double receive_v1(
+    hpx::naming::id_type dest,
+    char * send_buffer,
+    std::size_t size,
+    std::size_t test_time,
+    std::size_t window_size)
+{
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+    buffer_type recv_buffer;
+    //
+    message_action msg;
+
     // vector to store returns in
     std::vector<hpx::future<hpx::serialization::serialize_buffer<char>>> messages;
     messages.reserve(window_size);
-    //
-    std::size_t skip = SKIP_LARGE;
-    std::size_t parcel_count = 0;
     
-    // warm up
-    for (int s=0; s<skip; ++s) {
-        msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
-    }
-    //
+    // warm up, estimate timing
     hpx::util::high_resolution_timer t;
-    //    
-    for (std::size_t i = 0; i<loop; ++i) {
+    for (int s=0; s<SKIP; ++s) {
+        recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
+    }
+    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP)); 
+    //
+    t.restart();
+    for (std::size_t i = 0; i<num_loops; ++i) {
         for (std::size_t j = 0; j<window_size; ++j) {
             // launch a message to the remote node
             messages.push_back(hpx::async(msg, dest,
                 buffer_type(send_buffer, size, buffer_type::reference)));
-            //
-            parcel_count++;
         }
         hpx::wait_all(messages);
         messages.clear();
-    }    
-    double d = (static_cast<double>(parcel_count));
+    }
+    //    
     double elapsed = t.elapsed();
-    return 0.5*(elapsed * 1e6) / d;    
+    double d = (static_cast<double>(window_size*num_loops));
+//    std::cout << "Elapsed time " << elapsed << "\t" 
+//        << " loops " << static_cast<int>(num_loops) << "\t";
+    return (elapsed * 1e6) / (2.0*d);    
 }
 
 // ---------------------------------------------------------------------------------
@@ -120,11 +159,9 @@ double receive_v2(
     hpx::naming::id_type dest,
     char * send_buffer,
     std::size_t size,
-    std::size_t loop,
+    std::size_t test_time,
     std::size_t window_size)
 {
-    std::size_t skip = SKIP_LARGE;
-
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
     buffer_type recv_buffer;
 
@@ -133,14 +170,15 @@ double receive_v2(
     mutex_type                mutex_;
     std::atomic<unsigned int> counter;
 
-    // warm up
-    for (int s=0; s<skip; ++s) {
-        msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
-    }
-    //
+    // warm up, estimate timing
     hpx::util::high_resolution_timer t;
+    for (int s=0; s<SKIP; ++s) {
+        recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
+    }
+    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP)); 
     //
-    for (std::size_t i = 0; i < loop; ++i)
+    t.restart();
+    for (std::size_t i = 0; i < num_loops; ++i)
     {
         counter = 0;
         //
@@ -158,9 +196,12 @@ double receive_v2(
         unique_lock lk(mutex_);
         cv.wait(lk, [&]{return counter==window_size;});
     }
-
+    //    
     double elapsed = t.elapsed();
-    return (elapsed * 1e6) / (2 * loop * window_size);
+    double d = (static_cast<double>(window_size*num_loops));
+//    std::cout << "Elapsed time " << elapsed << "\t" 
+//        << " loops " << static_cast<int>(num_loops) << "\t";
+    return (elapsed * 1e6) / (2.0*d);    
 }
 
 // ---------------------------------------------------------------------------------
@@ -178,7 +219,7 @@ double receive_v3(
     hpx::naming::id_type dest,
     char * send_buffer,
     std::size_t size,
-    std::size_t loop,
+    std::size_t test_time,
     std::size_t window_size)
 {
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
@@ -192,18 +233,18 @@ double receive_v3(
 
     hpx::lcos::local::sliding_semaphore sem(window_size-1, -1);
     //
-    std::size_t skip = SKIP_LARGE;
     std::size_t parcel_count = 0;
     counter = 0;
 
-    // warm up
-    for (int s=0; s<skip; ++s) {
-        msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
-    }
-    //
+    // warm up, estimate timing
     hpx::util::high_resolution_timer t;
+    for (int s=0; s<SKIP; ++s) {
+        recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
+    }
+    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP)); 
     //
-    for (std::size_t i = 0; i < (loop*window_size); ++i) {
+    t.restart();
+    for (std::size_t i = 0; i < (num_loops*window_size); ++i) {
         // launch a message to the remote node
         hpx::async(msg, dest,
             buffer_type(send_buffer, size, buffer_type::reference)).then(
@@ -213,7 +254,7 @@ double receive_v3(
                     // so that N are always in flight
                     sem.signal(parcel_count);
                     //
-                    if (++counter == (loop*window_size)) {
+                    if (++counter == (num_loops*window_size)) {
                         cv.notify_one();
                     }
                 }
@@ -225,11 +266,13 @@ double receive_v3(
         parcel_count++;
     }
     unique_lock lk(mutex_);
-    cv.wait(lk, [&]{return counter == (loop*window_size);});
-    //
-    double d = (static_cast<double>(parcel_count));
+    cv.wait(lk, [&]{return counter == (num_loops*window_size);});
+    //    
     double elapsed = t.elapsed();
-    return 0.5*(elapsed * 1e6) / d;
+    double d = (static_cast<double>(window_size*num_loops));
+//    std::cout << "Elapsed time " << elapsed << "\t" 
+//        << " loops " << static_cast<int>(num_loops) << "\t";
+    return (elapsed * 1e6) / (2.0*d);    
 }
 
 // ---------------------------------------------------------------------------------
@@ -251,7 +294,7 @@ void run_benchmark(boost::program_options::variables_map & vm)
         there = localities[0];
 
     std::size_t window_size = vm["window-size"].as<std::size_t>();
-    std::size_t loop = vm["loop"].as<std::size_t>();
+    std::size_t test_time = vm["ms-loop"].as<std::size_t>();
     std::size_t min_size = vm["min-size"].as<std::size_t>();
     std::size_t max_size = vm["max-size"].as<std::size_t>();
 
@@ -263,36 +306,45 @@ void run_benchmark(boost::program_options::variables_map & vm)
     char* send_buffer = align_buffer(send_buffer_orig.get(), align_size);
 
     // perform actual measurements
-    print_header("Vector of futures");
+    print_header("Synchronous");
     hpx::util::high_resolution_timer timer;
     for (std::size_t size = min_size; size <= max_size; size *= 2)
     {
-        double latency = receive_v1(there, send_buffer, size, loop, window_size);
+        double latency = receive_v0(there, send_buffer, size, test_time, window_size);
         hpx::cout << std::left << std::setw(10) << size
                   << latency << hpx::endl << hpx::flush;
     }
-    hpx::cout << "Total time: " << timer.elapsed_nanoseconds() << std::endl;
+    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << std::endl;
+    
+    print_header("Vector of futures");
+    timer.restart();
+    for (std::size_t size = min_size; size <= max_size; size *= 2)
+    {
+        double latency = receive_v1(there, send_buffer, size, test_time, window_size);
+        hpx::cout << std::left << std::setw(10) << size
+                  << latency << hpx::endl << hpx::flush;
+    }
+    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << std::endl;
     
     print_header("Atomic counter");    
     timer.restart();
     for (std::size_t size = min_size; size <= max_size; size *= 2)
     {
-        double latency = receive_v2(there, send_buffer, size, loop, window_size);
+        double latency = receive_v2(there, send_buffer, size, test_time, window_size);
         hpx::cout << std::left << std::setw(10) << size
                   << latency << hpx::endl << hpx::flush;
     }
-    hpx::cout << "Total time: " << timer.elapsed_nanoseconds() << std::endl;
+    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << std::endl;
     
     print_header("Sliding semaphore");
     timer.restart();
     for (std::size_t size = min_size; size <= max_size; size *= 2)
     {
-        double latency = receive_v3(there, send_buffer, size, loop, window_size);
+        double latency = receive_v3(there, send_buffer, size, test_time, window_size);
         hpx::cout << std::left << std::setw(10) << size
                   << latency << hpx::endl << hpx::flush;
     }
-
-
+    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << std::endl;
 }
 
 // ---------------------------------------------------------------------------------
@@ -316,9 +368,9 @@ int main(int argc, char* argv[])
         ("window-size",
          boost::program_options::value<std::size_t>()->default_value(1),
          "Number of messages to send in parallel")
-        ("loop",
-         boost::program_options::value<std::size_t>()->default_value(100),
-         "Number of loops")
+        ("ms-loop",
+         boost::program_options::value<std::size_t>()->default_value(1),
+         "Amount of time in ms per iteration of the test")
         ("min-size",
          boost::program_options::value<std::size_t>()->default_value(1),
          "Minimum size of message to send")
