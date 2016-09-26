@@ -379,28 +379,122 @@ if (HPX_DOWNLOAD_AS_SUBPROJECT)
   add_subproject(HPX hpx)
 endif()
 ```
+
 * The contents of the [hpx_download](../../examples/cmake/hpx_download.cmake) 
 make use of two additional script/macro files
 [GitExternal](../../examples/cmake/GitExternal.cmake), 
 [SubProject](../../examples/cmake/SubProject.cmake)
+
     * Note that SHALLOW and VERBOSE are options that may be removed
-* These helper scripts allow us to add HPX as a subdirectory in our top level source tree, 
+
+---
+## Building tips #3 : An HPX superproject #2
+    
+* A superproject allow us to add HPX as a subdirectory in our top level source tree, 
 build HPX and set HPX\_DIR to the binary location so that later when our example projects
 do `find_package(HPX)` everything points to our _in tree_ copy of HPX.
+
     * No need to worry about Release/Debug incompatibility
     * No need to worry about wrong versions of boost/hwloc/jemalloc
     * No need to worry about wrong compiler flags
     * `make -j8 my_example` will build libhpx etc automatically
     * any changes to HPX after pull/merge automatically trigger a rebuild
+
+* When building, you must now pass 
+    
+    * -DHPX_DOWNLOAD_AS_SUBPROJECT=ON
+    * all `HPX_XXX` CMake options/variables that you need (as before)
+    * all your own options/variables to the CMake invocation 
+    
+* You can enable/disable the HPX subproject and switch back to a system/custom HPX
+at any time (though I recommend using branches in the HPX subdir).
+
+* The SubProject Macros will not overwrite your loal changes after the initial checkout      
+     
+---
+## Superproject build on OSX with Xcode 8
+```
+cmake \
+ -DCMAKE_BUILD_TYPE=Release \
+ -DCMAKE_CXX_FLAGS=-std=c++14 \
+ -DCMAKE_INSTALL_PREFIX=/Users/biddisco/apps/tutorial \
+ -DHPX_WITH_NATIVE_TLS=ON \
+ -DHPX_WITH_PARCELPORT_MPI=ON \
+ -DHPX_WITH_PARCELPORT_TCP=ON \
+ -DHPX_WITH_THREAD_IDLE_RATES=ON \
+ -DHPX_WITH_TESTS=ON \
+ -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
+ -DHPX_WITH_EXAMPLES=ON \
+ -DBOOST_ROOT=/Users/biddisco/apps/boost/1.59.0 \
+ -DBoost_COMPILER=-xgcc42 \
+ -DHWLOC_ROOT:PATH=/Users/biddisco/apps/hwloc/1.11.4 \
+ -DHWLOC_INCLUDE_DIR:PATH=/Users/biddisco/apps/hwloc/1.11.4/include \
+ -DHWLOC_LIBRARY:FILEPATH=/Users/biddisco/apps/hwloc/1.11.4/lib/libhwloc.dylib \
+ -DHPX_WITH_MALLOC=JEMALLOC \
+ -DJEMALLOC_INCLUDE_DIR:PATH=/Users/biddisco/apps/jemalloc/4.2.1/include \
+ -DJEMALLOC_LIBRARY:FILEPATH=/Users/biddisco/apps/jemalloc/4.2.1/lib/libjemalloc.dylib \
+ -DHPX_DOWNLOAD_AS_SUBPROJECT=ON \
+ -DSUBPROJECT_HPX=ON \
+ ~/src/tutorials/examples
+```
+Warning TLS not available on earlier XCode versions - use Boost 1.59.0 only on XCode 7.x 
+
+---
+## Main HPX Build options #1
+    
+* General format is HPX_WITH_FEATURE_X
+    * if Feature_X is available and working, then in the code you get
+    `#define HPX_HAVE_FEATURE_X`
+    * in build dir, config `#defines` written `<hpx/config/defines.hpp>`
+        
+* All options are documented on  
+[this page of HPX build options](http://stellar-group.github.io/hpx/docs/html/hpx/manual/build_system/building_hpx/cmake_variables.html)
+
+---
+## Main HPX Build options #2
+* Generic options
+    * HPX_WITH_CUDA: Enables latest features to interface with GPUs using CUDA.
+    * HPX_WITH_GENERIC_CONTEXT_COROUTINES: when ON, uses Boost.context for 
+    lightweitht threads, otherwise some platform provided lib (windows=fibers)
+    * HPX_WITH_LOGGING: when enabled can produce huge amounts of debug info
+    * HPX_WITH_NATIVE_TLS: Thread local storage, turn on unless on Xcode<8
+    * HPX_WITH_PARCEL_COALESCING: gathers messages together when they can't be sent immediately
+    * HPX_WITH_RUN_MAIN_EVERYWHERE: when on, main is called on all localities, when off, 
+    only root has int main called - to be discussed further
+    * HPX_WITH_VC_DATAPAR: latest SIMD code option using Vc library
+
+---
+## Main HPX Build options #3
+* Thread options
+    * HPX_WITH_STACKTRACES: Shows you where your exception was thrown in debug mode
+    * HPX_WITH_THREAD_BACKTRACE_ON_SUSPENSION: When tasks are suspended, capture a 
+    backtrace for debugging. (wasn't working last time I tried it - but need it).
+    * HPX_WITH_THREAD_CREATION_AND_CLEANUP_RATES: HPX_WITH_THREAD_CUMULATIVE_COUNTS:
+    HPX_WITH_THREAD_QUEUE_WAITTIME: HPX_WITH_THREAD_STEALING_COUNTS:
+    * HPX_WITH_THREAD_IDLE_RATES: performance counters for threading subsytem - 
+    Enable measuring the percentage of overhead times spent in the scheduler 
+    * HPX_WITH_THREAD_LOCAL_STORAGE:On everywhere except OSX pre Xcode 8
+    * HPX_WITH_THREAD_MANAGER_IDLE_BACKOFF: Performance tweaking -
+    HPX scheduler threads are backing off on idle queues
+    * HPX_WITH_THREAD_SCHEDULERS: enable different thread schedulers - 
+    Options are: all, abp-priority, local, static-priority, static, hierarchy, 
+    and periodic-priority. 
+    * HPX_WITH_THREAD_TARGET_ADDRESS: Enable storing target address in thread for 
+    NUMA awareness (never tried this) 
     
 ---
-    
-```
-make  
+## Main HPX Build options #4
+* Parcelport options
+    * HPX_WITH_PARCELPORT_MPI: Yes
+    * HPX_WITH_PARCELPORT_MPI_ENV: allows you to control the Env vars used to detect 
+    nodes etc
+    * HPX_WITH_PARCELPORT_MPI_MULTITHREADED: Yes
+    * HPX_WITH_PARCELPORT_TCP: depends, but usually Yes
+    * HPX_WITH_PARCEL_PROFILING: (still under development), but will give details about 
+    parcel counts and sizes etc.
 
-         
 ---
 class: center, middle
 ## Next 
 
-[Introduction to HPX : Part 2](../session2)
+[Running Applications and examples](../session4)
