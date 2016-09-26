@@ -9,10 +9,6 @@ project(stencil CXX)
 
 find_package(HPX REQUIRED)
 
-if(NOT HPX_FOUND)
-  message(FATAL_ERROR "HPX could not be found")
-endif()
-
 add_executable(stencil_serial stencil_serial.cpp)
 hpx_setup_target(stencil_serial)
 
