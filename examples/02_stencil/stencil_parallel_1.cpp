@@ -52,7 +52,7 @@ int hpx_main(boost::program_options::variables_map& vm)
 
     // Initialize: Boundaries are set to 1, interior is 0
     std::fill(U[curr].begin(), U[curr].begin() + Nx, 1.0);
-    std::fill(U[next].begin(), U[curr].begin() + Nx, 1.0);
+    std::fill(U[next].begin(), U[next].begin() + Nx, 1.0);
     for (std::size_t y = 0; y < Ny; ++y)
     {
         U[curr][y * Nx + 0] = 1.0;
@@ -62,7 +62,7 @@ int hpx_main(boost::program_options::variables_map& vm)
         U[next][y * Nx + (Nx - 1)] = 1.0;
     }
     std::fill(U[curr].end() - Nx, U[curr].end(), 1.0);
-    std::fill(U[next].end() - Nx, U[curr].end(), 1.0);
+    std::fill(U[next].end() - Nx, U[next].end(), 1.0);
 
     executor_type executor(numa_domains);
     hpx::util::high_resolution_timer t;

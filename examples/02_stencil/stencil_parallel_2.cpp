@@ -68,7 +68,7 @@ int hpx_main(boost::program_options::variables_map& vm)
     if (rank == 0)
     {
         std::fill(U[curr].begin(), U[curr].begin() + Nx, 1.0);
-        std::fill(U[next].begin(), U[curr].begin() + Nx, 1.0);
+        std::fill(U[next].begin(), U[next].begin() + Nx, 1.0);
     }
     for (std::size_t y = 0; y < Ny; ++y)
     {
@@ -81,7 +81,7 @@ int hpx_main(boost::program_options::variables_map& vm)
     if (rank == num_localities - 1)
     {
         std::fill(U[curr].end() - Nx, U[curr].end(), 1.0);
-        std::fill(U[next].end() - Nx, U[curr].end(), 1.0);
+        std::fill(U[next].end() - Nx, U[next].end(), 1.0);
     }
 
     channel_type send_up;
