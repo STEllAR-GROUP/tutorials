@@ -27,7 +27,7 @@ HPX uses Boost extensively throughout the code
 ### Installing Boost (on Daint)
 * Boost is not nearly as hard to install as people think
 
-```
+```sh
 # download
 wget http://vorboss.dl.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.gz
 
@@ -63,7 +63,7 @@ cd boost_1_61_0
 ## Dependencies #2
 ### Installing hwloc (on Daint)
 
-```
+```sh
 # download a tarball (version 1.11.4 latest @ Sep 2016)
 wget --no-check-certificate \
 https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.4.tar.gz
@@ -102,7 +102,7 @@ make -j8 install
 
 * jemalloc can be downloaded via github and there isn't a direct link
 
-```
+```sh
 # Download 
 # visit https://github.com/jemalloc/jemalloc/releases
 
@@ -118,7 +118,7 @@ make -j8 -k install
 
 ---
 ## HPX CMake: Release + papi + APEX + OTF2 (on Daint)
-```
+```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=Release \
  -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/rel \
@@ -149,7 +149,7 @@ cmake \
 
 ---
 ## Debug build
-```
+```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=Debug \
  -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/rel \
@@ -175,6 +175,24 @@ cmake \
 ```
 
 ---
+## Release vs Debug
+* How much faster will a release build be compared to a debug one?
+    
+    * Lots faster
+    
+    * When building release mode, the compiler will inline all the function invocation
+    code that is used by the template instantiations to specialize on different types etc.
+    
+    * Stack traces in debug mode can be 50-70 funcion calls deep
+    
+    * in release mode they might be only 5-7
+    
+    * nearly all of HPX is headers with extensive specializations of functions/algorithms
+    and huge amounts of this are optimized away by the compiler in release mode
+    
+    * never profile anything in debug mode except for checking if you made it faster or 
+    slower than the previous test
+---
 ## Building tips #1
 
 * Building _all_ of HPX can take a long time
@@ -185,10 +203,21 @@ cmake \
     * check it runs
     
 * if hello world is ok, then build the rest (at your discretion)
-    ```
+    ```sh
     make tests.unit tests.regression examples
     ```
 * use `make help` to dump out a list of targets
+
+* run tests 
+```sh
+ctest -R tests.unit
+```
+
+* note that some tests run distributed so you need to first allocate some nodes 
+to ensure that mpi works
+```sh
+salloc _N 2
+```
 
 ---
 ## Building tips #2
@@ -200,72 +229,39 @@ cmake \
     * so if you make a test called `my_test` you need to `make -j8 my_test_exe`    
 
 * in your own CMakeLists.txt you can
-```
+```cmake
     add_target(my_test ${MY_SRSC})
     hpx_setup_target(my_test)
 ```
 
 ---
-## Environment setup (on Daint)
-```
-module unload PrgEnv-cray
-module load PrgEnv-gnu
-#
-module unload gcc
-module load gcc/5.3.0
-#
-module load boost/1.61.0
-#
-export LDFLAGS=-dynamic
-export CFLAGS=-fPIC
-export CXXFLAGS=-fPIC
-export CC=/opt/cray/craype/default/bin/cc
-export CXX=/opt/cray/craype/default/bin/CC
-```
-
-* Or you can just use ... 
-
-```
-module load hpx/0.9.99/gnu_530-release
-```
-
-* A debug build ... 
-
-```
-module load hpx/0.9.99/gnu_530-debug
-```
-
----
 ## Build tutorial examples (on Daint)
+```sh
+# cd to scratch (it's mounted on compute nodes)
+cd $SCRATCH
+ 
+# get tutorial material 
+git clone https://github.com/STEllAR-GROUP/tutorials.git
 
-* get tutorial material (if you didn't already)
+# create a build dir
+mkdir build
+cd build
 
-```
-git clone git@github.com:STEllAR-GROUP/tutorials.git
-```
+# make sure you have all the modules loaded
+module swap PrgEnv-cray PrgEnv-gnu
+module swap gcc/4.8.2   gcc/5.3.0
+module load cmake/3.5.2
+module load boost/1.61.0
 
-* create a build dir (on scratch if using daint)
-
-```
-mkdir tut
-cd tut
-```
-
-* make sure you have the hpx module loaded
-
-```
+# release
 module load hpx/0.9.99/gnu_530-release
-```
+# (or debug) module load hpx/0.9.99/gnu_530-debug
 
-* invoke CMake with the tutorial examples path
+# invoke CMake with the tutorial examples path
+cmake -DCMAKE_BUILD_TYPE=Release ../tutorials/examples
+# or cmake -DCMAKE_BUILD_TYPE=Debug ../tutorials/examples
 
-```
-cmake ${path_to}/tutorials/examples
-```
-
-* ...and set a build going
-
-```
+# make
 make -j4
 ```
 
@@ -278,20 +274,20 @@ make -j4
 
 * invoke CMake with PATH to HPX (build tree or install tree)
 
-```
+```sh
 cmake -DHPX_DIR=${path_to_hpx_install} ${path_to_tutorials}/examples
 cmake -DHPX_DIR=${path_to_hpx_build}   ${path_to_tutorials}/examples
 ```
 * note that for a build tree you might want
  
-```
-cmake -DDHPX_DIR=${path_to_hpx_build}/lib/cmake/HPX
+```sh
+cmake -DHPX_DIR=${path_to_hpx_build}/lib/cmake/HPX
   ${path_to_tutorials}/examples
 ```
 
 * ...and set a build going
 
-```
+```sh
 make -j4
 ```
 
@@ -325,7 +321,7 @@ to see the CMakeLists file for one of the examples
 
 This example contains multiple binaries, all are added using the same simple syntax
 
-```
+```cmake
 add_executable(stencil_serial stencil_serial.cpp)
 hpx_setup_target(stencil_serial)
 ```
@@ -338,7 +334,7 @@ needed. See [CMakeLists for Hello World](../../examples/00_hello_world/CMakeList
 an example of how it is used
 
 If you require other links to be added, you can continue to use
-```
+```cmake
 target_link_libraries(solver_reference
     solver_mini_lib
     ${ALGEBRA_LIBS}
@@ -371,7 +367,7 @@ your test project, and allow CMake to create a subdir for HPX too
 * Add an option to download and build HPX as a subproject in a top level CMakeLists.txt 
 as follows
 
-```
+```cmake
 option(HPX_DOWNLOAD_AS_SUBPROJECT OFF) # default is no
 if (HPX_DOWNLOAD_AS_SUBPROJECT)
   list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -402,7 +398,7 @@ do `find_package(HPX)` everything points to our _in tree_ copy of HPX.
 
 * When building, you must now pass 
     
-    * -DHPX_DOWNLOAD_AS_SUBPROJECT=ON
+    * `-DHPX_DOWNLOAD_AS_SUBPROJECT=ON`
     * all `HPX_XXX` CMake options/variables that you need (as before)
     * all your own options/variables to the CMake invocation 
     
@@ -413,7 +409,7 @@ at any time (though I recommend using branches in the HPX subdir).
      
 ---
 ## Superproject build on OSX with Xcode 8
-```
+```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=Release \
  -DCMAKE_CXX_FLAGS=-std=c++14 \
@@ -491,7 +487,7 @@ Warning TLS not available on earlier XCode versions - use Boost 1.59.0 only on X
     * HPX_WITH_PARCELPORT_MPI_MULTITHREADED: Yes
     * HPX_WITH_PARCELPORT_TCP: depends, but usually Yes
     * HPX_WITH_PARCEL_PROFILING: (still under development), but will give details about 
-    parcel counts and sizes etc.
+    parcel traces/dependencies to help with profiling
 
 ---
 class: center, middle

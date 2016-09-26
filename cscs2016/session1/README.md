@@ -100,12 +100,12 @@ as quickly as possible as soon as anything
     * allows the user to ignore the threads/schedulers/locks
     * gives the user control over them too
     
-* The user doesn't manage threads directly
+* The user doesn't manage threads directly (usually)
 
     * user creates tasks
     * synchronizes between/amongst them
     * shouldn't need to worry about low level synchronization primitives
-    * (but sometimes needs to)
+    * (but sometimes needs to - see tutorial 'latency' example)
     
 * The runtime does its best to schedule tasks
 
@@ -114,8 +114,41 @@ as quickly as possible as soon as anything
     * or deliberately 
     
 * A good understanding of how it all works really helps          
+
 ---
-## More stuff
+## Task based programming
+* A different approach to writing your code
+
+    * your program should be a tree of tasks
+    * each task will depend on other tasks
+    * and have child tasks
+    
+<div class="crop">
+    <img src="images/DAG-weather.jpg" alt="" width="200" height="400">
+</div>
+    
+---
+## Task decomposition   
+    
+* Breaking a program into tasks should be straightforward 
+
+* More functional
+    * tasks should accept inputs and return results
+    * modifying global state should be avoided
+        * race conditions and other thread  
+
+* the leaf nodes of the tree are the smallest bits of work you can express
+    * but those leaf nodes might be broken further by HPX
+    * even `parallel::for(...)` loops decompose into tasks
+    * parallel::algorithm's are made up of tasks   
+
+* HPX differs from (most) other libraries because the same API and the same 
+scheduling/runtime can be used for the whole heirarchy of tasks
+
+* We aim to replace OpenMP+MPI+Acc with a single framework 
+    * based soundly on C++
+    * from top to bottom (of the task tree)
+    
 ---
 class: center, middle
 ## Next 
