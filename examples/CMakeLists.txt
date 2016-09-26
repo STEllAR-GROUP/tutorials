@@ -31,6 +31,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -dynamic")
 set(TUTORIAL_DIRS
   00_hello_world
   01_latency
+  02_stencil
 )
 
 foreach(example ${TUTORIAL_DIRS})
