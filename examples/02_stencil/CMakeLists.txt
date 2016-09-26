@@ -17,3 +17,9 @@ hpx_setup_target(stencil_parallel_0)
 
 add_executable(stencil_parallel_1 stencil_parallel_1.cpp)
 hpx_setup_target(stencil_parallel_1)
+
+add_executable(stencil_parallel_2 stencil_parallel_2.cpp)
+hpx_setup_target(stencil_parallel_2)
+
+#add_executable(stencil_parallel_3 stencil_parallel_3.cpp)
+#hpx_setup_target(stencil_parallel_3)

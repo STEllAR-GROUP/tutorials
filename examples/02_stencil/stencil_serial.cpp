@@ -4,40 +4,28 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <hpx/hpx_init.hpp>
+#include <hpx/util/high_resolution_timer.hpp>
 
 #include <array>
 #include <algorithm>
-#include <chrono>
 #include <vector>
 #include <iostream>
 #include <fstream>
 
-std::size_t idx(std::size_t x, std::size_t y, std::size_t N)
+void line_update(
+    std::size_t N,
+    double * result,
+    double const* up,
+    double const* middle,
+    double const* down)
 {
-    return x * N + y;
-}
-
-std::vector<double> line_update(
-    std::vector<double> const& up,
-    std::vector<double> const& middle,
-    std::vector<double> const& down)
-{
-    std::vector<double> result(middle.size());
-
-    for (std::size_t y = 1; y < result.size() - 1; ++y)
+    for (std::size_t x = 1; x < N - 1; ++x)
     {
-        result[y] = 0.25 * (up[y-1] + up[y+1] + down[y-1] + down[y+1]) - middle[y+1];
+        result[x] = 0.25 * (up[x-1] + up[x+1] + down[x-1] + down[x+1]) - middle[x];
     }
-
-    return result;
 }
 
-typedef std::vector<double> row_type;
-typedef std::vector<row_type> data_type;
-
-void output(std::string file_base, data_type const& data)
-{
-}
+typedef std::vector<double> data_type;
 
 int hpx_main(boost::program_options::variables_map& vm)
 {
@@ -50,42 +38,40 @@ int hpx_main(boost::program_options::variables_map& vm)
     std::size_t curr  = 0;
     std::size_t next = 1;
 
-
-    U[curr] = data_type(Nx);
-    U[next] = data_type(Nx);
+    U[curr] = data_type(Nx * Ny, 0.0);
+    U[next] = data_type(Nx * Ny, 0.0);
 
     // Initialize: Boundaries are set to 1, interior is 0
-    U[curr].front() = row_type(Ny, 1.0);
-    std::for_each(U[curr].begin() + 1, U[curr].begin() + Nx - 1,
-        [Ny](row_type& r)
-        {
-            r = row_type(Ny, 0.0);
-            r.front() = 1.0;
-            r.back() = 1.0;
-        });
-    U[curr].back() = row_type(Ny, 1.0);
-    // Make sure our output carries along the same...
-    U[next] = U[curr];
+    std::fill(U[curr].begin(), U[curr].begin() + Nx, 1.0);
+    std::fill(U[next].begin(), U[curr].begin() + Nx, 1.0);
+    for (std::size_t y = 0; y < Ny; ++y)
+    {
+        U[curr][y * Nx + 0] = 1.0;
+        U[next][y * Nx + 0] = 1.0;
 
-    auto start = std::chrono::steady_clock::now();
+        U[curr][y * Nx + (Nx - 1)] = 1.0;
+        U[next][y * Nx + (Nx - 1)] = 1.0;
+    }
+    std::fill(U[curr].end() - Nx, U[curr].end(), 1.0);
+    std::fill(U[next].end() - Nx, U[curr].end(), 1.0);
+
+    hpx::util::high_resolution_timer t;
     for (std::size_t t = 0; t < steps; ++t)
     {
-        for (std::size_t x = 1; x < Nx - 1; ++x)
+        for (std::size_t y = 1; y < Ny - 1; ++y)
         {
-            row_type& up = U[curr][x + 1];
-            row_type& middle = U[curr][x];
-            row_type& down = U[curr][x - 1];
-            U[next][x] = line_update(up, middle, down);
+            double* result = U[next].data() + y * Nx;
+            double const* up = U[curr].data() + (y - 1) * Nx;
+            double const* middle = U[curr].data() + y * Nx;
+            double const* down = U[curr].data() + (y + 1) * Nx;
+            line_update(Nx, result, up, middle, down);
         }
         std::swap(curr, next);
     }
-    auto end = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(
-        end - start).count();
+    double elapsed = t.elapsed();
 
-    std::cout << "Elapsed time: " << duration << "\n";
-
-    output("result", U[curr]);
+    double mlups = (((Nx - 2.) * (Ny - 2.) * steps) / 1e6)/ elapsed;
+    std::cout << "MLUPS: " << mlups << "\n";
 
     return hpx::finalize();
 }
