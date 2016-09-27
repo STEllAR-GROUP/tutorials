@@ -45,7 +45,7 @@ endif()
 # Find HPX, disable searching in user builds
 #--------------------------------------------------
 find_package(HPX REQUIRED NO_CMAKE_PACKAGE_REGISTRY)
-message("HPX was found in ${HPX_DIR}")
+message("\n-------\nTutorial using HPX from ${HPX_DIR}\n-------\n")
 
 #--------------------------------------------------
 # On the cray we need the following flags
@@ -62,8 +62,13 @@ set(TUTORIAL_DIRS
   02_stencil
 )
 
-foreach(example ${TUTORIAL_DIRS})
-  add_subdirectory(${example})
-endforeach()
+add_hpx_pseudo_target(tutorial)
 
+foreach(subdir ${TUTORIAL_DIRS})
+  set(regexp "[0-9]+_")
+  string(REGEX REPLACE "[0-9]+_" "" RESULT "${subdir}")
+  add_hpx_pseudo_target(tutorial.${RESULT})
+  add_subdirectory(${subdir})
+  add_hpx_pseudo_dependencies(tutorial tutorial.${RESULT})
+endforeach()
 

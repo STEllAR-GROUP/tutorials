@@ -10,3 +10,6 @@ find_package(HPX REQUIRED)
 
 add_executable(latency latency.cpp)
 hpx_setup_target(latency COMPONENT_DEPENDENCIES iostreams)
+
+# for tutorial target
+add_hpx_pseudo_dependencies(tutorial.latency latency)
