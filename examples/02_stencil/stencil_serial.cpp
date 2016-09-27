@@ -79,11 +79,5 @@ int main(int argc, char* argv[])
          "Save output to file")
     ;
 
-    // Initialize and run HPX, this example requires to run hpx_main on all
-    // localities
-    std::vector<std::string> const cfg = {
-        "hpx.run_hpx_main!=1"
-    };
-
-    return hpx::init(desc_commandline, argc, argv, cfg);
+    return hpx::init(desc_commandline, argc, argv);
 }

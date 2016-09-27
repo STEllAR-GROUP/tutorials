@@ -25,7 +25,7 @@ struct communicator
     communicator(std::size_t rank, std::size_t num)
     {
         static const char* up_name = "/stencil/up/";
-        static const char* down_name = "/stencil/up/";
+        static const char* down_name = "/stencil/down/";
 
         // Only set up channels if we have more than one partner
         if (num > 1)

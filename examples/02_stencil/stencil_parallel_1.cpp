@@ -49,9 +49,9 @@ int hpx_main(boost::program_options::variables_map& vm)
     auto policy = hpx::parallel::par.on(executor);
     for (std::size_t t = 0; t < steps; ++t)
     {
-        hpx::parallel::for_loop(
-            policy,
-            curr + 1, curr + Ny-1, hpx::parallel::induction(next.middle + Nx, Nx),
+        hpx::parallel::for_loop(policy,
+            curr + 1, curr + Ny-1,
+            hpx::parallel::induction(next.middle + Nx, Nx),
             [Nx](iterator it, data_type::iterator result)
             {
                 line_update(*it, *it + Nx, result);
@@ -89,8 +89,7 @@ int main(int argc, char* argv[])
     // Initialize and run HPX, this example requires to run hpx_main on all
     // localities
     std::vector<std::string> const cfg = {
-        "hpx.run_hpx_main!=1",
-        "hpx.numa_sensitive=2",
+        "hpx.numa_sensitive=2"
     };
 
     return hpx::init(desc_commandline, argc, argv, cfg);

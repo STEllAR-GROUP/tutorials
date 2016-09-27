@@ -28,12 +28,10 @@ typedef std::vector<double> communication_type;
 HPX_REGISTER_CHANNEL_DECLARATION(communication_type);
 HPX_REGISTER_CHANNEL(communication_type, stencil_communication);
 
-int hpx_main(boost::program_options::variables_map& vm)
+void worker(
+    std::size_t rank, std::size_t num, std::size_t Nx, std::size_t Ny, std::size_t steps,
+    std::string const& output_name)
 {
-    std::size_t Nx = vm["Nx"].as<std::size_t>();
-    std::size_t Ny_global = vm["Ny"].as<std::size_t>();
-    std::size_t steps = vm["steps"].as<std::size_t>();
-
     typedef hpx::compute::host::block_allocator<double> allocator_type;
     typedef hpx::compute::host::block_executor<> executor_type;
     typedef hpx::compute::vector<double, allocator_type> data_type;
@@ -44,20 +42,14 @@ int hpx_main(boost::program_options::variables_map& vm)
     auto numa_domains = hpx::compute::host::numa_domains();
     allocator_type alloc(numa_domains);
 
-    std::size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
-    std::size_t rank = hpx::get_locality_id();
-
-    // We divide our grid in stripes along the y axis.
-    std::size_t Ny = Ny_global / num_localities;
-
     U[0] = data_type(Nx * Ny, 0.0, alloc);
     U[1] = data_type(Nx * Ny, 0.0, alloc);
 
-    init(U, Nx, Ny, rank, num_localities);
+    init(U, Nx, Ny, rank, num);
 
     // Setup our communicator
     typedef communicator<std::vector<double>> communicator_type;
-    communicator_type comm(rank, num_localities);
+    communicator_type comm(rank, num);
 
     if (comm.has_neighbor(communicator_type::up))
     {
@@ -100,8 +92,8 @@ int hpx_main(boost::program_options::variables_map& vm)
             // Finally, we can send the updated first row for our neighbor
             // to consume in the next timestep. Don't send if we are on
             // the last timestep
-                comm.set(communicator_type::up,
-                    std::vector<double>(result, result + Nx), t + 1);
+            comm.set(communicator_type::up,
+                std::vector<double>(result, result + Nx), t + 1);
         }
 
         // Update our interior spatial domain
@@ -140,12 +132,45 @@ int hpx_main(boost::program_options::variables_map& vm)
 
     if (rank == 0)
     {
-        double mlups = (((Nx - 2.) * (Ny_global - 2.) * steps) / 1e6)/ elapsed;
+        double mlups = (((Nx - 2.) * (Ny * num - 2.) * steps) / 1e6)/ elapsed;
         std::cout << "MLUPS: " << mlups << "\n";
     }
 
-    if (vm.count("output"))
-        output(vm["output"].as<std::string>() + std::to_string(rank), U[0], Nx, Ny);
+    if (!output_name.empty())
+        output(output_name + std::to_string(rank), U[0], Nx, Ny);
+}
+
+int hpx_main(boost::program_options::variables_map& vm)
+{
+    std::size_t Nx = vm["Nx"].as<std::size_t>();
+    std::size_t Ny_global = vm["Ny"].as<std::size_t>();
+    std::size_t steps = vm["steps"].as<std::size_t>();
+
+    std::size_t rank = hpx::get_locality_id();
+    std::size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
+    std::size_t num_local_partitions = vm["local-partitions"].as<std::size_t>();
+
+    std::size_t num_partitions = num_localities * num_local_partitions;
+
+    // We divide our grid in stripes along the y axis.
+    std::size_t Ny = Ny_global / num_partitions;
+
+    std::vector<hpx::future<void>> workers;
+    workers.reserve(num_local_partitions);
+    for (std::size_t part = 0; part != num_local_partitions; ++part)
+    {
+        std::string output_name;
+        if (vm.count("output"))
+            output_name = vm["output"].as<std::string>();
+
+        workers.push_back(hpx::async(&worker,
+            (rank * num_local_partitions) + part, num_partitions,
+            Nx, Ny, steps,
+            output_name
+        ));
+    }
+
+    hpx::when_all(workers).get();
 
     return hpx::finalize();
 }
@@ -162,6 +187,8 @@ int main(int argc, char* argv[])
          "Elements in the y direction")
         ("steps", value<std::uint64_t>()->default_value(100),
          "Number of steps to apply the stencil")
+        ("local-partitions", value<std::uint64_t>()->default_value(1),
+         "Number of local partitions on one locality")
         ("output", value<std::string>(),
          "Save output to file")
     ;
