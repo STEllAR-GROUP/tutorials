@@ -12,4 +12,6 @@ add_executable(hello_world hello_world.cpp)
 hpx_setup_target(hello_world COMPONENT_DEPENDENCIES iostreams)
 
 # for tutorial target
-add_hpx_pseudo_dependencies(tutorial.hello_world hello_world)
+if (TARGET tutorial)
+  add_hpx_pseudo_dependencies(tutorial.hello_world hello_world)
+endif()

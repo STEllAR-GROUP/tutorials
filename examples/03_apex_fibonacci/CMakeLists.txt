@@ -12,4 +12,6 @@ add_executable(apex_fibonacci apex_fibonacci.cpp)
 hpx_setup_target(apex_fibonacci ) # COMPONENT_DEPENDENCIES iostreams)
 
 # for tutorial target
-add_hpx_pseudo_dependencies(tutorial.apex_fibonacci apex_fibonacci)
+if (TARGET tutorial)
+  add_hpx_pseudo_dependencies(tutorial.apex_fibonacci apex_fibonacci)
+endif()

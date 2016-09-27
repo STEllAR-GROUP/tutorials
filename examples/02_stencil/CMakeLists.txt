@@ -25,6 +25,8 @@ hpx_setup_target(stencil_parallel_2)
 #hpx_setup_target(stencil_parallel_3)
 
 # for tutorial target
-add_hpx_pseudo_dependencies(tutorial.stencil stencil_serial)
-add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_0)
-add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_1)
+if (TARGET tutorial)
+  add_hpx_pseudo_dependencies(tutorial.stencil stencil_serial)
+  add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_0)
+  add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_1)
+endif()
