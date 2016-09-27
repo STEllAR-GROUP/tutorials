@@ -30,7 +30,7 @@ HPX_REGISTER_CHANNEL(channel_data, stencil_channel);
 
 int hpx_main(boost::program_options::variables_map& vm)
 {
-    std::size_t Nx_global = vm["Nx"].as<std::size_t>();
+    std::size_t Nx = vm["Nx"].as<std::size_t>();
     std::size_t Ny_global = vm["Ny"].as<std::size_t>();
     std::size_t steps = vm["steps"].as<std::size_t>();
 
@@ -47,7 +47,7 @@ int hpx_main(boost::program_options::variables_map& vm)
     std::size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
     std::size_t rank = hpx::get_locality_id();
 
-    std::size_t Nx = Nx_global / num_localities;
+    // We divide our grid in stripes along the y axis.
     std::size_t Ny = Ny_global / num_localities;
 
     U[0] = data_type(Nx * Ny, 0.0, alloc);
@@ -116,13 +116,15 @@ int hpx_main(boost::program_options::variables_map& vm)
         // upper neighbor
         if (recv_up)
         {
+            // Get the first row.
             auto result = next.middle;
             // retrieve the row which is 'up' from our first row.
             std::vector<double> up = recv_up.get(hpx::launch::sync, t);
             // Create a row iterator with that top boundary
             auto it = curr.top_boundary(up);
+
             // After getting our missing row, we can update our first row
-            line_update(it, it + 1, result);
+            line_update(it, it + Nx, result);
 
             if(send_up)
             {
@@ -147,13 +149,14 @@ int hpx_main(boost::program_options::variables_map& vm)
         // neighbor below
         if (recv_down)
         {
-            auto result = next.middle + (Ny - 1) * Nx;
+            // Get the last row.
+            auto result = next.middle + (Ny - 2) * Nx;
             // retrieve the row which is 'down' from our last row.
             std::vector<double> down = recv_down.get(hpx::launch::sync, t);
             // Create a row iterator with that bottom boundary
-            auto it = curr.bottom_boundary(down);
+            auto it = (curr + Ny - 2).bottom_boundary(down);
             // After getting our missing row, we can update our last row
-            line_update(it, it + 1, result);
+            line_update(it, it + Nx, result);
 
             if (send_down)
             {
@@ -170,12 +173,12 @@ int hpx_main(boost::program_options::variables_map& vm)
 
     if (rank == 0)
     {
-        double mlups = (((Nx_global - 2.) * (Ny_global - 2.) * steps) / 1e6)/ elapsed;
+        double mlups = (((Nx - 2.) * (Ny_global - 2.) * steps) / 1e6)/ elapsed;
         std::cout << "MLUPS: " << mlups << "\n";
-
-        if (vm.count("output"))
-            output(vm["output"].as<std::string>(), U[0], Nx, Ny);
     }
+
+    if (vm.count("output"))
+        output(vm["output"].as<std::string>() + std::to_string(rank), U[0], Nx, Ny);
 
     return hpx::finalize();
 }
