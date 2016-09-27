@@ -3,6 +3,9 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include "stencil.hpp"
+#include "output.hpp"
+
 #include <hpx/hpx_init.hpp>
 #include <hpx/include/compute.hpp>
 #include <hpx/include/lcos.hpp>
@@ -18,22 +21,6 @@
 #include <iostream>
 #include <string>
 
-void line_update(
-    std::size_t N,
-    double * result,
-    double const* up,
-    double const* middle,
-    double const* down)
-{
-    for (std::size_t x = 1; x < N - 1; ++x)
-    {
-        result[x] = 0.25 * (up[x-1] + up[x+1] + down[x-1] + down[x+1]) - middle[x];
-    }
-}
-
-typedef hpx::compute::host::block_allocator<double> allocator_type;
-typedef hpx::compute::host::block_executor<> executor_type;
-typedef hpx::compute::vector<double, allocator_type> data_type;
 
 typedef std::vector<double> channel_data;
 typedef hpx::lcos::channel<channel_data> channel_type;
@@ -47,10 +34,12 @@ int hpx_main(boost::program_options::variables_map& vm)
     std::size_t Ny_global = vm["Ny"].as<std::size_t>();
     std::size_t steps = vm["steps"].as<std::size_t>();
 
-    double h = 1.0/16.0;
+    typedef hpx::compute::host::block_allocator<double> allocator_type;
+    typedef hpx::compute::host::block_executor<> executor_type;
+    typedef hpx::compute::vector<double, allocator_type> data_type;
+    typedef column_iterator<data_type::iterator> iterator;
+
     std::array<data_type, 2> U;
-    std::size_t curr  = 0;
-    std::size_t next = 1;
 
     auto numa_domains = hpx::compute::host::numa_domains();
     allocator_type alloc(numa_domains);
@@ -61,28 +50,10 @@ int hpx_main(boost::program_options::variables_map& vm)
     std::size_t Nx = Nx_global / num_localities;
     std::size_t Ny = Ny_global / num_localities;
 
-    U[curr] = data_type(Nx * Ny, 0.0, alloc);
-    U[next] = data_type(Nx * Ny, 0.0, alloc);
+    U[0] = data_type(Nx * Ny, 0.0, alloc);
+    U[1] = data_type(Nx * Ny, 0.0, alloc);
 
-    // Initialize: Boundaries are set to 1, interior is 0
-    if (rank == 0)
-    {
-        std::fill(U[curr].begin(), U[curr].begin() + Nx, 1.0);
-        std::fill(U[next].begin(), U[next].begin() + Nx, 1.0);
-    }
-    for (std::size_t y = 0; y < Ny; ++y)
-    {
-        U[curr][y * Ny + 0] = 1.0;
-        U[next][y * Ny + 0] = 1.0;
-
-        U[curr][y * Ny + (Nx - 1)] = 1.0;
-        U[next][y * Ny + (Nx - 1)] = 1.0;
-    }
-    if (rank == num_localities - 1)
-    {
-        std::fill(U[curr].end() - Nx, U[curr].end(), 1.0);
-        std::fill(U[next].end() - Nx, U[next].end(), 1.0);
-    }
+    init(U, Nx, Ny, rank, num_localities);
 
     channel_type send_up;
     channel_type send_down;
@@ -95,74 +66,99 @@ int hpx_main(boost::program_options::variables_map& vm)
         std::string channel_up_name = "/stencil/channel_up/";
         std::string channel_down_name = "/stencil/channel_down/";
 
+        // We have an upper neighbor if our rank is greater than zero.
         if (rank > 0)
         {
+            // Retrieve the channel from our upper neighbor from which we receive
+            // the row we need to update the first row in our partition.
             recv_up = hpx::find_from_basename<channel_type>(channel_down_name, rank - 1);
+            // Create the channel we use to send our first row to our upper
+            // neighbor
             send_up = channel_type(hpx::find_here());
+            // Register the channel with a name such that our neighbor can find it.
             hpx::register_with_basename(channel_up_name, send_up, rank);
 
-            // send initial value to ower upper neighbor
+            // send initial value to our upper neighbor
             send_up.set(hpx::launch::apply,
-                std::vector<double>(U[curr].begin(), U[curr].begin() + Nx), 0);
+                std::vector<double>(U[0].begin(), U[0].begin() + Nx), 0);
         }
 
+        // We have a lower neighbor if we aren't the last rank.
         if (rank < num_localities - 1)
         {
+            // Retrieve the channel from our neighbor below from which we receive
+            // the row we need to update the last row in our partition.
             recv_down = hpx::find_from_basename<channel_type>(channel_up_name, rank + 1);
+            // Create the channel we use to send our last row to our neighbor
+            // below
             send_down = channel_type(hpx::find_here());
+            // Register the channel with a name such that our neighbor can find it.
             hpx::register_with_basename(channel_down_name, send_down, rank);
 
-            // send initial value to ower neighbor below
+            // send initial value to our neighbor below
             send_down.set(hpx::launch::apply,
-                std::vector<double>(U[curr].end() - Nx, U[curr].end()), 0);
+                std::vector<double>(U[0].end() - Nx, U[0].end()), 0);
         }
     }
 
     executor_type executor(numa_domains);
     hpx::util::high_resolution_timer t;
+
+    // Construct our column iterators. We want to begin with the second
+    // row to avoid out of bound accesses.
+    iterator curr(Nx, U[0].begin());
+    iterator next(Nx, U[1].begin());
+
     auto policy = hpx::parallel::par.on(executor);
     for (std::size_t t = 0; t < steps; ++t)
     {
+        // Update our upper boundary if we have an interior partition and an
+        // upper neighbor
         if (recv_up)
         {
-            double* result = U[next].data();
+            auto result = next.middle;
+            // retrieve the row which is 'up' from our first row.
             std::vector<double> up = recv_up.get(hpx::launch::sync, t);
-            double const* middle = U[curr].data();
-            double const* down = U[curr].data() + Nx;
-            line_update(Nx, result, up.data(), middle, down);
+            // Create a row iterator with that top boundary
+            auto it = curr.top_boundary(up);
+            // After getting our missing row, we can update our first row
+            line_update(it, it + 1, result);
 
-            // After we finished updating the line, we can send it up
             if(send_up)
             {
+                // Finally, we can send the updated first row for our neighbor
+                // to consume in the next timestep
                 send_up.set(hpx::launch::apply,
                     std::vector<double>(result, result + Nx), t + 1);
             }
         }
 
+        // Update our interior spatial domain
         hpx::parallel::for_loop(
             policy,
-            1, Ny-1,
-            [&U, curr, next, Nx, Ny](std::size_t y)
+            curr + 1, curr + Ny-1, hpx::parallel::induction(next.middle + Nx, Nx),
+            [Nx](iterator it, data_type::iterator result)
             {
-                double* result = U[next].data() + y * Nx;;
-                double const* up = U[curr].data() + (y - 1) * Nx;
-                double const* middle = U[curr].data() + y * Nx;
-                double const* down = U[curr].data() + (y + 1) * Nx;
-                line_update(Nx, result, up, middle, down);
+                line_update(*it, *it + Nx, result);
             }
         );
 
+        // Update our lower boundary if we have an interior partition and a
+        // neighbor below
         if (recv_down)
         {
-            double* result = U[next].data();
-            double const* up = U[curr].data() + (Ny - 2) * Nx;
-            double const* middle = U[curr].data() + (Ny - 1) * Nx;
+            auto result = next.middle + (Ny - 1) * Nx;
+            // retrieve the row which is 'down' from our last row.
             std::vector<double> down = recv_down.get(hpx::launch::sync, t);
-            line_update(Nx, result, up, middle, down.data());
+            // Create a row iterator with that bottom boundary
+            auto it = curr.bottom_boundary(down);
+            // After getting our missing row, we can update our last row
+            line_update(it, it + 1, result);
 
-            // After we finished updating the line, we can send it down
             if (send_down)
             {
+                // Finally, we can send the updated last row for our neighbor
+                // to consume in the next timestep
                 send_down.set(hpx::launch::apply,
                     std::vector<double>(result, result + Nx), t + 1);
             }
@@ -176,6 +172,9 @@ int hpx_main(boost::program_options::variables_map& vm)
     {
         double mlups = (((Nx_global - 2.) * (Ny_global - 2.) * steps) / 1e6)/ elapsed;
         std::cout << "MLUPS: " << mlups << "\n";
+
+        if (vm.count("output"))
+            output(vm["output"].as<std::string>(), U[0], Nx, Ny);
     }
 
     return hpx::finalize();
@@ -193,6 +192,8 @@ int main(int argc, char* argv[])
          "Elements in the y direction")
         ("steps", value<std::uint64_t>()->default_value(100),
          "Number of steps to apply the stencil")
+        ("output", value<std::string>(),
+         "Save output to file")
     ;
 
     // Initialize and run HPX, this example requires to run hpx_main on all

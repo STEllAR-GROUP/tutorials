@@ -3,29 +3,17 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include "stencil.hpp"
+#include "output.hpp"
+
 #include <hpx/hpx_init.hpp>
 #include <hpx/util/high_resolution_timer.hpp>
 
+#include <boost/program_options.hpp>
+
 #include <array>
-#include <algorithm>
 #include <vector>
 #include <iostream>
-#include <fstream>
-
-void line_update(
-    std::size_t N,
-    double * result,
-    double const* up,
-    double const* middle,
-    double const* down)
-{
-    for (std::size_t x = 1; x < N - 1; ++x)
-    {
-        result[x] = 0.25 * (up[x-1] + up[x+1] + down[x-1] + down[x+1]) - middle[x];
-    }
-}
-
-typedef std::vector<double> data_type;
 
 int hpx_main(boost::program_options::variables_map& vm)
 {
@@ -33,45 +21,44 @@ int hpx_main(boost::program_options::variables_map& vm)
     std::size_t Ny = vm["Ny"].as<std::size_t>();
     std::size_t steps = vm["steps"].as<std::size_t>();
 
-    double h = 1.0/16.0;
+    typedef std::vector<double> data_type;
+    typedef column_iterator<std::vector<double>::iterator> iterator;
+
     std::array<data_type, 2> U;
-    std::size_t curr  = 0;
-    std::size_t next = 1;
 
-    U[curr] = data_type(Nx * Ny, 0.0);
-    U[next] = data_type(Nx * Ny, 0.0);
+    U[0] = data_type(Nx * Ny, 0.0);
+    U[1] = data_type(Nx * Ny, 0.0);
 
-    // Initialize: Boundaries are set to 1, interior is 0
-    std::fill(U[curr].begin(), U[curr].begin() + Nx, 1.0);
-    std::fill(U[next].begin(), U[curr].begin() + Nx, 1.0);
-    for (std::size_t y = 0; y < Ny; ++y)
-    {
-        U[curr][y * Nx + 0] = 1.0;
-        U[next][y * Nx + 0] = 1.0;
-
-        U[curr][y * Nx + (Nx - 1)] = 1.0;
-        U[next][y * Nx + (Nx - 1)] = 1.0;
-    }
-    std::fill(U[curr].end() - Nx, U[curr].end(), 1.0);
-    std::fill(U[next].end() - Nx, U[curr].end(), 1.0);
+    init(U, Nx, Ny);
 
     hpx::util::high_resolution_timer t;
+
+    // Construct our column iterators. We want to begin with the second
+    // row to avoid out of bound accesses.
+    iterator curr(Nx, U[0].begin());
+    iterator next(Nx, U[1].begin());
+
     for (std::size_t t = 0; t < steps; ++t)
     {
-        for (std::size_t y = 1; y < Ny - 1; ++y)
+        // We store the result of our update in the next middle line.
+        // We need to skip the first row.
+        auto result = next.middle + Nx;
+
+        // Iterate over the interior: skip the first and last column
+        for(auto it = curr + 1; it != curr + Ny - 1; ++it)
         {
-            double* result = U[next].data() + y * Nx;
-            double const* up = U[curr].data() + (y - 1) * Nx;
-            double const* middle = U[curr].data() + y * Nx;
-            double const* down = U[curr].data() + (y + 1) * Nx;
-            line_update(Nx, result, up, middle, down);
+            result = line_update(it.row(), it.row() + Nx, result);
         }
+
         std::swap(curr, next);
     }
     double elapsed = t.elapsed();
 
     double mlups = (((Nx - 2.) * (Ny - 2.) * steps) / 1e6)/ elapsed;
     std::cout << "MLUPS: " << mlups << "\n";
+
+    if (vm.count("output"))
+        output(vm["output"].as<std::string>(), U[0], Nx, Ny);
 
     return hpx::finalize();
 }
@@ -88,6 +75,8 @@ int main(int argc, char* argv[])
          "Elements in the y direction")
         ("steps", value<std::uint64_t>()->default_value(100),
          "Number of steps to apply the stencil")
+        ("output", value<std::string>(),
+         "Save output to file")
     ;
 
     // Initialize and run HPX, this example requires to run hpx_main on all
