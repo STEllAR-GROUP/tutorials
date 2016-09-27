@@ -48,10 +48,22 @@ find_package(HPX REQUIRED NO_CMAKE_PACKAGE_REGISTRY)
 message("\n-------\nTutorial using HPX from ${HPX_DIR}\n-------\n")
 
 #--------------------------------------------------
+# Check we are using the same build type as HPX
+#--------------------------------------------------
+if (NOT "${HPX_BUILD_TYPE}" STREQUAL "${CMAKE_BUILD_TYPE}")
+  message(WARNING "CMAKE_BUILD_TYPE does not match ${HPX_BUILD_TYPE} : "
+    "\"${CMAKE_BUILD_TYPE}\",\"${HPX_BUILD_TYPE}\""
+    "\nPlease add -DCMAKE_BUILD_TYPE=${HPX_BUILD_TYPE} to your cmake command"
+  )
+endif()
+
+#--------------------------------------------------
 # On the cray we need the following flags
 #--------------------------------------------------
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -dynamic")
+if (NOT WIN32)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -dynamic")
+endif()
 
 #--------------------------------------------------
 # Each example goes into its own subdir
