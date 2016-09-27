@@ -294,57 +294,67 @@ void run_benchmark(boost::program_options::variables_map & vm)
         there = localities[0];
 
     std::size_t window_size = vm["window-size"].as<std::size_t>();
-    std::size_t test_time = vm["ms-loop"].as<std::size_t>();
-    std::size_t min_size = vm["min-size"].as<std::size_t>();
-    std::size_t max_size = vm["max-size"].as<std::size_t>();
+    std::size_t test_time   = vm["ms-loop"].as<std::size_t>();
+    std::size_t flags       = vm["method"].as<std::size_t>();
+    std::size_t min_size    = vm["min-size"].as<std::size_t>();
+    std::size_t max_size    = vm["max-size"].as<std::size_t>();
 
-    if(max_size < min_size) std::swap(max_size, min_size);
+    if (max_size < min_size) std::swap(max_size, min_size);
 
     // align used buffers on page boundaries
     unsigned long align_size = getpagesize();
     boost::scoped_array<char> send_buffer_orig(new char[max_size + align_size]);
     char* send_buffer = align_buffer(send_buffer_orig.get(), align_size);
 
-    // perform actual measurements
-    print_header("Synchronous");
     hpx::util::high_resolution_timer timer;
-    for (std::size_t size = min_size; size <= max_size; size *= 2)
-    {
-        double latency = receive_v0(there, send_buffer, size, test_time, window_size);
-        hpx::cout << std::left << std::setw(10) << size
-                  << latency << hpx::endl << hpx::flush;
+    // perform actual measurements
+    if ((flags & 1) == 1) {
+        print_header("Synchronous");
+        for (std::size_t size = min_size; size <= max_size; size *= 2)
+        {
+            double latency = receive_v0(there, send_buffer, size, test_time, window_size);
+            hpx::cout << std::left << std::setw(10) << size
+                      << latency << hpx::endl << hpx::flush;
+        }
+        hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     }
-    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     
-    print_header("Vector of futures");
-    timer.restart();
-    for (std::size_t size = min_size; size <= max_size; size *= 2)
-    {
-        double latency = receive_v1(there, send_buffer, size, test_time, window_size);
-        hpx::cout << std::left << std::setw(10) << size
-                  << latency << hpx::endl << hpx::flush;
+    if ((flags & 2) == 2) {
+        print_header("Vector of futures");
+        timer.restart();
+        for (std::size_t size = min_size; size <= max_size; size *= 2)
+        {
+            double latency = receive_v1(there, send_buffer, size, test_time, window_size);
+            hpx::cout << std::left << std::setw(10) << size
+                      << latency << hpx::endl << hpx::flush;
+        }
+        hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     }
-    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     
-    print_header("Atomic counter");    
-    timer.restart();
-    for (std::size_t size = min_size; size <= max_size; size *= 2)
-    {
-        double latency = receive_v2(there, send_buffer, size, test_time, window_size);
-        hpx::cout << std::left << std::setw(10) << size
-                  << latency << hpx::endl << hpx::flush;
+        
+    if ((flags & 4) == 4) {
+        print_header("Atomic counter");    
+        timer.restart();
+        for (std::size_t size = min_size; size <= max_size; size *= 2)
+        {
+            double latency = receive_v2(there, send_buffer, size, test_time, window_size);
+            hpx::cout << std::left << std::setw(10) << size
+                      << latency << hpx::endl << hpx::flush;
+        }
+        hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     }
-    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
-    
-    print_header("Sliding semaphore");
-    timer.restart();
-    for (std::size_t size = min_size; size <= max_size; size *= 2)
-    {
-        double latency = receive_v3(there, send_buffer, size, test_time, window_size);
-        hpx::cout << std::left << std::setw(10) << size
-                  << latency << hpx::endl << hpx::flush;
+        
+    if ((flags & 8) == 8) {
+        print_header("Sliding semaphore");
+        timer.restart();
+        for (std::size_t size = min_size; size <= max_size; size *= 2)
+        {
+            double latency = receive_v3(there, send_buffer, size, test_time, window_size);
+            hpx::cout << std::left << std::setw(10) << size
+                      << latency << hpx::endl << hpx::flush;
+        }
+        hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     }
-    hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
 }
 
 // ---------------------------------------------------------------------------------
@@ -371,6 +381,10 @@ int main(int argc, char* argv[])
         ("ms-loop",
          boost::program_options::value<std::size_t>()->default_value(1),
          "Amount of time in ms per iteration of the test")
+        ("method",
+         boost::program_options::value<std::size_t>()->default_value(0x0F),
+         "Bitmask flags used to turn on or off algorithms, 1 sync, 2 vector,"
+         " 4 atomic, 8 sempaphore")
         ("min-size",
          boost::program_options::value<std::size_t>()->default_value(1),
          "Minimum size of message to send")
