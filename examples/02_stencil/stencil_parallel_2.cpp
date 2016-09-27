@@ -5,6 +5,7 @@
 
 #include "stencil.hpp"
 #include "output.hpp"
+#include "communicator.hpp"
 
 #include <hpx/hpx_init.hpp>
 #include <hpx/include/compute.hpp>
@@ -22,11 +23,10 @@
 #include <string>
 
 
-typedef std::vector<double> channel_data;
-typedef hpx::lcos::channel<channel_data> channel_type;
+typedef std::vector<double> communication_type;
 
-HPX_REGISTER_CHANNEL_DECLARATION(channel_data);
-HPX_REGISTER_CHANNEL(channel_data, stencil_channel);
+HPX_REGISTER_CHANNEL_DECLARATION(communication_type);
+HPX_REGISTER_CHANNEL(communication_type, stencil_communication);
 
 int hpx_main(boost::program_options::variables_map& vm)
 {
@@ -55,50 +55,21 @@ int hpx_main(boost::program_options::variables_map& vm)
 
     init(U, Nx, Ny, rank, num_localities);
 
-    channel_type send_up;
-    channel_type send_down;
+    // Setup our communicator
+    typedef communicator<std::vector<double>> communicator_type;
+    communicator_type comm(rank, num_localities);
 
-    channel_type recv_up;
-    channel_type recv_down;
-
-    if (num_localities > 1)
+    if (comm.has_neighbor(communicator_type::up))
     {
-        std::string channel_up_name = "/stencil/channel_up/";
-        std::string channel_down_name = "/stencil/channel_down/";
-
-        // We have an upper neighbor if our rank is greater than zero.
-        if (rank > 0)
-        {
-            // Retrieve the channel from our upper neighbor from which we receive
-            // the row we need to update the first row in our partition.
-            recv_up = hpx::find_from_basename<channel_type>(channel_down_name, rank - 1);
-            // Create the channel we use to send our first row to our upper
-            // neighbor
-            send_up = channel_type(hpx::find_here());
-            // Register the channel with a name such that our neighbor can find it.
-            hpx::register_with_basename(channel_up_name, send_up, rank);
-
-            // send initial value to our upper neighbor
-            send_up.set(hpx::launch::apply,
-                std::vector<double>(U[0].begin(), U[0].begin() + Nx), 0);
-        }
-
-        // We have a lower neighbor if we aren't the last rank.
-        if (rank < num_localities - 1)
-        {
-            // Retrieve the channel from our neighbor below from which we receive
-            // the row we need to update the last row in our partition.
-            recv_down = hpx::find_from_basename<channel_type>(channel_up_name, rank + 1);
-            // Create the channel we use to send our last row to our neighbor
-            // below
-            send_down = channel_type(hpx::find_here());
-            // Register the channel with a name such that our neighbor can find it.
-            hpx::register_with_basename(channel_down_name, send_down, rank);
-
+        // send initial value to our upper neighbor
+        comm.set(communicator_type::up,
+            std::vector<double>(U[0].begin(), U[0].begin() + Nx), 0);
+    }
+    if (comm.has_neighbor(communicator_type::down))
+    {
             // send initial value to our neighbor below
-            send_down.set(hpx::launch::apply,
-                std::vector<double>(U[0].end() - Nx, U[0].end()), 0);
-        }
+        comm.set(communicator_type::down,
+            std::vector<double>(U[0].end() - Nx, U[0].end()), 0);
     }
 
     executor_type executor(numa_domains);
@@ -114,25 +85,22 @@ int hpx_main(boost::program_options::variables_map& vm)
     {
         // Update our upper boundary if we have an interior partition and an
         // upper neighbor
-        if (recv_up)
+        if (comm.has_neighbor(communicator_type::up))
         {
             // Get the first row.
             auto result = next.middle;
             // retrieve the row which is 'up' from our first row.
-            std::vector<double> up = recv_up.get(hpx::launch::sync, t);
+            std::vector<double> up = comm.get(communicator_type::up, t).get();
             // Create a row iterator with that top boundary
             auto it = curr.top_boundary(up);
 
             // After getting our missing row, we can update our first row
             line_update(it, it + Nx, result);
 
-            if(send_up)
-            {
-                // Finally, we can send the updated first row for our neighbor
-                // to consume in the next timestep
-                send_up.set(hpx::launch::apply,
-                    std::vector<double>(result, result + Nx), t + 1);
-            }
+            // Finally, we can send the updated first row for our neighbor
+            // to consume in the next timestep
+            comm.set(communicator_type::up,
+                std::vector<double>(result, result + Nx), t + 1);
         }
 
         // Update our interior spatial domain
@@ -147,24 +115,21 @@ int hpx_main(boost::program_options::variables_map& vm)
 
         // Update our lower boundary if we have an interior partition and a
         // neighbor below
-        if (recv_down)
+        if (comm.has_neighbor(communicator_type::down))
         {
             // Get the last row.
             auto result = next.middle + (Ny - 2) * Nx;
             // retrieve the row which is 'down' from our last row.
-            std::vector<double> down = recv_down.get(hpx::launch::sync, t);
+            std::vector<double> down = comm.get(communicator_type::down, t).get();
             // Create a row iterator with that bottom boundary
             auto it = (curr + Ny - 2).bottom_boundary(down);
             // After getting our missing row, we can update our last row
             line_update(it, it + Nx, result);
 
-            if (send_down)
-            {
-                // Finally, we can send the updated last row for our neighbor
-                // to consume in the next timestep
-                send_down.set(hpx::launch::apply,
-                    std::vector<double>(result, result + Nx), t + 1);
-            }
+            // Finally, we can send the updated last row for our neighbor
+            // to consume in the next timestep
+            comm.set(communicator_type::down,
+                std::vector<double>(result, result + Nx), t + 1);
         }
 
         std::swap(curr, next);
