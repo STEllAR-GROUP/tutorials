@@ -74,10 +74,15 @@ set(TUTORIAL_DIRS
   02_stencil
 )
 
+if(HPX_WITH_APEX)
+  set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
+    03_apex_fibonacci
+  )
+endif()
+
 add_hpx_pseudo_target(tutorial)
 
 foreach(subdir ${TUTORIAL_DIRS})
-  set(regexp "[0-9]+_")
   string(REGEX REPLACE "[0-9]+_" "" RESULT "${subdir}")
   add_hpx_pseudo_target(tutorial.${RESULT})
   add_subdirectory(${subdir})
