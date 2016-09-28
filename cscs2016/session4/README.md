@@ -85,6 +85,82 @@ Configuration after runtime start:
 ## Controlling CPU binding
 ### Binding the HPX worker threads to specific CPU Cores
 
+* `--hpx:bind=...`
+    * `compact`
+    * `scatter`
+	* `balanced`
+	* _description_
+
+<img src="images/affinities.png" alt="Thread affinities" width="30" height="300">
+
+---
+## Controlling CPU binding
+### Binding the HPX worker threads to specific CPU Cores
+
+* Bind Description:
+
+.left-column[
+```
+mappings:
+    distribution
+    mapping(;mapping)*
+
+distribution:
+    'compact'
+    'scatter
+    'balanced'
+
+mapping:
+    thread-spec=pu-specs
+
+thread-spec:
+    'thread':range-specs
+
+pu-specs:
+    pu-spec(.pu-spec)*
+```
+]
+.right-column[
+
+```
+
+pu-spec:
+    type:range-specs
+    ~pu-spec
+
+range-specs:
+    range-spec(,range-spec)*
+
+range-spec:
+    int
+    int-int
+    'all'
+
+type:
+    'socket' | 'numanode'
+    'core'
+    'pu'
+```
+]
+
+---
+## Controlling CPU binding
+### Binding the HPX worker threads to specific CPU Cores
+
+* Bind Description, Examplea
+
+```
+$ ./bin/hello_world --hpx:threads=4 --hpx:print-bind \
+	--hpx:bind=thread:0-3=core:0-3.pu:0
+****************************************************************
+locality: 0
+   0: PU L#0(P#0), Core L#0(P#0), Socket L#0(P#0), Node L#0(P#0)
+   1: PU L#1(P#2), Core L#1(P#1), Socket L#0(P#0), Node L#0(P#0)
+   2: PU L#2(P#4), Core L#2(P#2), Socket L#0(P#0), Node L#0(P#0)
+   3: PU L#3(P#6), Core L#3(P#3), Socket L#0(P#0), Node L#0(P#0):
+```
+
+* Use `lstopo` to get an idea of your CPU topology
 
 ---
 ## Distributed Runs
