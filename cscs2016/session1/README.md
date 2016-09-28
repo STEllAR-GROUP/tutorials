@@ -95,25 +95,6 @@ as quickly as possible as soon as anything
     * you can manually start/stop the runtime (if you really want to)
 
 ---
-## Synchonization with futures
-* The principal means of synchronization in HPX is the `future<T>`
-
-* A future is the result of something that hasn't yet run
-
-* A future is set by one thread/task
-    * using `future.set_value(stuff);` 
-
-* The value is rettrieved by another thread/task 
-    * using `auto value = future.get();` syntax
-
-* Futures in HPX are extended to support continuations
-    * `future2 = future1.then(something_else);`
-
-* And `when_xxx(one_or_more_futures)` syntax
-
-* From these building blocks one can make complex DAGs  
- 
----
 ## HPX is a (only a) library
 * It's implemented as a C++ library/framework
 
@@ -136,6 +117,25 @@ as quickly as possible as soon as anything
     
 * A good understanding of how it all works really helps          
 
+---
+## Synchonization with futures
+* The principal means of synchronization in HPX is the `future<T>`
+
+* A future is the result of something that hasn't yet run
+
+* A future is set by one thread/task
+    * using `future.set_value(stuff);` 
+
+* The value is rettrieved by another thread/task 
+    * using `auto value = future.get();` syntax
+
+* Futures in HPX are extended to support continuations
+    * `future2 = future1.then(something_else);`
+
+* And `when_xxx(one_or_more_futures)` syntax
+
+* From these building blocks one can make complex DAGs  
+ 
 ---
 ## Task based programming
 * A different approach to writing your code
@@ -305,6 +305,17 @@ but it can't run until the dependencies are satisfied
 ```
 * We are still writing C++, but how much is our code any more
     
+---
+## HPX is moving towards the future of C++
+* HPX is implementing the proposals for concurrency and parallelism in c++
+
+* What works and is successful will probably go into c++2x etc
+    * what doesn't, will be subsumed into something else that does
+
+    <br />
+    <br />
+    <br />
+
 ###"It's no use going back to yesterday, because I was a different person then."
 Lewis Carroll, Alice in Wonderland     
 
