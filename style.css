@@ -89,6 +89,15 @@ float: right;
     width: 111pt;
 }
 
+.logo-img-ethz {
+    margin-left: 20px;
+    display: inline-block;
+    position: relative;
+    height: 12px;
+    width: 64px;
+    transform: translate(0, -15px);
+}
+
 .crop {
     overflow: hidden;
 }
@@ -96,4 +105,3 @@ float: right;
 .crop img {
     margin: -60px 0 0 0;
 }
-
