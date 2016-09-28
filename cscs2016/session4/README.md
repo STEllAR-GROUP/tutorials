@@ -117,13 +117,16 @@ Build:
 ## Controlling CPU binding
 ### Binding the HPX worker threads to specific CPU Cores
 
+.left-column[
 * `--hpx:bind=...`
     * `compact`
     * `scatter`
 	* `balanced`
 	* _description_
-
-<img src="images/affinities.png" alt="Thread affinities" width="30" height="300">
+]
+.right-column[
+![Thread affinities](images/affinities.png)
+]
 
 ---
 ## Controlling CPU binding
