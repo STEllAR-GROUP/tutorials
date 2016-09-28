@@ -70,7 +70,7 @@ Configuration after runtime start:
 
 ... And much more ...
 ```
-* Can be set with `-I...` or `--hpx:option=...`
+* Can be set with `-I...`
 	* Example: `-Ihpx.bind=compact`
 
 ---
@@ -277,6 +277,7 @@ locality: 0
 	* `-n`: Number of Processes
 	* `-N`: Number of Nodes to distribute Processes on
 	* `-c`: Number of cores
+	* `--hint=nomultithread`: Turn of multithreading
 
 ---
 ## Batch environments
