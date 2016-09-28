@@ -55,11 +55,6 @@ message(hpx::serialization::serialize_buffer<char> const& receive_buffer)
 // this declares an action called message_action
 HPX_PLAIN_DIRECT_ACTION(message);
 
-HPX_REGISTER_BASE_LCO_WITH_VALUE_DECLARATION(
-    hpx::serialization::serialize_buffer<char>, serialization_buffer_char);
-HPX_REGISTER_BASE_LCO_WITH_VALUE(
-    hpx::serialization::serialize_buffer<char>, serialization_buffer_char);
-
 // ---------------------------------------------------------------------------------
 typedef hpx::lcos::local::mutex              mutex_type;
 typedef std::unique_lock<mutex_type>         unique_lock;
@@ -97,11 +92,8 @@ double receive_v0(
         }
     }
     //    
-    double elapsed = t.elapsed();
     double d = (static_cast<double>(window_size*num_loops));
-//    hpx::cout << "Elapsed time " << elapsed << "\t" 
-//        << " loops " << static_cast<int>(num_loops) << "\t";
-    return (elapsed * 1e6) / (2.0*d);    
+    return (t.elapsed() * 1e6) / (2.0*d);
 }
 
 // ---------------------------------------------------------------------------------
@@ -143,11 +135,8 @@ double receive_v1(
         messages.clear();
     }
     //    
-    double elapsed = t.elapsed();
     double d = (static_cast<double>(window_size*num_loops));
-//    hpx::cout << "Elapsed time " << elapsed << "\t" 
-//        << " loops " << static_cast<int>(num_loops) << "\t";
-    return (elapsed * 1e6) / (2.0*d);    
+    return (t.elapsed() * 1e6) / (2.0*d);
 }
 
 // ---------------------------------------------------------------------------------
@@ -197,11 +186,8 @@ double receive_v2(
         cv.wait(lk, [&]{return counter==window_size;});
     }
     //    
-    double elapsed = t.elapsed();
     double d = (static_cast<double>(window_size*num_loops));
-//    hpx::cout << "Elapsed time " << elapsed << "\t" 
-//        << " loops " << static_cast<int>(num_loops) << "\t";
-    return (elapsed * 1e6) / (2.0*d);    
+    return (t.elapsed() * 1e6) / (2.0*d);
 }
 
 // ---------------------------------------------------------------------------------
@@ -228,13 +214,12 @@ double receive_v3(
     message_action            msg;
     condition_var_type        cv;
     mutex_type                mutex_;
-    std::atomic<unsigned int> counter;
+    std::atomic<unsigned int> counter{0};
     // we want N messages in flight at once, so we must wait
 
     hpx::lcos::local::sliding_semaphore sem(window_size-1, -1);
     //
     std::size_t parcel_count = 0;
-    counter = 0;
 
     // warm up, estimate timing
     hpx::util::high_resolution_timer t;
@@ -268,11 +253,70 @@ double receive_v3(
     unique_lock lk(mutex_);
     cv.wait(lk, [&]{return counter == (num_loops*window_size);});
     //    
-    double elapsed = t.elapsed();
     double d = (static_cast<double>(window_size*num_loops));
-//    hpx::cout << "Elapsed time " << elapsed << "\t" 
-//        << " loops " << static_cast<int>(num_loops) << "\t";
-    return (elapsed * 1e6) / (2.0*d);    
+    return (t.elapsed() * 1e6) / (2.0*d);
+}
+
+// ---------------------------------------------------------------------------------
+// Send a message and receives the reply using a sliding_semaphore to
+// track messages in flight. There are always 'window_size' messages in transit
+// at any time
+// Warning : message N might be returned after message N+M because at the remote
+// end each message return is triggered on an HPX task which may or may not
+// be suspended and delay the current return message.
+// This means that when message N completes- we cannot be 100% that 'window_size'
+// messages are really in flight, but we get close. Also when the loop terminates
+// there may be one or more messages still uncompleted, so we wait for them at the end
+// to avoid destroying the CV before it is done with
+double receive_v4(
+    hpx::naming::id_type dest,
+    char * send_buffer,
+    std::size_t size,
+    std::size_t test_time,
+    std::size_t window_size)
+{
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+    buffer_type recv_buffer;
+
+    message_action            msg;
+    condition_var_type        cv;
+    mutex_type                mutex_;
+    std::atomic<unsigned int> counter{0};
+    // we want N messages in flight at once, so we must wait
+
+    hpx::lcos::local::sliding_semaphore sem(window_size-1, -1);
+    //
+    std::size_t parcel_count = 0;
+
+    // warm up, estimate timing
+    hpx::util::high_resolution_timer t;
+    for (int s=0; s<SKIP; ++s) {
+        recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
+    }
+    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP)); 
+    //
+    t.restart();
+    for (std::size_t i = 0; i < (num_loops*window_size); ++i) {
+        // launch a message to the remote node
+        hpx::async(msg, dest,
+            buffer_type(send_buffer, size, buffer_type::reference)).then(
+                hpx::launch::sync,
+                [&,parcel_count](auto &&f) -> void {
+                    // when the message completes, increment our semaphore count
+                    // so that N are always in flight
+                    sem.signal(counter++);
+                 }
+            );
+
+        //
+        sem.wait(parcel_count);
+        //
+        parcel_count++;
+    }
+    sem.wait(parcel_count + window_size - 2);
+    //    
+    double d = (static_cast<double>(window_size*num_loops));
+    return (t.elapsed() * 1e6) / (2.0*d);
 }
 
 // ---------------------------------------------------------------------------------
@@ -355,6 +399,18 @@ void run_benchmark(boost::program_options::variables_map & vm)
         }
         hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     }
+    
+    if ((flags & 16) == 16) {
+        print_header("Sliding atomic");
+        timer.restart();
+        for (std::size_t size = min_size; size <= max_size; size *= 2)
+        {
+            double latency = receive_v4(there, send_buffer, size, test_time, window_size);
+            hpx::cout << std::left << std::setw(10) << size
+                      << latency << hpx::endl << hpx::flush;
+        }
+        hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
+    }
 }
 
 // ---------------------------------------------------------------------------------
@@ -382,7 +438,7 @@ int main(int argc, char* argv[])
          boost::program_options::value<std::size_t>()->default_value(1),
          "Amount of time in ms per iteration of the test")
         ("method",
-         boost::program_options::value<std::size_t>()->default_value(0x0F),
+         boost::program_options::value<std::size_t>()->default_value(0xFF),
          "Bitmask flags used to turn on or off algorithms, 1 sync, 2 vector,"
          " 4 atomic, 8 sempaphore")
         ("min-size",
@@ -394,4 +450,3 @@ int main(int argc, char* argv[])
 
     return hpx::init(desc, argc, argv);
 }
-

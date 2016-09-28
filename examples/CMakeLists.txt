@@ -75,6 +75,12 @@ set(TUTORIAL_DIRS
   04_saxpy
 )
 
+if(HPX_WITH_APEX)
+  set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
+    # 03_apex_stencil_1d
+  )
+endif()
+
 add_hpx_pseudo_target(tutorial)
 
 foreach(subdir ${TUTORIAL_DIRS})
