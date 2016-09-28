@@ -548,6 +548,18 @@ Warning TLS not available on earlier XCode versions - use Boost 1.59.0 only on X
     parcel traces/dependencies to help with profiling
 
 ---
+## Apex trace output
+
+* To generate trace files compatible with Vampir etc.
+```sh
+export APEX_TAU=1
+export APEX_OTF2=1
+export APEX_PROFILE=1
+export APEX_SCREEN_OUTPUT=1
+export TAU_TRACE=1
+```
+*   OTF2 trace files generated in OTF2
+---
 class: center, middle
 ## Next 
 

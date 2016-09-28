@@ -93,6 +93,25 @@ as quickly as possible as soon as anything
     * you can manually start/stop the runtime (if you really want to)
 
 ---
+## Synchonization with futures
+* The principal means of synchronization in HPX is the `future<T>`
+
+* A future is the result of something that hasn't yet run
+
+* A future is set by one thread/task
+    * using `future.set_value(stuff);` 
+
+* The value is rettrieved by another thread/task 
+    * using `auto value = future.get();` syntax
+
+* Futures in HPX are extended to support continuations
+    * `future2 = future1.then(something_else);`
+
+* And `when_xxx(one_or_more_futures)` syntax
+
+* From these building blocks one can make complex DAGs  
+ 
+---
 ## HPX is a (only a) library
 * It's implemented as a C++ library/framework
 
@@ -130,9 +149,11 @@ as quickly as possible as soon as anything
 ---
 ## The goal with tasks 
 * Make these gaps as small as possible
-    * Keep breaking tasks into smaller tasks
-<img src="images/Task-waits.png" alt="" width="500" height="500">
-    * limit of task size is 
+    * Keep breaking tasks into smaller tasks so the scheduler can fill gaps
+    * limit of task size/granularity is a function of overheads
+        * context switch (actually swapping stack, registers etc)
+        * time to create, queue, dequeue a task
+<img src="images/Task-waits.png" alt="" width="500" height="400">
 
 ---
 ## Task decomposition   
@@ -142,7 +163,7 @@ as quickly as possible as soon as anything
 * More functional
     * tasks should accept inputs and return results
     * modifying global state should be avoided
-        * race conditions and other thread  
+        * race conditions and other thread related problems (deadlocks etc) 
 
 * the leaf nodes of the tree are the smallest bits of work you can express
     * but those leaf nodes might be broken further by HPX
@@ -157,12 +178,69 @@ scheduling/runtime can be used for the whole heirarchy of tasks
     * from top to bottom (of the task tree)
     
 ---
-## Task scheduling and execution
+## Task scheduling and lifetime
 
-* Each task goes onto one of the schedulers 
+* Each task goes onto one of the schedulers
+
     * where a task goes is controlled by executors
-    * schedulers maintina a high priority and normal queue
+
+    * schedulers maintain a high priority and normal queue
+
     * schedulers can steal (some do, some don't)
+    
+    * you can choose a scheduler when you create an executor
+
+* Tasks can be
+
+    * Running : context is active, code is running as it would on native thread
+        
+    * Suspended : task ran, but then had to wait for something
+    
+    * Staged : task has been created, but cannot be run yet
+    
+    * Pending :it is ready to run, but waiting in a queue
+               
+    * Terminated : awaiting cleanup
+
+---
+## Suspended tasks
+* A task that is running requires a value from a future
+
+    * the future is not ready :( 
+        
+    * `auto val = future->get()` would block (if we were not HPX)
+    
+    * the current task cannot progress so it changes state to _suspended_
+    
+    * the scheduler puts it into the suspended list
+    
+    * the future that was needed has the suspended task added to its internal 
+    (shared state) waiting list
+    
+    * when that future become ready, the task will be changed to _pending_
+    
+    * and go back onto the queue so that when a worker is free, it can run     
+
+* The same process happens when a task tries to take a lock but can't get it
+
+    * The shared state inside the mutex will `notify` the task and do the 'right thing' 
+    
+* This is one reason why all the `std::thread`, `std::mutex` etc code has been reimplemented
+
+---
+## Staged tasks
+* Like a suspended task, but it hasn't run yet
+
+* A staged task is what exists when a continuation or `when_xxx` creates a task
+but it can't run until the dependencies are satisfied
+
+* It's a suspended task that hasn't yet started
+
+* When is the task actually created?
+    * sometimes at compile time
+    * sometimes at run time
+    * it can be confusing
+    * Session tommorow will look again at this question
      
 ---
 class: center, middle
