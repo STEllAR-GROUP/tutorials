@@ -518,17 +518,148 @@ future<double> f3 = hpx::dataflow(
 ---
 ## Execution Policies
 
+### From the C++ Standard
+
+*  Specify execution guarantees (in terms of thread-safety) for executed parallel tasks:
+    * `sequential_execution_policy: seq`
+    * `parallel_execution_policy: par`
+    * `parallel_vector_execution_policy: par_vec`
+
+--
+### HPX Extensions
+
+* Asynchronous Execution Policies:
+    * `sequential_task_execution_policy: seq(task)`
+    * `parallel_task_execution_policy: par(task)`
+* In both cases the formerly synchronous functions return a `future<R>`
+* Instruct the parallel construct to be executed asynchronously
+* Allows integration with asynchronous control flow
+
 ---
 
 name: executors
 
 ## Executors
+### Concept
+
+* Executor are objects responsible for
+    * Creating execution agents on which work is performed (N4466)
+    * In N4466 this is limited to parallel algorithms, here much broader use
+* Abstraction of the (potentially platform-specific) mechanisms for launching work
+* Responsible for defining the **Where** and **How** of the execution of tasks
+
+---
+## Executors
+### Implementation
+
+* Executors must implement one function: `async_execute(F&& f, Args&&... args)`
+* Invocation of executors happens through `executor_traits` which exposes (emulates) additional functionality:
+
+```
+    executor_traits<my_executor_type>::execute(
+    my_executor,
+    [](size_t i){ // perform task i }, n);
+```
+
+* Four modes of invocation: single async, single sync, bulk async and bulk sync
+* The async calls return a future
+
+---
+## Executors
+### Examples
+
+* `sequential_executor`, `parallel_executor`:
+    * Default executors corresponding to par, seq
+* `this_thread_executor`
+* `thread_pool_executor`
+    * Specify core(s) to run on (NUMA aware)
+* `distribution_policy_executor`
+    * Use one of HPX’s (distributed) distribution policies, specify node(s) to run on
+* `hpx::compute::host::block_executor`
+    * Use a set of CPUs
+* `hpx::compute::cuda::default_executor`
+    * Use for running things on GPU
+* Etc.
+
+---
+## Execution Parameters
+
+* Allow to control the grain size of work
+    * i.e. amount of iterations of a parallel `for_each` run on the same thread
+    * Similar to OpenMP scheduling policies: `static`, `guided`, `dynamic`
+    * Much more fine control
+
+---
+## Rebind Execution Policies
+
+Execution policies have associated default executor and default executor
+parameters
+
+* `par`: parallel executor, static chunk size
+* `seq`: sequential executor, no chunking
+    * Rebind executor and executor parameters
+
+```
+numa_executor exec;
+// rebind only executor
+auto policy1 = par.on(exec);
+static_chunk_size param;
+
+// rebind only executor parameter
+auto policy2 = par.with(param);
+// rebind both
+auto policy3 = par.on(exec).with(param);
+```
 
 ---
 ## Data Placement
+### Basics
+
+* Mechanism to tell **where** to allocate data
+* C++ defines an Allocator concept `std::allocator<T>`
+* Extensions:
+    * Where do you want to allocate Data
+    * Ability to bulk allocate Data (NUMA aware allocation, GPU Device Allocation)
+* Data Structures to use those allocators
+* Different strategies for different platforms
+    * Need interface to control explicit placement of data
+         * NUMA architectures
+         * GPUs
+         * Distributed systems
 
 ---
-## Targets
+## Data Placement
+### Data Structures
+
+* `hpx::compute::vector<T, Allocator>`
+    * Same interface as `std::vector<T>`
+    * Manages data locality through allocator
+    * Uses execution target objects for data placement
+    * Allows for direct manipulation of data on NUMA domains, GPUs, remote nodes, etc.
+* `hpx::partitioned_vector<T>`
+    * Same interface as `std::vector<T>` (almost)
+    * Segmented data store
+    * Segments can be `hpx::compute::vector<T>`
+    * Uses distribution_policy for data placement
+    * Allows for manipulation of data on several targets
+
+---
+## Execution Targets
+
+* Opaque type which represent a place in the system
+    * Used to identify data placement
+    * Used to specify execution site close to data
+* Targets encapsulate architecture specifics
+    * CPU sets (NUMA domains), Scratch Pad Memory, GPU devices, Remote nodes
+* Allocators to be initialized from targets
+    * Customization of data placement
+* Executors to be initialized from targets as well
+    * Make sure code is executed close to placed data
+
+---
+## Parallel Algorithms
+
+![Parallel Algorithms for C++](images/parallel_stl.png)
 
 ---
 ## Example: SAXPY - The HPX Way
@@ -566,7 +697,7 @@ std::transform(b.begin(),
 * `bb` is `b[i]`
 * `cc` is `c[i]`
 * the calculated value gets written to `a[i]`
-* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/cscs2016/session2/saxpy/serial.cpp)
+* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/serial.cpp)
 ]
 
 ---
@@ -596,7 +727,7 @@ double x = ...;
 .right-column[
 * Replace the standard algorithm with a parallel one
 * Set parallel exeuction policy
-* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/cscs2016/session2/saxpy/parallel.cpp)
+* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/parallel.cpp)
 ]
 
 ---
@@ -642,7 +773,7 @@ hpx::parallel::transform(
 * Get targets for locality of data and execution
 * Setup Executor and Allocator
 * Run on the allocator
-* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/cscs2016/session2/saxpy/parallel_numa.cpp)
+* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/parallel_numa.cpp)
 ]
 
 ---
@@ -688,14 +819,13 @@ hpx::parallel::transform(
 * Get targets for locality of data and execution
 * Setup Executor and Allocator
 * Run on the allocator
-* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/cscs2016/session2/saxpy/parallel_cuda.cpp)
+* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/parallel_numa.cpp)
 * Works only for CUDA version 8 :(
 ]
 
 ---
 class: center, middle
-## Next Steps
+## Next
 
 [Building HPX and Applications](../session3)
 
-[Running HPX Applications](../session4)

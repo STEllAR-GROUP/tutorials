@@ -6,9 +6,9 @@
 cmake_minimum_required(VERSION 3.0)
 
 #--------------------------------------------------
-# this policy is used in HPX CMakeLists and causes the 
+# this policy is used in HPX CMakeLists and causes the
 # CMAKE_CXX_COMPILER_ID to change, (on OSX).
-# This triggers compiler mismatch error. 
+# This triggers compiler mismatch error.
 # So we use the same policy here.
 #--------------------------------------------------
 cmake_policy(VERSION 2.8.12)
@@ -72,6 +72,7 @@ set(TUTORIAL_DIRS
   00_hello_world
   01_latency
   02_stencil
+  04_saxpy
 )
 
 add_hpx_pseudo_target(tutorial)
