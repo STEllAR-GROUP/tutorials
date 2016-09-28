@@ -819,7 +819,7 @@ hpx::parallel::transform(
 * Get targets for locality of data and execution
 * Setup Executor and Allocator
 * Run on the allocator
-* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/parallel_numa.cpp)
+* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/parallel_cuda.cu)
 * Works only for CUDA version 8 :(
 ]
 

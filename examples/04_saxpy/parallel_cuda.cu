@@ -19,19 +19,19 @@ int hpx_main(boost::program_options::variables_map& vm)
     std::size_t N = vm["N"].as<std::size_t>();
     std::size_t steps = vm["steps"].as<std::size_t>();
 
-    typedef hpx::compute::host::block_allocator<double> allocator_type;
-    typedef hpx::compute::host::block_executor<> executor_type;
+    typedef hpx::compute::cuda::default_allocator allocator_type;
+    typedef hpx::compute::cuda::default_executor executor_type;
 
-    auto numa_domains = hpx::compute::host::numa_domains();
+    hpx::compute::cuda::target device;
 
-    allocator_type alloc(numa_domains);
+    allocator_type alloc(device);
 
     hpx::compute::vector<double, allocator_type> a(N, 0.0, alloc);
     hpx::compute::vector<double, allocator_type> b(N, 1.0, alloc);
     hpx::compute::vector<double, allocator_type> c(N, 2.0, alloc);
     double x = 3.0;
 
-    executor_type exec(numa_domains);
+    executor_type exec(device);
 
     hpx::util::high_resolution_timer t;
     for (std::size_t t = 0; t < steps; ++t)
@@ -39,7 +39,7 @@ int hpx_main(boost::program_options::variables_map& vm)
         using hpx::parallel::par;
         hpx::parallel::transform(par.on(exec),
             b.begin(), b.end(), c.begin(), a.begin(),
-            [x](double bb, double cc)
+            [x] HPX_DEVICE (double bb, double cc)
             {
                 return bb * x + cc;
             }
