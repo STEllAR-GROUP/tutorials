@@ -332,6 +332,8 @@ Note: The following only applies if you have the MPI parcelport compiled in
 ### `hpx::init`
 
 ```
+#include <hpx/hpx_init.hpp>
+
 int hpx_main()
 {
 	// Initiate HPX shutdown
@@ -349,6 +351,8 @@ int main(int argc, char** argv)
 ### Use C-style main
 
 ```
+#include <hpx/hpx_init.hpp>
+
 // Use regular "C-style-main" and parse non-consumed command line arguments
 int hpx_main(int argc, char** argv)
 {
@@ -362,6 +366,8 @@ int hpx_main(int argc, char** argv)
 ### Using Boost.ProgramOptions
 
 ```
+#include <hpx/hpx_init.hpp>
+
 // Use Boost.ProgramOptions to retrieved non-consumed command line arguments
 int hpx_main(boost::program_options::variables_map& vm)
 {
@@ -387,6 +393,8 @@ int main(int argc, char** argv)
 ### Using The HPX INI Config
 
 ```
+#include <hpx/hpx_init.hpp>
+
 int hpx_main()
 {
 	std::string val = hpx::get_config_entry("my.cool.option", "42");
@@ -408,6 +416,34 @@ int main(int argc, char** argv)
 ```
 
 * Can be combined with an application specific `options_description` as well!
+
+---
+## HPX Application Startup
+### Alternative "replacing" main
+
+* Alternative for providing `hpx_main` and calling `hpx_init`
+* The HPX runtime gets set up in the background
+* The application still accepts all regular HPX parameters
+
+```
+#include <hpx/hpx_main.hpp>
+
+int main()
+{
+	return 0;
+}
+```
+
+Or:
+
+```
+#include <hpx/hpx_main.hpp>
+
+int main(int argc, char** argv)
+{
+	return 0;
+}
+```
 
 ---
 class: center, middle
