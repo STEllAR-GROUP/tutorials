@@ -74,7 +74,15 @@ float: right;
     display: inline-block;
     position: relative;
     height: 30pt;
-    width: 60pt;
+    width: 74pt;
+}
+
+.logo-img-fau {
+    margin-left: 20px;
+    display: inline-block;
+    position: relative;
+    height: 30pt;
+    width: 111pt;
 }
 
 .crop {

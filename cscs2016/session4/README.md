@@ -74,6 +74,38 @@ Configuration after runtime start:
 	* Example: `-Ihpx.bind=compact`
 
 ---
+## Dumping Version Information
+### `--hpx:version`
+
+```
+$ ./bin/hello_world --hpx:version
+
+HPX - High Performance ParalleX
+A general purpose parallel C++ runtime system for distributed applications
+of any scale.
+
+Copyright (c) 2007-2016, The STE||AR Group,
+http://stellar-group.org, email:hpx-users@stellar.cct.lsu.edu
+
+Distributed under the Boost Software License, Version 1.0. (See accompanying
+file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+Versions:
+  HPX: V1.0.0-trunk (AGAS: V3.0), Git: 4f281039e4
+  Boost: V1.61.0
+  Hwloc: V1.11.0
+  MPI: MPICH V3.2rc1, MPI V3.1
+
+Build:
+  Type: debug
+  Date: Sep 28 2016 11:42:06
+  Platform: linux
+  Compiler: GNU C++ version 5.3.0 20151204 (Cray Inc.)
+  Standard Library: GNU libstdc++ version 20151204
+  Allocator: JEMALLOC
+```
+
+---
 ## Controlling CPU binding
 ### General
 
@@ -166,17 +198,52 @@ locality: 0
 ## Distributed Runs
 ### General
 
----
-## Distributed Runs
-### Selecting parcelports
+* HPX itself doesn't come with a dedicated launcher (like `mpirun`)
+	* `--hpx:localities=N`: using N localities
+	* `--hpx:locality=i`: ith locality
+	* `--hpx:agas=host`: The root (locality 0) process host
+	* `--hpx:hpx=host`: The host this HPX process is listening on
+* Manual setup tedious:
+	* Start N processes, set correct parameters...
 
 ---
 ## Distributed Runs
 ### `hpxrun.py`
 
+* Small wrapper script to allow easy setup for distributed runs:
+
+```
+  -h, --help            show this help message and exit
+  -l LOCALITIES, --localities=LOCALITIES
+                        Number of localities to run (environment variable
+                        HPXRUN_LOCALITIES
+  -t THREADS, --threads=THREADS
+                        Number of threads per locality (environment variable
+                        HPXRUN_THREADS)
+  -p PARCELPORT, --parcelport=PARCELPORT
+                        Which parcelport to use (Options are: ibverbs, ipc,
+                        mpi, tcp) (environment variable HPXRUN_PARCELPORT
+  -r RUNWRAPPER, --runwrapper=RUNWRAPPER
+                        Which runwrapper to use (Options are: none, mpi, srun)
+                        (environment variable HPXRUN_ (environment variable
+                        HPXRUN_RUNWRAPPER)
+  -e EXPECTED, --expected=EXPECTED
+                        Expected return codes of all invoked processes
+                        (environment variable HPXRUN_EXPECTED)
+  -v, --verbose         Verbose output (environment variable HPXRUN_VERBOSE)
+
+```
+
 ---
 ## Batch environments
 ### General
+
+* The HPX startup routines can detect Batch systems
+* Extracts the needed information to setup the Application:
+	* Number of threads
+	* Number of localities
+	* Host names
+* Supported environments: SLURM, PBS, ALPS, MPI
 
 ---
 ## Batch environments
@@ -185,6 +252,10 @@ locality: 0
 ---
 ## Batch environments
 ### MPI
+
+---
+## Distributed Runs
+### Selecting parcelports
 
 ---
 ## Debugging options

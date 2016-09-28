@@ -4,8 +4,8 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title></title>
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
-        <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+        <script src="./js/remark-latest.min.js"></script>
+        <script src="./js/jquery-3.1.0.js"></script>
     </head>
     <body>
         <script>
@@ -21,8 +21,9 @@
                 if ($("div.remark-slide-content").find("div.logo").length == 0)
                 {
                     var stellar = "<img src=\"./stellar.svg\" class=\"logo-img\"></img>";
+                    var fau = "<img src=\"./fau-logo-tech.png\" class=\"logo-img-fau\"></img>";
                     var cscs = "<img src=\"./CSCS_2_CMYK.jpg\" class=\"logo-img-cscs\"></img>";
-                    var logo = $("<div class=\"logo\">" + stellar + cscs + "</div>")
+                    var logo = $("<div class=\"logo\">" + stellar + fau + cscs + "</div>")
                     $("div.remark-slide-content").append(logo);
                 }
             });
