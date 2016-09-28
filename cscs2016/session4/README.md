@@ -321,11 +321,87 @@ Note: The following only applies if you have the MPI parcelport compiled in
 	* This will print the counter once the application has been completed
 * Set counter interval:
 	* `--hpx:print-counter-interval time`
+* Print performance counters from your application:
+	* `hpx::evaluate_active_counters(bool reset, char const* description)`
+
+---
+## HPX Application Startup
+### `hpx::init`
+
+```
+int hpx_main()
+{
+	// Initiate HPX shutdown
+	return hpx::finalize()
+}
+
+int main(int argc, char** argv)
+{
+	hpx::init(argc, argv);
+}
+```
+
+---
+## Adding your own options
+### Use C-style main
+
+```
+// Use regular "C-style-main" and parse non-consumed command line arguments
+int hpx_main(int argc, char** argv)
+{
+	// Initiate HPX shutdown
+	return hpx::finalize()
+}
+```
 
 ---
 ## Adding your own options
 ### Using Boost.ProgramOptions
 
+```
+// Use Boost.ProgramOptions to retrieved non-consumed command line arguments
+int hpx_main(boost::program_options::variables_map& vm)
+{
+    std::size_t Nx = vm["Nx"].as<std::size_t>();
+	return hpx::finalize()
+}
+
+int main(int argc, char** argv)
+{
+    using namespace boost::program_options;
+
+    options_description desc_commandline;
+    desc_commandline.add_options()
+        ("Nx", value<std::uint64_t>()->default_value(1024),
+         "Elements in the x direction")
+	hpx::init(desc_commandline, argc, argv);
+}
+```
+* [Read the docs!](http://www.boost.org/doc/libs/release/doc/html/program_options.html)
+
 ---
 ## Adding your own options
 ### Using The HPX INI Config
+
+```
+int hpx_main()
+{
+	std::string val = hpx::get_config_entry("my.cool.option", "42");
+
+	return hpx::finalize()
+}
+
+int main(int argc, char** argv)
+{
+    // Initialize and run HPX, this example requires to run hpx_main on all
+    // localities. And an application specific setting
+    std::vector<std::string> const cfg = {
+        "hpx.run_hpx_main!=1",
+		"my.cool.option!=yeha"
+    };
+
+    return hpx::init(argc, argv, cfg);
+}
+```
+
+* Can be combined with an application specific `options_description` as well!
