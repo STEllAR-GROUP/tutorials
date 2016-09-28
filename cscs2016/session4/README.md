@@ -1,8 +1,8 @@
 
 class: center, middle
 
-# Running HPX Applications
-## Command line options
+# Hello World!
+## Options and Running Applications
 
 [Overview](..)
 
@@ -405,3 +405,9 @@ int main(int argc, char** argv)
 ```
 
 * Can be combined with an application specific `options_description` as well!
+
+---
+class: center, middle
+## Next
+
+[Worked 2D Stencil Example - From Serial to Distributed](../session5)
