@@ -239,11 +239,92 @@ but it can't run until the dependencies are satisfied
 * It's a suspended task that hasn't yet started
 
 * When is the task actually created?
-    * sometimes at compile time
-    * sometimes at run time
-    * it can be confusing
-    * Session tommorow will look again at this question
+    * When the code that instantiates it is executed
+    
+    * Inside continuations this might be when another task completes
+        * `future.then(another_task.then(more_tasks));`
+        
+    * Outside continuations it can be 'up-front'
+        * a loop generating futures and attaching to previous iterations
+            `future[i] = future[i-1].then(another_task);`
+        * it can be confusing
+        
+    * Session tommorow (Resource management) will look again at this question
      
+---
+## Active Messages
+* MPI uses send/receive
+    * (it has one sided RMA too)   
+    * there is an implied synchronization between the endpoints
+    
+* HPX uses active messages
+    * a remote function invocation + arguments
+    * the arguments are the 'message' data
+    
+* A remote funtion invocation create a task on the remote node
+    * the task goes into the queue of the remote node
+    * it is no different to any other task
+    * it might not have any relation to other tasks running there
+    * it can synchronize with other tasks
+
+---
+## Structure of an application
+* You can write an HPX application that only starts on locality 0
+    * meaning `int main` runs on locality 0
+        but other nodes just sit in a waiting loop
+    * node 0 triggers a `do_work` action on remote nodes
+    * how you coordinate these tasks is up to you
+    
+* You can run different binaries on differnt nodes
+    * provising the `actions` on each node match up    
+         
+* Different platforms on differnt nodes are supported
+    * but unlikey to be used for most of our HPC codes
+    
+---
+## Where does HPX end and your code start
+* HPX has a runtime
+* Everything is a task (at some level)
+* HPX provides a parallel STL ... and parallel for etc
+
+```
+    auto range = boost::irange<std::size_t>(0, hpx::get_os_thread_count());
+    //
+    for_each(par.with(static_chunk_size())
+      , boost::begin(range), boost::end(range)
+        // For each element in the range, call the following lambda 
+      , [id](std::size_t num_thread)
+        {
+            std::cout
+              << "Hello, I am HPX Thread " << num_thread
+              << " executed on Locality " << id << std::endl;
+            //
+            compute_something_interesting();
+        }
+    );
+```
+* We are still writing C++, but how much is our code any more
+    
+###"It's no use going back to yesterday, because I was a different person then."
+Lewis Carroll, Alice in Wonderland     
+
+---
+## A quick tour of the HPX resources
+
+### HPX github repo
+[https://github.com/STEllAR-GROUP/hpx](https://github.com/STEllAR-GROUP/hpx)<br />
+Use the issue tracker to post your bug reports
+
+### HPX IRC channel
+"You can get support via the #ste||ar IRC channels at freenode, 
+where you will often find knowledgeable people willing to help with 
+your problems and questions related to HPX."
+
+### HPX mailing list
+Subscribe and post your questions here hpx-users@stellar.cct.lsu.edu
+(hardly anyone does, they use IRC and github issues)
+
+
 ---
 class: center, middle
 ## Next 
