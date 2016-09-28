@@ -1,21 +1,37 @@
 
 class: center, middle
 
-# Resource managment
-## Keeping things under control
+# Resource Management and Performance Issues
+## Keeping it under control
 
 [Overview](..)
 
-Previous: [Worked 2D Stencil Example - Options and Running Applications](../session5)
+Previous: [Worked 2D Stencil Example](../session5)
 
 ???
-[Click here to view the Presentation](https://stellar-group.github.io/tutorials/cscs2016/session5/)
+
+--- 
+##when are tasks created
+continuations and .then constructs inside continuations 
 
 ---
+##launch:sync policy
+
 ---
-## More stuff
+##Move semantics
+
 ---
+##callbacks on async_cb
+
+---
+##sliding semaphore
+
+---
+##direct actions and plain actions
+
+---
+
 class: center, middle
-## Next
+## Next 
 
-[Introduction to HPX : Part 2](../session7)
+[Debugging and Profiling](../session6)

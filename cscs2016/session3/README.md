@@ -4,6 +4,10 @@ class: center, middle
 # Building HPX (on Daint)
 ## CMake, Options, Dependencies 
 
+[Overview](..)
+
+Previous: [Introduction to HPX - Part 2 (API)](../session2)
+
 ---
 ## Dependencies #1
 ### Boost
