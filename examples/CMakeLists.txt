@@ -74,12 +74,6 @@ set(TUTORIAL_DIRS
   02_stencil
 )
 
-if(HPX_WITH_APEX)
-  set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
-    03_apex_fibonacci
-  )
-endif()
-
 add_hpx_pseudo_target(tutorial)
 
 foreach(subdir ${TUTORIAL_DIRS})
