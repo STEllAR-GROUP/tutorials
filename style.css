@@ -38,7 +38,11 @@ tbody tr:last-child td {
     background-position: 10% 98%;
     background-size: 155pt 20pt;
 }
-/*
+*/
+
+.remark-code {
+    font-size: 10pt;
+}
 
 /* Two-column layout */
 .left-column {

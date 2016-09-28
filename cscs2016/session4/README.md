@@ -179,11 +179,13 @@ type:
 ## Controlling CPU binding
 ### Binding the HPX worker threads to specific CPU Cores
 
-* Bind Description, Examplea
+* Use `lstopo` to get an idea of your CPU topology
+* Bind Description, Examples:
 
 ```
+# 4 worker threads, running on the first 4 CPUs using the first Hyperthread
 $ ./bin/hello_world --hpx:threads=4 --hpx:print-bind \
-	--hpx:bind=thread:0-3=core:0-3.pu:0
+	--hpx:bind="thread:0-3=core:0-3.pu:0"
 ****************************************************************
 locality: 0
    0: PU L#0(P#0), Core L#0(P#0), Socket L#0(P#0), Node L#0(P#0)
@@ -192,7 +194,21 @@ locality: 0
    3: PU L#3(P#6), Core L#3(P#3), Socket L#0(P#0), Node L#0(P#0):
 ```
 
-* Use `lstopo` to get an idea of your CPU topology
+```
+# 4 worker threads, running on the first 2 run on NUMA domain 0, using the second
+# and third core, worker thread 3 runs on the second NUMA on the 7th core, worker
+# thread 4 on the 2nd NUMA and 8th worker core, using the first Hyperthread
+$ ./bin/hello_world --hpx:threads=4 --hpx:print-bind \
+	--hpx:bind="thread:0-1=socket:0.core:0-2.pu:0;thread:2-3=socket:1.core:6-7.pu:0"
+****************************************************************
+locality: 0
+   0: PU L#0(P#0), Core L#0(P#0), Socket L#0(P#0), Node L#0(P#0)
+   1: PU L#1(P#2), Core L#1(P#1), Socket L#0(P#0), Node L#0(P#0)
+   2: PU L#13(P#11), Core L#13(P#5), Socket L#1(P#1), Node L#1(P#1)
+   3: PU L#14(P#13), Core L#14(P#6), Socket L#1(P#1), Node L#1(P#1)
+```
+
+* Note: This was run on the head node of daint. Try it on the compute nodes!
 
 ---
 ## Distributed Runs
@@ -249,19 +265,62 @@ locality: 0
 ## Batch environments
 ### SLURM
 
+* HPX startup parses the various Environment Variables set by SLURM:
+	* Number of Nodes to use
+	* Number of Threads to use
+	* List of nodes of the allocation
+* Use `salloc` to get an allocation, `srun` to start the application
+* Useful parameters
+	* `-n`: Number of Processes
+	* `-N`: Number of Nodes to distribute Processes on
+	* `-c`: Number of cores
+
 ---
 ## Batch environments
 ### MPI
+
+Note: The following only applies if you have the MPI parcelport compiled in
+
+* Just use mpirun to start your distributed Application, we will use the number
+ of ranks, and the rank to communicate with MPI routines.
+* Read the documentation of your Supercomputer on how to launch MPI
+ jobs.
+* You usually want one process (==locality) per node!
+* Note to Cray users:
+	* If you have SLURM on your cray, srun will automatically activate MPI
+	* If using plain ALPS, aprun has the same effect
 
 ---
 ## Distributed Runs
 ### Selecting parcelports
 
+* `--hpx:list-parcel-ports`: Lists which parcelports are available and enabled
+* Use the INI configuration to explicitly disable/enable Parcelports:
+	* `-Ihpx.parcel.tcp.enable=0` will disable the TCP parcelport
+
 ---
 ## Debugging options
 
+* Attach a debugger:
+	* `--hpx:attach-debugger`: This will stop the HPX application and wait for
+		the debugger to be attached and the application being continued
+	* `--hpx:attach-debugger=exception`: Stops the application if there was an
+		exception
+* Logging:
+	* `--hpx:debug-hpx-log`
+* Debug command line parsing:
+	* `--hpx:debug-clp`
+
 ---
 ## Performance Counters
+
+* List all available performance counters:
+	* `--hpx:list-counters`
+* Print counter:
+	* `--hpx:print-counter counter`
+	* This will print the counter once the application has been completed
+* Set counter interval:
+	* `--hpx:print-counter-interval time`
 
 ---
 ## Adding your own options
