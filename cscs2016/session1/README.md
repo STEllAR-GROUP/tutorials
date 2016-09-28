@@ -324,7 +324,8 @@ Lewis Carroll, Alice in Wonderland
 
 ### HPX github repo
 [https://github.com/STEllAR-GROUP/hpx](https://github.com/STEllAR-GROUP/hpx)<br />
-Use the issue tracker to post your bug reports
+Use the issue tracker to post your bug reports.
+Look at the examples and unit tests to get ideas.
 
 ### HPX IRC channel
 "You can get support via the #ste||ar IRC channels at freenode, 
@@ -335,6 +336,9 @@ your problems and questions related to HPX."
 Subscribe and post your questions here hpx-users@stellar.cct.lsu.edu
 (hardly anyone does, they use IRC and github issues)
 
+### HPX Docs
+[http://stellar-group.github.io/hpx/docs/html](http://stellar-group.github.io/hpx/docs/html)<br />
+The best place to look for a first try
 
 ---
 class: center, middle
