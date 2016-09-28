@@ -45,7 +45,7 @@ cd boost_1_61_0
 
 ```
 * It takes 10 minutes or less to build (most is headers)
-* Best to build debug and release if you are tinking with HPX settings
+* Best to build debug and release if you are tinkering with HPX settings
 
 ---
 ## Dependencies #2
@@ -117,42 +117,65 @@ make -j8 -k install
 * It takes a couple of minutes and you just need to pass the path into your HPX CMake
 
 ---
-## HPX CMake: Release + papi + APEX + OTF2 (on Daint)
+## OTF2 + TAU (just FYI)
+###TAU
+```sh
+wget wget http://tau.uoregon.edu/tau.tgz
+tar -xzf tau.tgz
+# note the use of -prefix instead of --prefix
+./configure -pthread -prefix=/apps/daint/hpx/0.9.99/gnu_530/tau-2.25
+make -j8 install
+```
+###OTF2
+```sh
+wget http://www.vi-hps.org/upload/packages/otf2/otf2-2.0.tar.gz
+tar -xzf otf2-2.0.tar.gz
+cd otf2-2.0/
+./configure --prefix=/apps/daint/otf2/2.0/gnu_530 --enable-shared
+make -j8 install
+```
+---
+## Compiling on supercomputers
+
+* Daint has login nodes that are binary compatible with compute nodes
+    
+    * No need to setup a cross-compiling toolchain
+    
+* HPX contains toolchain files for several machines
+    
+    * Look in `hpx/cmake/templates/toolchains`
+    
+* You can use them to reduce slightly the number of options set by hand
+
+    * (HPX cmake is quite good and works on all the machines I've tried)
+    
+---
+## HPX CMake: Release
 ```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=Release \
- -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/rel \
+ -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/release \
  -DCMAKE_CXX_FLAGS=-std=c++11 \
  -DCMAKE_EXE_LINKER_FLAGS=-dynamic \
  -DHWLOC_ROOT=/apps/daint/hwloc/1.11.4/gnu_530 \
+ -DHPX_WITH_HWLOC=ON \
  -DHPX_WITH_MALLOC=JEMALLOC \
  -DJEMALLOC_INCLUDE_DIR:PATH=/apps/daint/jemalloc/4.2.1/gnu_530/include \
  -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
  -DBOOST_ROOT=$BOOST_ROOT \
- -DHPX_WITH_TESTS=ON \
- -DHPX_WITH_TESTS_BENCHMARKS=ON \
- -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
- -DHPX_WITH_TESTS_HEADERS=OFF \
- -DHPX_WITH_TESTS_REGRESSIONS=ON \
- -DHPX_WITH_TESTS_UNIT=ON \
- -DHPX_WITH_EXAMPLES=ON \
- -DHPX_WITH_HWLOC=ON \
- -DHPX_WITH_PARCELPORT_MPI=ON \
- -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
- -DHPX_WITH_PAPI=ON \
- -DHPX_WITH_APEX=ON \
- -DAPEX_WITH_OTF2=ON \
- -DOTF2_ROOT=/apps/daint/otf2/2.0/gnu_530 \
+ -DHPX_WITH_TESTS=OFF \
+ -DHPX_WITH_EXAMPLES=OFF \
+ -DHPX_WITH_PARCELPORT_MPI=ON -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
  /apps/daint/hpx/src/hpx
 ```
 
 ---
-## Debug build
+## HPX CMake : Debug
 ```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=Debug \
- -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/rel \
+ -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/debug \
  -DCMAKE_CXX_FLAGS=-std=c++11 \
  -DCMAKE_EXE_LINKER_FLAGS=-dynamic \
  -DHWLOC_ROOT=/apps/daint/hwloc/1.11.4/gnu_530 \
@@ -161,17 +184,46 @@ cmake \
  -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
  -DBOOST_ROOT=$BOOST_ROOT \
  -DHPX_WITH_TESTS=ON \
- -DHPX_WITH_TESTS_BENCHMARKS=ON \
+ -DHPX_WITH_TESTS_BENCHMARKS=OFF \
  -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
  -DHPX_WITH_TESTS_HEADERS=OFF \
- -DHPX_WITH_TESTS_REGRESSIONS=ON \
+ -DHPX_WITH_TESTS_REGRESSIONS=OFF \
  -DHPX_WITH_TESTS_UNIT=ON \
  -DHPX_WITH_EXAMPLES=ON \
  -DHPX_WITH_HWLOC=ON \
  -DHPX_WITH_PARCELPORT_MPI=ON \
  -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
- /apps/daint/hpx/src/hpx \
+ /apps/daint/hpx/src/hpx 
+```
+
+---
+## HPX CMake: RelWithDebInfo (profiling) 
+###APEX + TAU + PAPI + OTF2
+```cmake
+cmake \
+ -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+ -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/profiling \
+ -DCMAKE_CXX_FLAGS=-std=c++11 \
+ -DCMAKE_EXE_LINKER_FLAGS=-dynamic \
+ -DHWLOC_ROOT=/apps/daint/hwloc/1.11.4/gnu_530 \
+ -DHPX_WITH_HWLOC=ON \
+ -DHPX_WITH_MALLOC=JEMALLOC \
+ -DJEMALLOC_INCLUDE_DIR:PATH=/apps/daint/jemalloc/4.2.1/gnu_530/include \
+ -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
+ -DBOOST_ROOT=$BOOST_ROOT \
+ -DHPX_WITH_TESTS=ON -DHPX_WITH_TESTS_BENCHMARKS=ON \
+ -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF -DHPX_WITH_TESTS_HEADERS=OFF \
+ -DHPX_WITH_TESTS_REGRESSIONS=ON -DHPX_WITH_TESTS_UNIT=ON \
+ -DHPX_WITH_EXAMPLES=ON \
+ -DHPX_WITH_PARCELPORT_MPI=ON -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
+ -DHPX_WITH_PAPI=ON \
+ -DHPX_WITH_APEX=ON -DAPEX_WITH_PAPI=ON \
+ -DAPEX_WITH_OTF2=ON -DAPEX_WITH_TAU=ON \
+ -DOTF2_ROOT=/apps/daint/otf2/2.0/gnu_530 \
+ -DTAU_ROOT=/apps/daint/hpx/0.9.99/gnu_530/tau-2.25 \
+ -DHPX_WITH_THREAD_IDLE_RATES=ON \
+ /apps/daint/hpx/src/hpx
 ```
 
 ---
@@ -247,21 +299,22 @@ git clone https://github.com/STEllAR-GROUP/tutorials.git
 mkdir build
 cd build
 
-# make sure you have all the modules loaded
-module swap PrgEnv-cray PrgEnv-gnu
-module swap gcc/4.8.2   gcc/5.3.0
-module load cmake/3.5.2
-module load boost/1.61.0
+# make sure you load all the modules we'll use in tutorial
+module swap   PrgEnv-cray PrgEnv-gnu
+module swap   gcc         gcc/5.3.0
+module unload cray-mpich
+module load   cray-mpich/7.3.3
+module load   boost/1.61.0
+module load   cmake/3.5.2
+module load   papi
 
-# release
+# for debug: module load hpx/0.9.99/gnu_530-debug / profiling
 module load hpx/0.9.99/gnu_530-release
-# (or debug) module load hpx/0.9.99/gnu_530-debug
 
-# invoke CMake with the tutorial examples path
+#  CMake with examples path (debug: -DCMAKE_BUILD_TYPE=Debug/RelWithDebInfo)
 cmake -DCMAKE_BUILD_TYPE=Release ../tutorials/examples
-# or cmake -DCMAKE_BUILD_TYPE=Debug ../tutorials/examples
 
-# make
+# make the demos
 make -j4
 ```
 
@@ -291,6 +344,9 @@ cmake -DHPX_DIR=${path_to_hpx_build}/lib/cmake/HPX
 make -j4
 ```
 
+* Note : HPX on daint is using a number of patches we applied during preparation
+for this tutorial so if doing a clone from github, try `cscs_tutorial` branch
+ 
 ---
 ## CMakeLists.txt for a set of test projects 
 
@@ -409,7 +465,7 @@ at any time (though I recommend using branches in the HPX subdir).
      
 ---
 ## Superproject build on OSX with Xcode 8
-```cmake
+```sh
 cmake \
  -DCMAKE_BUILD_TYPE=Release \
  -DCMAKE_CXX_FLAGS=-std=c++14 \
@@ -432,6 +488,8 @@ cmake \
  -DHPX_DOWNLOAD_AS_SUBPROJECT=ON \
  -DSUBPROJECT_HPX=ON \
  ~/src/tutorials/examples
+ 
+ make -j8 tutorial
 ```
 Warning TLS not available on earlier XCode versions - use Boost 1.59.0 only on XCode 7.x 
 

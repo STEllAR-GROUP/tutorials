@@ -118,15 +118,22 @@ as quickly as possible as soon as anything
 ---
 ## Task based programming
 * A different approach to writing your code
-
     * your program should be a tree of tasks
     * each task will depend on other tasks
     * and have child tasks
-    
+    * You don't have to have the same on all nodes (c.f. MPI)
 <div class="crop">
     <img src="images/DAG-weather.jpg" alt="" width="200" height="400">
 </div>
+* each one of these boxes will contain a sub-tree of (possibly millions) of tasks
     
+---
+## The goal with tasks 
+* Make these gaps as small as possible
+    * Keep breaking tasks into smaller tasks
+<img src="images/Task-waits.png" alt="" width="500" height="500">
+    * limit of task size is 
+
 ---
 ## Task decomposition   
     
@@ -140,7 +147,7 @@ as quickly as possible as soon as anything
 * the leaf nodes of the tree are the smallest bits of work you can express
     * but those leaf nodes might be broken further by HPX
     * even `parallel::for(...)` loops decompose into tasks
-    * parallel::algorithm's are made up of tasks   
+    * all parallel::algorithm's are made up of tasks   
 
 * HPX differs from (most) other libraries because the same API and the same 
 scheduling/runtime can be used for the whole heirarchy of tasks
@@ -149,6 +156,14 @@ scheduling/runtime can be used for the whole heirarchy of tasks
     * based soundly on C++
     * from top to bottom (of the task tree)
     
+---
+## Task scheduling and execution
+
+* Each task goes onto one of the schedulers 
+    * where a task goes is controlled by executors
+    * schedulers maintina a high priority and normal queue
+    * schedulers can steal (some do, some don't)
+     
 ---
 class: center, middle
 ## Next 

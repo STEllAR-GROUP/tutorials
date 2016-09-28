@@ -19,21 +19,21 @@ Thursday, September 29 and Friday, September 30, 2016
 
 # Thursday, September 29, 2016
 
-* [9:00 to 10:30: Introduction to HPX - Part 1](session1)
+* [9:00 to 10:30: Introduction to HPX - Part 1 (overview)](session1)
 * Tea Break, 15 Minutes
-* [10:45 to 12:15: Introduction to HPX - Part 2](session2)
+* [10:45 to 12:15: Introduction to HPX - Part 2 (API)](session2)
 * Lunch, 1 hour
 * [13:15 to 14:45: Building HPX - CMake Options and Dependencies](session3)
 * Tea Break, 15 Minutes
-* [15:00 to 16:30: Hello World! - Command Line Options](session4)
+* [15:00 to 16:30: Hello World! - Options and Running Applications](session4)
 
-# Wednesday, September 29, 2016
+# Friday, September 29, 2016
 
-* [9:00 to 10:30: Distributed HPX Applications - Part 1](session5)
+* [9:00 to 10:30: Worked 2D Stencil Example - From Serial to Distributed](session5)
 * Tea Break, 15 Minutes
-* [10:45 to 12:15: Distributed HPX Applications - Part 2](session6)
+* [10:45 to 12:15: Resource Management and Performance Issues](session6)
 * Lunch, 1 hour
-* [13:15 to 14:45: Debugging HPX Applications - Part 1](session7)
+* [13:15 to 14:45: Debugging HPX Applications](session7)
 * Tea Break, 15 Minutes
-* [15:00 to 16:30: Debugging HPX Applications - Part 2](session8)
+* [15:00 to 16:30: Open for worked examples](session8)
 
