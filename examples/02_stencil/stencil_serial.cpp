@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
          "Elements in the y direction")
         ("steps", value<std::size_t>()->default_value(100),
          "Number of steps to apply the stencil")
-        ("output", value<std::string>()->required(),
+        ("output", value<std::string>(),
          "Save output to file")
     ;
 

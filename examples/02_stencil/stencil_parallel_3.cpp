@@ -64,6 +64,11 @@ void worker(
             std::vector<double>(U[0].end() - Nx, U[0].end()), 0);
     }
 
+    if (rank == 0)
+    {
+        std::cout << "Running example using " << num << " Partitions\n";
+    }
+
     executor_type executor(numa_domains);
     hpx::util::high_resolution_timer t;
 
@@ -127,9 +132,15 @@ void worker(
                 std::vector<double>(result, result + Nx), t + 1);
         }
 
+        if (rank == 0)
+            std::cout << "." << std::flush;
+
         std::swap(curr, next);
     }
     double elapsed = t.elapsed();
+
+    if (rank == 0)
+        std::cout << "\n";
 
     if (rank == 0)
     {

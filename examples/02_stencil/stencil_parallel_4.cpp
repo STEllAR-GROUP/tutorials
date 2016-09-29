@@ -51,6 +51,11 @@ void worker(
     typedef communicator<std::vector<double>> communicator_type;
     communicator_type comm(rank, num);
 
+    if (rank == 0)
+    {
+        std::cout << "Running example using " << num << " Partitions\n";
+    }
+
     if (comm.has_neighbor(communicator_type::up))
     {
         // send initial value to our upper neighbor

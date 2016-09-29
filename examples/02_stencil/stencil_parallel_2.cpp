@@ -59,6 +59,11 @@ int hpx_main(boost::program_options::variables_map& vm)
     typedef communicator<std::vector<double>> communicator_type;
     communicator_type comm(rank, num_localities);
 
+    if (rank == 0)
+    {
+        std::cout << "Running example using " << num_localities << " Partitions\n";
+    }
+
     if (comm.has_neighbor(communicator_type::up))
     {
         // send initial value to our upper neighbor
@@ -67,7 +72,7 @@ int hpx_main(boost::program_options::variables_map& vm)
     }
     if (comm.has_neighbor(communicator_type::down))
     {
-            // send initial value to our neighbor below
+        // send initial value to our neighbor below
         comm.set(communicator_type::down,
             std::vector<double>(U[0].end() - Nx, U[0].end()), 0);
     }
@@ -100,8 +105,8 @@ int hpx_main(boost::program_options::variables_map& vm)
             // Finally, we can send the updated first row for our neighbor
             // to consume in the next timestep. Don't send if we are on
             // the last timestep
-                comm.set(communicator_type::up,
-                    std::vector<double>(result, result + Nx), t + 1);
+            comm.set(communicator_type::up,
+                std::vector<double>(result, result + Nx), t + 1);
         }
 
         // Update our interior spatial domain
@@ -135,9 +140,15 @@ int hpx_main(boost::program_options::variables_map& vm)
                 std::vector<double>(result, result + Nx), t + 1);
         }
 
+        if (rank == 0)
+            std::cout << "." << std::flush;
+
         std::swap(curr, next);
     }
     double elapsed = t.elapsed();
+
+    if (rank == 0)
+        std::cout << "\n";
 
     if (rank == 0)
     {
