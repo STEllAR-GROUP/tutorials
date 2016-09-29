@@ -750,9 +750,9 @@ allocator alloc(numa_domains);
 
 using hpx::compute::vector;
 
-vector<double, executor> a = ...;
-vector<double, executor> b = ...;
-vector<double, executor> c = ...;
+vector<double, allocator> a = ...;
+vector<double, allocator> b = ...;
+vector<double, allocator> c = ...;
 double x = ...;
 ```
 ]
@@ -796,9 +796,9 @@ allocator alloc(device);
 
 using hpx::compute::vector;
 
-vector<double, executor> a = ...;
-vector<double, executor> b = ...;
-vector<double, executor> c = ...;
+vector<double, allocator> a = ...;
+vector<double, allocator> b = ...;
+vector<double, allocator> c = ...;
 double x = ...;
 ```
 ]
