@@ -22,7 +22,7 @@ int hpx_main(boost::program_options::variables_map& vm)
     std::size_t steps = vm["steps"].as<std::size_t>();
 
     typedef std::vector<double> data_type;
-    typedef column_iterator<std::vector<double>::iterator> iterator;
+    typedef row_iterator<std::vector<double>::iterator> iterator;
 
     std::array<data_type, 2> U;
 
@@ -47,7 +47,7 @@ int hpx_main(boost::program_options::variables_map& vm)
         // Iterate over the interior: skip the first and last column
         for(auto it = curr + 1; it != curr + Ny - 1; ++it)
         {
-            result = line_update(it.row(), it.row() + Nx, result);
+            result = line_update(*it, *it + Nx, result);
         }
 
         std::swap(curr, next);

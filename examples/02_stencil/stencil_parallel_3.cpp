@@ -35,7 +35,7 @@ void worker(
     typedef hpx::compute::host::block_allocator<double> allocator_type;
     typedef hpx::compute::host::block_executor<> executor_type;
     typedef hpx::compute::vector<double, allocator_type> data_type;
-    typedef column_iterator<data_type::iterator> iterator;
+    typedef row_iterator<data_type::iterator> iterator;
 
     std::array<data_type, 2> U;
 
@@ -99,6 +99,7 @@ void worker(
         // Update our interior spatial domain
         hpx::parallel::for_loop(policy,
             curr + 1, curr + Ny-1,
+            // We need to advance the result by one row each iteration
             hpx::parallel::induction(next.middle + Nx, Nx),
             [Nx](iterator it, data_type::iterator result)
             {

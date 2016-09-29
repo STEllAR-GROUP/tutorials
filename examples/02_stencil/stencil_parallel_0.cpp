@@ -22,7 +22,7 @@ int hpx_main(boost::program_options::variables_map& vm)
     std::size_t steps = vm["steps"].as<std::size_t>();
 
     typedef std::vector<double> data_type;
-    typedef column_iterator<data_type::iterator> iterator;
+    typedef row_iterator<data_type::iterator> iterator;
 
     std::array<data_type, 2> U;
 
@@ -44,6 +44,7 @@ int hpx_main(boost::program_options::variables_map& vm)
         // We store the result of our update in the next middle line.
         hpx::parallel::for_loop(policy,
             curr + 1, curr + Ny-1,
+            // We need to advance the result by one row each iteration
             hpx::parallel::induction(next.middle + Nx, Nx),
             [Nx](iterator it, data_type::iterator result)
             {
