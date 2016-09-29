@@ -293,6 +293,20 @@ a reference to the underlying data.
     at once   
 
 ---
+##Latency V1
+* Synchronous send and receive of a message 
+
+* An action is spawned to do nothing other than send a message back
+    * We wait for the return after every send
+
+* Do this in a loop and find the averaage time
+
+* Using more threads helps slightly as polling the network is faster
+
+* Changing the window size has no effect
+
+[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L75)
+---
 
 class: center, middle
 ## Next
