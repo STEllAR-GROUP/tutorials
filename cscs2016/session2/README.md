@@ -487,32 +487,32 @@ future<double> f3 = hpx::dataflow(
 
 ---
 ## Concepts of Parallelism
-### Bringin it all together
+### Bringing it all together
 ![Bringing it all together](images/parallelism-0.png)
 
 ---
 ## Concepts of Parallelism
-### Bringin it all together
+### Bringing it all together
 ![Bringing it all together](images/parallelism-1.png)
 
 ---
 ## Concepts of Parallelism
-### Bringin it all together
+### Bringing it all together
 ![Bringing it all together](images/parallelism-2.png)
 
 ---
 ## Concepts of Parallelism
-### Bringin it all together
+### Bringing it all together
 ![Bringing it all together](images/parallelism-3.png)
 
 ---
 ## Concepts of Parallelism
-### Bringin it all together
+### Bringing it all together
 ![Bringing it all together](images/parallelism-4.png)
 
 ---
 ## Concepts of Parallelism
-### Bringin it all together
+### Bringing it all together
 ![Bringing it all together](images/parallelism-5.png)
 
 ---
