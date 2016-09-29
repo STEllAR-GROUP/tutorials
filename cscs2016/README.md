@@ -12,6 +12,8 @@ Thursday, September 29 and Friday, September 30, 2016
 * **John Biddiscombe**, Swiss National Supercomputing Centre (CSCS)
 * **Thomas Heller**, Computer Architecture, Friedrich-Alexander-University Erlangen-Nuremberg
 
+[https://stellar-group.github.io/tutorials#1](https://stellar-group.github.io/tutorials/#1)<br />
+[https://github.com/STEllAR-GROUP/tutorials](https://github.com/STEllAR-GROUP/tutorials)
 ???
 [Click here to view the Presentation](https://stellar-group.github.io/tutorials/cscs2016)
 
