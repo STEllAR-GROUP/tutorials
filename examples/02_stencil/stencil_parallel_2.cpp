@@ -156,11 +156,11 @@ int main(int argc, char* argv[])
 
     options_description desc_commandline;
     desc_commandline.add_options()
-        ("Nx", value<std::uint64_t>()->default_value(1024),
+        ("Nx", value<std::size_t>()->default_value(1024),
          "Elements in the x direction")
-        ("Ny", value<std::uint64_t>()->default_value(1024),
+        ("Ny", value<std::size_t>()->default_value(1024),
          "Elements in the y direction")
-        ("steps", value<std::uint64_t>()->default_value(100),
+        ("steps", value<std::size_t>()->default_value(100),
          "Number of steps to apply the stencil")
         ("output", value<std::string>(),
          "Save output to file")

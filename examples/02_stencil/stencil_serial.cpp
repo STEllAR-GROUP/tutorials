@@ -57,8 +57,8 @@ int hpx_main(boost::program_options::variables_map& vm)
     double mlups = (((Nx - 2.) * (Ny - 2.) * steps) / 1e6)/ elapsed;
     std::cout << "MLUPS: " << mlups << "\n";
 
-//    if (vm.count("output"))
-//        output(vm["output"].as<std::string>(), U[0], Nx, Ny);
+    if (vm.count("output"))
+        output(vm["output"].as<std::string>(), U[0], Nx, Ny);
 
     return hpx::finalize();
 }
@@ -69,14 +69,14 @@ int main(int argc, char* argv[])
 
     options_description desc_commandline;
     desc_commandline.add_options()
-        ("Nx", value<std::uint64_t>()->default_value(1024),
+        ("Nx", value<std::size_t>()->default_value(1024),
          "Elements in the x direction")
-        ("Ny", value<std::uint64_t>()->default_value(1024),
+        ("Ny", value<std::size_t>()->default_value(1024),
          "Elements in the y direction")
-        ("steps", value<std::uint64_t>()->default_value(100),
+        ("steps", value<std::size_t>()->default_value(100),
          "Number of steps to apply the stencil")
-//        ("output", value<std::string>()->required(),
-//         "Save output to file")
+        ("output", value<std::string>()->required(),
+         "Save output to file")
     ;
 
     return hpx::init(desc_commandline, argc, argv);
