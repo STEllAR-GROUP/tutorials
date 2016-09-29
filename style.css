@@ -85,8 +85,9 @@ float: right;
     margin-left: 20px;
     display: inline-block;
     position: relative;
-    height: 30pt;
-    width: 51pt;
+    height: 20pt;
+    width: 34pt;
+    transform: translate(0, -5px);
 }
 
 .logo-img-ethz {
