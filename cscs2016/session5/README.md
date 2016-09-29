@@ -294,9 +294,9 @@ struct row_iterator
         );
 ```
 
-* [http://stellar-group.github.io/hpx/docs/html/header/hpx/parallel/algorithms/for_loop_hpp.html](Documentation, for_loop)
-* [http://stellar-group.github.io/hpx/docs/html/header/hpx/parallel/algorithms/for_loop_hpp.html](Documentation, induction)
-* [http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0075r1.pdf](Standards Proposal, P0075r1)
+* [Documentation, for_loop](http://stellar-group.github.io/hpx/docs/html/header/hpx/parallel/algorithms/for_loop_hpp.html)
+* [Documentation, induction](http://stellar-group.github.io/hpx/docs/html/header/hpx/parallel/algorithms/for_loop_hpp.html)
+* [Standards Proposal, P0075r1](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0075r1.pdf)
 * [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/stencil_parallel_0.cpp)
 
 ---
@@ -523,30 +523,100 @@ int main()
 ## The Channel LCO
 ### Synchronization between Threads of Control
 
+* A Global object you can set and get values from multiple times:
+    * sender uses `channel<T>::get(launch_policy, generation)`
+    * receiver uses `channel<T>::set(launch_policy, value, generation)`
+* Generation can be used to differentiate between iterations!
+* [Use the source, Luke](https://github.com/STEllAR-GROUP/hpx/blob/master/hpx/lcos/channel.hpp#L150-L325)
+
 ---
 ## Symbolic names
 ### Resolving Global Objects by name
+
+* `hpx::lcos::channel<T>` is a client to a component.
+* GIDs and clients can be associated with symbolic names
+    * `hpx::register_with_basename(name, channel, rank);`
+* GIDS and clients can be found by its symbolic names
+    * `channel = hpx::find_from_basename<channel<T>>(name, rank);`
+
+[Read the Documentation!](http://stellar-group.github.io/hpx/docs/html/header/hpx/runtime/basename_registration_hpp.html)
 
 ---
 ## Parallelization
 ### Communication between Partitions
 
+* If a partition has an upper neighbor
+    * It needs to **send** its first row up
+    * It needs to **recieve** the last row from its upper neighbor
+
+* If a partition has a lower neighbor
+    * It needs to **send** its last row down
+    * It needs to **recieve** the first row from its lower neighbor
+
+* [Full Code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/communicator.hpp)
+
 ---
 ## Modeling the Stencil in C++ with HPX
 ### First Distributed Version
 
----
-## Modeling the Stencil in C++ with HPX
-### The importance of Oversubscription
+* Update first row boundary
+
+```
+if (comm.has_neighbor(communicator_type::up))
+{
+    // Get the first row.
+    auto result = next.middle;
+    // retrieve the row which is 'up' from our first row.
+    std::vector<double> up = comm.get(communicator_type::up, t).get();
+    // Create a row iterator with that top boundary
+    auto it = curr.top_boundary(up);
+
+    // After getting our missing row, we can update our first row
+    line_update(it, it + Nx, result);
+
+    // Finally, we can send the updated first row for our neighbor
+    // to consume in the next timestep. Don't send if we are on
+    // the last timestep
+        comm.set(communicator_type::up,
+            std::vector<double>(result, result + Nx), t + 1);
+}
+```
+* [Full Code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/stencil_parallel_2.cpp#L88-L105)
 
 ---
 ## Modeling the Stencil in C++ with HPX
-### Having more than one Partition per Locality
+### First Distributed Version
+
+* Update last row boundary
+
+```
+// Update our lower boundary if we have an interior partition and a
+// neighbor below
+if (comm.has_neighbor(communicator_type::down))
+{
+    // Get the last row.
+    auto result = next.middle + (Ny - 2) * Nx;
+    // retrieve the row which is 'down' from our last row.
+    std::vector<double> down = comm.get(communicator_type::down, t).get();
+    // Create a row iterator with that bottom boundary
+    auto it = (curr + Ny - 2).bottom_boundary(down);
+    // After getting our missing row, we can update our last row
+    line_update(it, it + Nx, result);
+
+    // Finally, we can send the updated last row for our neighbor
+    // to consume in the next timestep. Don't send if we are on
+    // the last timestep
+    comm.set(communicator_type::down,
+        std::vector<double>(result, result + Nx), t + 1);
+}
+```
+
+* [Full Code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/stencil_parallel_2.cpp#L120-L136)
 
 ---
+class: center, middle
 ## Modeling the Stencil in C++ with HPX
-### Futurization - Waiting is losing
-
+### How good does it scale?
 
 ---
 class: center, middle
