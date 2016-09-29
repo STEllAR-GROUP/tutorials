@@ -240,10 +240,57 @@ new one can begin.
 * Note that this is a contrived example and real-world use might require more thought 
 
 ---
-##direct actions and plain actions
+##Plain and Direct Actions
+* An action is a remote function call, returning a future
+* A plain action is the normal kind of action
+    * When you call `hpx::async(action, locality, args ...);`    
+    * 1) The message is despatched immediately on the current task 
+    and a future is returned    
+    * 2) When the message arrives, it will be decoded 
+        * but only when the remote node finishes a task and polls the network        
+    * 3) once decoded the action becomes a task on the pending queue    
+    * 4) the action executes when a worker becomes free 
+        * fast response is not guaranteed!
+* A direct action skips steps 3,4 
+    * after decoding, the task is executed directly on the decoding thread    
+    * this creates a faster turnaround for certain actions
+    * it can be used for short remote functions (such as this)
+    
+```
+hpx::serialization::serialize_buffer<char>
+message(hpx::serialization::serialize_buffer<char> const& receive_buffer)
+{
+    return receive_buffer;
+}
+```                     
+---
+##Serialize_Buffer
+* Sending an array can be optimized by using a `serialize_buffer`
+* Any data block that is bitwise serializable can be cast to a pointer and passed into
+a `serialize_buffer` 
+* The `serialize_buffer` has a specialization in the `hpx::serialization` layer to
+pass the pointer thought without any overheads (it can be zero copied or RDMA'd)
+```
+    typedef hpx::serialization::serialize_buffer<char> buffer_type;
+    buffer_type recv_buffer;
+    ...
+    recv_buffer = msg(dest, buffer_type(send_buffer, size, buffer_type::reference));
+```  
+* The constructor of the `serialize_buffer` can copy, take ownership or a just take
+a reference to the underlying data.
 
 ---
-##Start/Stop the runtime
+##Latency Example 
+* A common benchmark is to ping pong a message back and forth between 2 nodes
+* Using MPI, a thread calls `send` then blocks on `receive`
+    * On the remote node, one blocks on `receive` and then calls `send`
+    * turnaround is fast
+    
+* Given what we know about actions : how fast is HPX compared to MPI?
+
+* Caveat : HPX isn't designed to have a fast response to ping-pong type messages
+    * we will instead measure the average time for 1, when N messages are in flight 
+    at once   
 
 ---
 
