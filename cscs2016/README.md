@@ -39,3 +39,16 @@ Thursday, September 29 and Friday, September 30, 2016
 * Tea Break, 15 Minutes
 * [15:00 to 16:30: Open for worked examples](session8)
 
+---
+## Acknowledgements
+
+* Hartmut Kaiser (LSU)
+* Bryce Lelbach (LBNL)
+* Agustin Berge
+* John Biddiscombe (CSCS)
+* Patrick Diehl (Bonn)
+* Matrin Stumpf (FAU)
+* Arne Hendricks (FAU)
+* Parsa Amini (LSU
+* And many others...
+
