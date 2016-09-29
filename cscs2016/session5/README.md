@@ -614,6 +614,17 @@ if (comm.has_neighbor(communicator_type::down))
 * [Full Code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/stencil_parallel_2.cpp#L120-L136)
 
 ---
+## Modeling the Stencil in C++ with HPX
+### Notes on running the example
+
+* The default problem size is pretty small.
+    * You might want to consider increasing the problem size (--Nx, --Ny command line arguments)
+
+* We use striping in y-Direction
+    * Not a very wise partitioning scheme
+    * Easy for demonstration purposes
+
+---
 class: center, middle
 ## Modeling the Stencil in C++ with HPX
 ### How good does it scale?
