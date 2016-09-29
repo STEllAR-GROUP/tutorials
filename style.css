@@ -41,7 +41,7 @@ tbody tr:last-child td {
 */
 
 .remark-code {
-    font-size: 10pt;
+    font-size: 11pt;
 }
 
 /* Two-column layout */
@@ -86,7 +86,7 @@ float: right;
     display: inline-block;
     position: relative;
     height: 30pt;
-    width: 111pt;
+    width: 51pt;
 }
 
 .logo-img-ethz {
