@@ -18,10 +18,12 @@ void hello_locality()
 {
     // Get the ID of the locality this function is executed on
     std::size_t id = hpx::get_locality_id();
+    std::string name = hpx::get_locality_name();
 
     // Print a message using hpx::cout (sends the output to locality 0)
     hpx::cout
-        << "Hello, I am executed on Locality " << id << std::endl;
+        << "Hello, I am executed on Locality " << id 
+        << " (" << name << ")" << std::endl;
 
     using hpx::parallel::for_each;
     using hpx::parallel::par;
