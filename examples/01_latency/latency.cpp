@@ -258,16 +258,13 @@ double receive_v3(
 }
 
 // ---------------------------------------------------------------------------------
-// Send a message and receives the reply using a sliding_semaphore to
-// track messages in flight. There are always 'window_size' messages in transit
+// Send a message and receives the reply using a sliding_semaphore (as per v3) to
+// track messages in flight, but we trigger the signal using an atomic counter. 
+// As before there are always 'window_size' messages in transit
 // at any time
-// Warning : message N might be returned after message N+M because at the remote
-// end each message return is triggered on an HPX task which may or may not
-// be suspended and delay the current return message.
-// This means that when message N completes- we cannot be 100% that 'window_size'
-// messages are really in flight, but we get close. Also when the loop terminates
-// there may be one or more messages still uncompleted, so we wait for them at the end
-// to avoid destroying the CV before it is done with
+// The use of the atomic counter means that we always signal with the correct
+// number of messages in flight and we do not need an additional wait on the
+// condition variable at the end.
 double receive_v4(
     hpx::naming::id_type dest,
     char * send_buffer,
@@ -307,14 +304,13 @@ double receive_v4(
                     sem.signal(counter++);
                  }
             );
-
         //
         sem.wait(parcel_count);
         //
         parcel_count++;
     }
     sem.wait(parcel_count + window_size - 2);
-    //    
+    //
     double d = (static_cast<double>(window_size*num_loops));
     return (t.elapsed() * 1e6) / (2.0*d);
 }

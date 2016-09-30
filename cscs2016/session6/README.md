@@ -293,7 +293,7 @@ a reference to the underlying data.
     at once   
 
 ---
-##Latency V1
+##Latency V0
 * Synchronous send and receive of a message 
 
 * An action is spawned to do nothing other than send a message back
@@ -306,8 +306,77 @@ a reference to the underlying data.
 * Changing the window size has no effect
 
 [See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L75)
----
 
+* Note the use of DIRECT_ACTION, `serialize_buffer`
+
+---
+##Latency V1
+* Vector of futures
+
+* Spawn N actions and store the futures in a vector
+
+* Wait on the vector of futures until all complete
+
+* take the time and compute the average for 1
+
+* Gives a more realistic answer than v0, but we are not really measuring N   
+
+[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L111)
+
+* Note : We are actually measuring a sawtooth from 0 to N
+<crop>
+    <img src="images/sawtooth.jpg" alt="" height="300px" >
+</crop>
+
+---
+##Latency V2
+* Simple Atomic Counter and Condition Variable
+
+* Spawn N messages, each time one returns, increment a counter
+
+* When the counter reaches N, restart
+
+* Simple, but still a sawtooth
+
+[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L154)
+
+---
+##Latency V3
+* Sliding Semaphore 
+* Loop over sends, and track how many are in flight with a sliding semaphore
+* This will maintain N in flight using a sliding window, so that when <N are in flight
+the loop continues, when N are in floght, the loop blocks.
+    * Note, we actually set the window to N-1 so that we can measure 1 because 
+sliding semaphore uses > and not >= as the test internally
+* we have got past the sawtooth, but there's a nasty bug
+* The Nth message may return before the N-1 (or N-2 etc)th message because when multiple
+threads are used, on the remote node, one might get suspended by the OS and return after
+a later one
+* Our semaphore is therefore 'noisy' and we don't have exactly N in flight
+* Can segfault if one late message returns after the semaphore goes out of scope
+* Add an extra condition variable at the end to make sure we keep semaphore alive 
+until the last message has returned
+    * (this also means the timing is correct on the last iteration)
+
+[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L211)
+
+---
+##Latency V4
+* Sliding Semaphore with Atomic
+
+* The bug in V3 is caused by the noisy/random return of messages
+
+* We can easily fix this by using an atomic counter instead of the loop index
+for triggering our semaphore.
+
+* We no longer need the condition variable at the end to prevent segfaults on the 
+semaphore access.
+
+[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L275)
+
+* V5 : Suggestions welcome for an even better version
+
+---
 class: center, middle
 ## Next
 
