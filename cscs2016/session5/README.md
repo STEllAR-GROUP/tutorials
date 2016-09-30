@@ -295,7 +295,7 @@ struct row_iterator
 ```
 
 * [Documentation, for_loop](http://stellar-group.github.io/hpx/docs/html/header/hpx/parallel/algorithms/for_loop_hpp.html)
-* [Documentation, induction](http://stellar-group.github.io/hpx/docs/html/header/hpx/parallel/algorithms/for_loop_hpp.html)
+* [Documentation, induction](http://stellar-group.github.io/hpx/docs/html/header/hpx/parallel/algorithms/for_loop_induction_hpp.html)
 * [Standards Proposal, P0075r1](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0075r1.pdf)
 * [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/stencil_parallel_0.cpp)
 
@@ -335,6 +335,7 @@ struct row_iterator
 ### Writing Components
 
 * Goal:
+
 ```
 struct hello_world_component;
 struct hello_world;
@@ -577,8 +578,8 @@ if (comm.has_neighbor(communicator_type::up))
     // Finally, we can send the updated first row for our neighbor
     // to consume in the next timestep. Don't send if we are on
     // the last timestep
-        comm.set(communicator_type::up,
-            std::vector<double>(result, result + Nx), t + 1);
+    comm.set(communicator_type::up,
+        std::vector<double>(result, result + Nx), t + 1);
 }
 ```
 * [Full Code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/stencil_parallel_2.cpp#L88-L105)
