@@ -18,13 +18,15 @@ Previous: [Resource Management and Performance Issues](../session6)
 ## Revisiting the Stencil
 ### How good does it scale?
 
-* Weak Scaling: Using 30000x30000 grid points per locality
+  ![2D Stencil - Weak Scaling](images/weak_scaling0.png)
+[Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)
 
-![2D Stencil - Weak Scaling](images/weak_scaling0.png)
+---
+## Revisiting the Stencil
+### How good does it scale?
 
-* Strong Scaling: Using 30000x960000 total grid points
-
-![2D Stencil - Strong Scaling](images/strong_scaling0.png)
+  ![2D Stencil - Strong Scaling](images/strong_scaling0.png)
+[Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)
 
 ---
 ## Revisiting the Stencil
@@ -35,16 +37,33 @@ Previous: [Resource Management and Performance Issues](../session6)
 * [Futurization - Waiting is losing]()
 
 ---
+# Revisiting the Stencil
+### Influence of Oversubscription
+
+  ![Influence of Oversubscription on Weak Scaling](images/oversubscribe_weak.png)
+[Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)
+
+
+---
+# Revisiting the Stencil
+### Influence of Oversubscription
+
+  ![Influence of Oversubscription on Strong Scaling](images/oversubscribe_strong.png)
+[Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)
+
+---
 ## Revisiting the Stencil
 ### How good does it scale now?
 
-* Weak Scaling: Using 30000x30000 grid points per locality
+  ![2D Stencil - Weak Scaling](images/weak_scaling1.png)
+[Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)
 
-![2D Stencil - Weak Scaling](images/weak_scaling1.png)
+---
+## Revisiting the Stencil
+### How good does it scale now?
 
-* Strong Scaling: Using 30000x960000 total grid points
-
-![2D Stencil - Strong Scaling](images/strong_scaling1.png)
+  ![2D Stencil - Strong Scaling](images/strong_scaling1.png)
+[Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)
 
 ---
 class: center, middle
