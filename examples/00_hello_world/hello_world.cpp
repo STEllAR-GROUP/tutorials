@@ -22,21 +22,19 @@ void hello_locality()
 
     // Print a message using hpx::cout (sends the output to locality 0)
     hpx::cout
-        << "Hello, I am executed on Locality " << id 
+        << "Hello, I am executed on Locality " << id
         << " (" << name << ")" << std::endl;
 
-    using hpx::parallel::for_each;
+    using hpx::parallel::for_loop;
     using hpx::parallel::par;
-    using hpx::parallel::static_chunk_size;
 
-    // An integer range being used in a parallel loop
-    auto range = boost::irange<std::size_t>(0, hpx::get_os_thread_count());
-
-    // Iterate over the begin of the range until the end in parallel
-    for_each(par.with(static_chunk_size())
-      , boost::begin(range), boost::end(range)
-        // For each element in the range, call the following lambda (anonymous function)
-      , [id](std::size_t num_thread)
+    // Iterate over the range in parallel
+    for_loop(
+        par,
+        0, hpx::get_os_thread_count(),
+        // For each element in the range, call the following lambda
+        // (anonymous function)
+        [id](std::size_t num_thread)
         {
             // Print a message using hpx::cout (sends the output to locality 0)
             hpx::cout
