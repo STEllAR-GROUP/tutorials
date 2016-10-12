@@ -72,6 +72,7 @@ set(TUTORIAL_DIRS
   00_hello_world
   01_latency
   02_stencil
+  03_fibonacci
   04_saxpy
 )
 
