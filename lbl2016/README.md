@@ -15,3 +15,4 @@ Tuesday, October 18, 2016
 
  - Hartmut Kaiser, Louisiana State University (LSU)
  - John Biddiscombe, Swiss National Supercomputing Centre (CSCS)
+ - Bryce Adelstein Lelbach, Berkeley Labs (LBL)
