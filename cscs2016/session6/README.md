@@ -93,9 +93,9 @@ passed into the async function.
 ```
     auto my_future = hpx:async(something).then(another_thing).then(yet_more);
 ```
-    * `my_future` and `something` are instantiated when that line of code is hit,
-    but `another_thing` isn't created until `something` completes, and `yet_more`
-    isn't created until `another_thing` completes.
+* `my_future` and `something` are instantiated when that line of code is hit,
+but `another_thing` isn't created until `something` completes, and `yet_more`
+isn't created until `another_thing` completes.
 
 ```
     std::vector<shared_future<T>> futures;
@@ -195,7 +195,8 @@ for each will keep incrementing until there's an overflow.
         [](auto &&f){            
             return something_wonderful(f.get());
         }
-    );```
+    );
+```
 * The task that spawns the child will suspend and the child runs in its place
     * The parent task goes back to the pending work queue
     
