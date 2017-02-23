@@ -13,8 +13,7 @@ Thursday, March 9 and Friday, March 10, 2017
 * **Thomas Heller**, Computer Architecture, Friedrich-Alexander-University Erlangen-Nuremberg (FAU
 * **Hartmut Kaiser**, Center for Computation and Technology, Louisiana State University (LSU)
 
-[https://stellar-group.github.io/tutorials#1](https://stellar-group.github.io/tutorials/#1)<br />
-[https://github.com/STEllAR-GROUP/tutorials](https://github.com/STEllAR-GROUP/tutorials)
+[https://github.com/STEllAR-GROUP/tutorials](https://github.com/STEllAR-GROUP/tutorials/hlrs2017)
 ???
 [Click here to view the Presentation](https://stellar-group.github.io/tutorials/hlrs2017)
 
