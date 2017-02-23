@@ -66,7 +66,7 @@ cd boost_1_63_0
 
 ---
 ## Dependencies #2
-### Installing hwloc (on Daint)
+### Installing hwloc
 
 ```sh
 # download a tarball (version 1.11.5 latest @ March 2017)
@@ -103,7 +103,7 @@ make -j8 install
 
 ---
 ## Dependencies #3
-### Installing jemalloc (on Daint)
+### Installing jemalloc
 
 * jemalloc can be downloaded via github and there isn't a direct link
 
