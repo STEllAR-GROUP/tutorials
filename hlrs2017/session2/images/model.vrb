@@ -1,0 +1,215 @@
+\flushleft
+    \begin{tikzpicture}[overlay]
+        \begin{scope}[shift={(-0.5,0)}]
+    \tikzstyle{box}=[minimum width = 4em, color = faublue, line width = 0.5mm, draw, node distance = 5em, text=black];
+    \tikzstyle{line}=[thick, color = faublue, line width=0.5mm];
+
+    \node<2-4> (global_memory) [fill = gray!25, draw = gray!25, minimum width=31.5em, minimum height=6em, xshift=15.5em, yshift=4.25em, text = gray] {Global Address Space};
+    \node<5> (global_memory) [fill = gray!25, draw = gray!25, minimum width=31.5em, minimum height=6em, xshift=15.5em, yshift=4.25em, text = gray] {};
+
+    \node<1-4> (locality_0) [box, minimum height=10em, xshift=2.5em, label={Locality 0}, yshift=2em] {Memory};
+    \node<1-4> (locality_1) [box, minimum height=10em, xshift=8.5em, label={Locality 1}, yshift=2em] {Memory};
+    \node<1-4> (locality_i) [box, minimum height=10em, xshift=18.5em, label={Locality i}, yshift=2em] {Memory};
+    \node<1-4> (locality_n) [box, minimum height=10em, xshift=28.5em, label={Locality N-1}, yshift=2em] {Memory};
+
+    \node<5> (locality_0) [box, minimum height=10em, xshift=2.5em, label={Locality 0}, yshift=2em] {};
+    \node<5> (locality_1) [box, minimum height=10em, xshift=8.5em, label={Locality 1}, yshift=2em] {};
+    \node<5> (locality_i) [box, minimum height=10em, xshift=18.5em, label={Locality i}, yshift=2em] {};
+    \node<5> (locality_n) [box, minimum height=10em, xshift=28.5em, label={Locality N-1}, yshift=2em] {};
+
+    \node<2-> (agas) [box, minimum height=1.5em, below of = locality_0, yshift = -1.5em, minimum width = 30em, xshift=13em] {Parcelport};
+    \node<2-> (pp) [box, minimum height=1.5em, below of = agas, yshift = 3em, minimum width = 30em] {Active Global Address Space (AGAS) Service};
+
+    \node<2-> (tm_0) [box, minimum height=1.5em, below of = locality_0, yshift = -6em, align=center] {Thread-\\Scheduler};
+
+    \node<2-> (tm_1) [box, minimum height=1.5em, below of = locality_1, yshift = -6em, align=center] {Thread-\\Scheduler};
+
+    \node<2,5-> (tm_i) [box, minimum height=1.5em, below of = locality_i, yshift = -6em, align=center] {Thread-\\Scheduler};
+    \node<3-4> (tm_i) [box, minimum height=1.5em, below of = locality_i, yshift = -6em, align=center, fill = faublue!50] {Thread-\\Scheduler};
+
+    \node<2-> (tm_n) [box, minimum height=1.5em, below of = locality_n, yshift = -6em, align=center] {Thread-\\Scheduler};
+
+    \path<1->
+    ($(locality_1.east) + (1.0em, 0.0em)$) edge [line, loosely dotted] node {} ($(locality_i.west) - (1.0em, 0.0em)$)
+    ($(locality_i.east) + (1.0em, 0.0em)$) edge [line, loosely dotted] node {} ($(locality_n.west) - (1.0em, 0.0em)$);
+
+    \node<3> (tm) [box, fill = white, minimum width = 6em, minimum height = 12em, xshift = 3.75em] {};
+
+    \node<3> (thread_0_0) [box, fill = white, above of = tm, xshift=0.25em, yshift= -0.25em] {Thread};
+    \node<3> (thread_1_0) [box, fill = white, below of = thread_0_0, yshift=3.625em] {Thread};
+    \node<3> (thread_2_0) [box, fill = white, below of = thread_1_0, yshift=3.625em] {Thread};
+    \node<3> (thread_3_0) [box, fill = white, below of = thread_2_0, yshift=3.625em] {Thread};
+    \node<3> (thread_n_0) [box, fill = white, below of = thread_3_0, yshift=0.625em] {Thread};
+
+    \node<3> (thread_0_1) [box, fill = white, above of = tm, xshift=0em, yshift= -0.5em] {Thread};
+    \node<3> (thread_1_1) [box, fill = white, below of = thread_0_1, yshift=3.625em] {Thread};
+    \node<3> (thread_2_1) [box, fill = white, below of = thread_1_1, yshift=3.625em] {Thread};
+    \node<3> (thread_3_1) [box, fill = white, below of = thread_2_1, yshift=3.625em] {Thread};
+    \node<3> (thread_n_1) [box, fill = white, below of = thread_3_1, yshift=0.625em] {Thread};
+
+    \node<3> (thread_0_2) [box, fill = white, above of = tm, xshift=-0.25em, yshift= -0.75em] {Thread};
+    \node<3> (thread_1_2) [box, fill = white, below of = thread_0_2, yshift=3.625em] {Thread};
+    \node<3> (thread_2_2) [box, fill = white, below of = thread_1_2, yshift=3.625em] {Thread};
+    \node<3> (thread_3_2) [box, fill = white, below of = thread_2_2, yshift=3.625em] {Thread};
+    \node<3> (thread_n_2) [box, fill = white, below of = thread_3_2, yshift=0.625em] {Thread};
+
+    \node<3> (thread_0) [box, fill = white, above of = tm, xshift=-0.5em, yshift= -1em] {Thread};
+    \node<3> (thread_1) [box, fill = white, below of = thread_0, yshift=3.625em] {Thread};
+    \node<3> (thread_2) [box, fill = white, below of = thread_1, yshift=3.625em] {Thread};
+    \node<3> (thread_3) [box, fill = white, below of = thread_2, yshift=3.625em] {Thread};
+    \node<3> (thread_n) [box, fill = white, below of = thread_3, yshift=0.625em] {Thread};
+
+    \node<4> (tm) [box, fill = white, minimum width = 20em, minimum height = 12em, xshift = 10.75em] {};
+
+    \node<4> (thread_0_0) [box, fill = white, above of = tm, xshift=-6.75em, yshift= -0.25em] {Thread};
+    \node<4> (thread_1_0) [box, fill = white, below of = thread_0_0, yshift=3.625em] {Thread};
+    \node<4> (thread_2_0) [box, fill = white, below of = thread_1_0, yshift=3.625em] {Thread};
+    \node<4> (thread_3_0) [box, fill = white, below of = thread_2_0, yshift=3.625em] {Thread};
+    \node<4> (thread_n_0) [box, fill = white, below of = thread_3_0, yshift=0.625em] {Thread};
+
+    \node<4> (thread_0_1) [box, fill = white, above of = tm, xshift=-7em, yshift= -0.5em] {Thread};
+    \node<4> (thread_1_1) [box, fill = white, below of = thread_0_1, yshift=3.625em] {Thread};
+    \node<4> (thread_2_1) [box, fill = white, below of = thread_1_1, yshift=3.625em] {Thread};
+    \node<4> (thread_3_1) [box, fill = white, below of = thread_2_1, yshift=3.625em] {Thread};
+    \node<4> (thread_n_1) [box, fill = white, below of = thread_3_1, yshift=0.625em] {Thread};
+
+    \node<4> (thread_0_2) [box, fill = white, above of = tm, xshift=-7.25em, yshift= -0.75em] {Thread};
+    \node<4> (thread_1_2) [box, fill = white, below of = thread_0_2, yshift=3.625em] {Thread};
+    \node<4> (thread_2_2) [box, fill = white, below of = thread_1_2, yshift=3.625em] {Thread};
+    \node<4> (thread_3_2) [box, fill = white, below of = thread_2_2, yshift=3.625em] {Thread};
+    \node<4> (thread_n_2) [box, fill = white, below of = thread_3_2, yshift=0.625em] {Thread};
+
+    \node<4> (thread_0) [box, fill = white, above of = tm, xshift=-7.5em, yshift= -1em] {Thread};
+    \node<4> (thread_1) [box, fill = white, below of = thread_0, yshift=3.625em] {Thread};
+    \node<4> (thread_2) [box, fill = white, below of = thread_1, yshift=3.625em] {Thread};
+    \node<4> (thread_3) [box, fill = white, below of = thread_2, yshift=3.625em] {Thread};
+    \node<4> (thread_n) [box, fill = white, below of = thread_3, yshift=0.625em] {Thread};
+
+    \path<3-4>
+    ($(thread_3.south) - (-0.5em, 0.25em)$) edge [line, loosely dotted, color = gray] node {} ($(thread_n.north) + (0.5em, 1em)$);
+
+    \path<3>
+    (tm_i.west) edge [-triangle 45, thick, line width = 1mm, color = gray, bend left] node {} (tm.south);
+
+    \path<4>
+    (tm_i.west) edge [-triangle 45, thick, line width = 1mm, color = gray, bend left] node {} ($(tm.south) - (7.0em, 0.0em)$);
+
+    \node<4> (thread_0) [xshift=10em, yshift= 5em] {};
+    \node<4> (thread_1) [xshift=10em, yshift= 3em, align = center] {};
+    \node<4> (thread_2) [xshift=10em, yshift= 2.25em, align = center] {};
+    \node<4> (thread_3) [xshift=10em, yshift= 0.25em, align = center] {};
+    \node<4> (thread_4) [xshift=10em, yshift= -0.5em, align = center] {};
+    \node<4> (thread_5) [xshift=10em, yshift= -3em, align = center] {};
+    \node<4> (thread_6) [xshift=10em, yshift= -2.5em, align = center] {};
+    \node<4> (thread_7) [xshift=10em, yshift= -5.5em, align = center] {};
+
+    \path<4> (thread_0) edge [-, snake it, line width = 0.5mm, color = gray] node {} (thread_1);
+    \path<4> (thread_2) edge [-, snake it, line width = 0.5mm, color = gray] node {} (thread_3);
+    \path<4> (thread_4) edge [-, dashed, snake it, line width = 0.5mm, color = gray] node {} (thread_5);
+    \path<4> (thread_6) edge [-, snake it, line width = 0.5mm, color = gray] node {} (thread_7);
+
+    \node<5> (comp0_0) [fill = faublue!70, xshift = 1.5em, yshift = 6em] {};
+    \node<5> (comp1_0) [fill = faublue!70, xshift = 2.5em, yshift = 5.5em] {};
+    \node<5> (comp2_0) [fill = faublue!70, xshift = 2.0em, yshift = 4em] {};
+    \node<5> (comp3_0) [fill = faublue!70, xshift = 3.5em, yshift = 5em] {};
+    \node<5> (comp4_0) [fill = faublue!70, xshift = 3.5em, yshift = 3em] {};
+    \node<5> (comp5_0) [fill = faublue!70, xshift = 3.5em, yshift = 6em] {};
+
+    \node<5> (comp0_1) [fill = faublue!70, xshift = 7.25em, yshift = 6em] {};
+    \node<5> (comp1_1) [fill = faublue!70, xshift = 8.25em, yshift = 5.5em] {};
+    \node<5> (comp2_1) [fill = faublue!70, xshift = 7.75em, yshift = 4em] {};
+    \node<5> (comp3_1) [fill = faublue!70, xshift = 9.25em, yshift = 5em] {};
+    \node<5> (comp4_1) [fill = faublue!70, xshift = 9.25em, yshift = 3em] {};
+    \node<5> (comp5_1) [fill = faublue!70, xshift = 9.25em, yshift = 6em] {};
+
+    \node<5> (comp0_2) [fill = faublue!70, xshift = 17.25em, yshift = 6em] {};
+    \node<5> (comp1_2) [fill = faublue!70, xshift = 18.25em, yshift = 5.5em] {};
+    \node<5> (comp2_2) [fill = faublue!70, xshift = 17.75em, yshift = 4em] {};
+    \node<5> (comp3_2) [fill = faublue!70, xshift = 19.25em, yshift = 5em] {};
+    \node<5> (comp4_2) [fill = faublue!70, xshift = 19.25em, yshift = 3em] {};
+    \node<5> (comp5_2) [fill = faublue!70, xshift = 19.25em, yshift = 6em] {};
+
+    \node<5> (comp0_3) [fill = faublue!70, xshift = 27.25em, yshift = 6em] {};
+    \node<5> (comp1_3) [fill = faublue!70, xshift = 28.25em, yshift = 5.5em] {};
+    \node<5> (comp2_3) [fill = faublue!70, xshift = 27.75em, yshift = 4em] {};
+    \node<5> (comp3_3) [fill = faublue!70, xshift = 29.25em, yshift = 5em] {};
+    \node<5> (comp4_3) [fill = faublue!70, xshift = 29.25em, yshift = 3em] {};
+    \node<5> (comp5_3) [fill = faublue!70, xshift = 29.25em, yshift = 6em] {};
+
+    \node<5> (id0_0) [fill = gray!70, xshift = 1.5em, yshift = 0.5em] {};
+    \node<5> (id1_0) [fill = gray!70, xshift = 2.5em, yshift = 0em] {};
+    \node<5> (id2_0) [fill = gray!70, xshift = 2.0em, yshift = -1.5em] {};
+    \node<5> (id3_0) [fill = gray!70, xshift = 3.5em, yshift = -1.5em] {};
+    \node<5> (id4_0) [fill = gray!70, xshift = 3.5em, yshift = -0.5em] {};
+    \node<5> (id5_0) [fill = gray!70, xshift = 3.5em, yshift = 0.5em] {};
+
+    \node<5> (id0_1) [fill = gray!70, xshift = 7.25em, yshift = 0.5em] {};
+    \node<5> (id1_1) [fill = gray!70, xshift = 8.25em, yshift = 0em] {};
+    \node<5> (id2_1) [fill = gray!70, xshift = 7.75em, yshift = -1.5em] {};
+    \node<5> (id3_1) [fill = gray!70, xshift = 9.25em, yshift = -1.5em] {};
+    \node<5> (id4_1) [fill = gray!70, xshift = 9.25em, yshift = -0.5em] {};
+    \node<5> (id5_1) [fill = gray!70, xshift = 9.25em, yshift = 0.5em] {};
+
+    \node<5> (id0_2) [fill = gray!70, xshift = 17.25em, yshift = 0.5em] {};
+    \node<5> (id1_2) [fill = gray!70, xshift = 18.25em, yshift = 0em] {};
+    \node<5> (id2_2) [fill = gray!70, xshift = 17.75em, yshift = -1.5em] {};
+    \node<5> (id3_2) [fill = gray!70, xshift = 19.25em, yshift = -1.5em] {};
+    \node<5> (id4_2) [fill = gray!70, xshift = 19.25em, yshift = -0.5em] {};
+    \node<5> (id5_2) [fill = gray!70, xshift = 19.25em, yshift = 0.5em] {};
+
+    \node<5> (id0_3) [fill = gray!70, xshift = 27.25em, yshift = 0.5em] {};
+    \node<5> (id1_3) [fill = gray!70, xshift = 28.25em, yshift = 0em] {};
+    \node<5> (id2_3) [fill = gray!70, xshift = 27.75em, yshift = -1.5em] {};
+    \node<5> (id3_3) [fill = gray!70, xshift = 29.25em, yshift = -1.5em] {};
+    \node<5> (id4_3) [fill = gray!70, xshift = 29.25em, yshift = -0.5em] {};
+    \node<5> (id5_3) [fill = gray!70, xshift = 29.25em, yshift = 0.5em] {};
+
+    \path<5> (id0_0) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp0_0);
+    \path<5> (id1_0) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp1_1);
+    \path<5> (id2_0) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp2_2);
+    \path<5> (id3_0) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp3_3);
+    \path<5> (id4_0) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp4_3);
+    \path<5> (id5_0) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp5_1);
+
+    \path<5> (id0_1) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp0_3);
+    \path<5> (id1_1) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp1_2);
+    \path<5> (id2_1) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp2_1);
+    \path<5> (id3_1) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp3_0);
+    \path<5> (id4_1) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp4_2);
+    \path<5> (id5_1) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp5_2);
+
+    \path<5> (id0_2) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp0_2);
+    \path<5> (id1_2) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp1_1);
+    \path<5> (id2_2) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp2_3);
+    \path<5> (id3_2) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp3_0);
+    \path<5> (id4_2) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp4_1);
+    \path<5> (id5_2) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend left] node {} (comp5_1);
+
+    \path<5> (id0_3) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend right] node {} (comp0_0);
+    \path<5> (id1_3) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend right] node {} (comp1_0);
+    \path<5> (id2_3) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend right] node {} (comp2_1);
+    \path<5> (id3_3) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend right] node {} (comp3_2);
+    \path<5> (id4_3) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend right] node {} (comp4_3);
+    \path<5> (id5_3) edge [- triangle 45, dashed, line width = 0.2mm, color = gray, bend right] node {} (comp5_3);
+
+    \end{scope}
+    \end{tikzpicture}
+    \begin{onlyenv}<4>
+        \hspace*{5em}
+        \begin{minipage}{26.5em}
+            \vspace*{-7em}
+            \begin{lstlisting}[basicstyle=\ttfamily\tiny]
+    future<id_type> id =
+        new_<Component>(locality, ...);
+            \end{lstlisting}
+        \end{minipage}
+        \hspace*{5em}
+        \begin{minipage}{26.5em}
+            \vspace*{-3.9em}
+            \begin{lstlisting}[basicstyle=\ttfamily\tiny]
+    future<R> result =
+        async(id.get(), action, ...);
+            \end{lstlisting}
+        \end{minipage}
+    \end{onlyenv}
+\beamerclosesubstitutedenvironement {standaloneframe}

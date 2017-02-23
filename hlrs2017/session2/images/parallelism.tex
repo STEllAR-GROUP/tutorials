@@ -1,0 +1,92 @@
+\documentclass[beamer]{standalone}
+\usepackage{listings}
+\usepackage{tikz}
+
+\setbeamerfont{aaa}{size*={15.00}{14.00}}
+
+\setbeamertemplate{frametitle}{\insertframetitle\\\usebeamerfont{framesubtitle}\hspace*{1em}\insertframesubtitle}
+
+\setbeamerfont{framesubtitle}{size=\Large}
+%\usetikzlibrary{shapes,calc,backgrounds,shadows, arrows, positioning, snake}
+\usetikzlibrary{shapes,calc,backgrounds,shadows, arrows, snakes, decorations.pathmorphing}
+
+\tikzstyle{every picture}+=[remember picture]
+
+\tikzstyle{na} = [baseline=-5px]
+\tikzstyle{queue_item} = [rectangle, minimum height=14px]
+
+\tikzset{snake it/.style={decorate, decoration=snake}}
+
+\lstloadlanguages{C++}
+% Settings for the lstlistings environment
+\lstset{
+language=C++,                       % choose the language of the code
+basicstyle=\ttfamily,  % the size of the fonts that are used for the
+                                    % code
+numbers=none,                       % where to put the line-numbers
+numberstyle=\tiny,                  % the size of the fonts that are used for the
+                                    % line-numbers
+stepnumber=1,                       % the step between two line-numbers. If it's
+                                    % 1 each line will be numbered
+numbersep=5pt,                      % how far the line-numbers are from the code
+% backgroundcolor=\color{gray!25},      % choose the background color. You must add
+                                    % \usepackage{color}
+showspaces=false,                   % show spaces adding particular underscores
+showstringspaces=false,             % underline spaces within strings
+showtabs=false,                     % show tabs within strings adding particular
+                                    % underscores
+keywordstyle=\bfseries\color{darkblue},  % color of the keywords
+commentstyle=\color{darkgreen},     % color of the comments
+stringstyle=\color{darkred},        % color of strings
+captionpos=t,                       % sets the caption-position to top
+tabsize=2,                          % sets default tabsize to 2 spaces
+%frame=single,                       % adds a frame around the code
+breaklines=true,                    % sets automatic line breaking
+breakatwhitespace=false,            % sets if automatic breaks should only happen
+                                    % at whitespace
+escapechar=\%,                      % toggles between regular LaTeX and listing
+belowskip=0.3cm,                    % vspace after listing
+morecomment=[s][\bfseries\color{darkblue}]{struct}{\ },
+morecomment=[s][\bfseries\color{darkblue}]{class}{\ },
+morecomment=[s][\bfseries\color{darkblue}]{public:}{\ },
+morecomment=[s][\bfseries\color{darkblue}]{public}{\ },
+morecomment=[s][\bfseries\color{darkblue}]{protected:}{\ },
+morecomment=[s][\bfseries\color{darkblue}]{private:}{\ },
+morecomment=[s][\bfseries\color{black}]{operator+}{\ },
+moredelim=**[is][\color{red}]{@}{@},
+xleftmargin=0.1cm,
+%xrightmargin=0.1cm,
+}
+
+\def\Put(#1,#2)#3{\leavevmode\makebox(0,0){\put(#1,#2){#3}}}
+\begin{document}
+\definecolor{faublue}{RGB}{61,85,111}
+\definecolor{darkblue}{RGB}{0,51,102}
+\definecolor{darkred}{rgb}{.6,0,0}
+\definecolor{darkgreen}{rgb}{0,.6,0}
+\definecolor{red}{rgb}{.98,0,0}
+\begin{standaloneframe}[fragile]
+    \begin{tikzpicture}[overlay]
+%     \begin{scope}[shift={(-0.5,0)}]
+        \node (application) [draw = gray, xshift=16em, yshift=6em, minimum width = 20em] {Application};
+        \node (middle) [minimum width = 20em, minimum height = 13em, yshift = -6em, draw =gray, below of = application] {};
+        \node (concepts) [minimum width = 18em, minimum height = 6em, yshift = -6.5em, draw =gray, below of = application, label=\textit{Concepts}, fill= gray!25] {};
+        \node (execution_pol) [yshift = -8em, draw =gray, below of = application, yshift = 1.5em, fill = gray!25, draw = gray!25] {Execution Policies};
+        \node (executors) [xshift = -5.5em, yshift = -8.5em, draw =gray, below of = application, fill = white] {Executors};
+        \node (executor_param) [xshift = 3em, yshift = -8.5em, draw =gray, below of = application, fill = white] {Executor Parameters};
+        \node<2-> (res) [left of = execution_pol, xshift = -12em, yshift=5em] {Restrictions};
+        \node<3-> (where) [left of = execution_pol, xshift = -10em, yshift=-8em] {Sequence, Where};
+        \node<4-> (grain) [left of = execution_pol, xshift = 12em, yshift=-10em] {Grain Size};
+
+        \node<5-> (futures) [fill = faublue!50, below of = concepts, minimum width = 18em, yshift = -2em] {Futures, Async, Dataflow};
+
+        \node<6-> (futures) [fill = faublue!50, below of = concepts, minimum width = 8.5em, yshift = 8em, xshift = -4.5em] {Parallel Algorithms};
+        \node<6-> (futures) [fill = faublue!50, below of = concepts, minimum width = 8.5em, yshift = 8em, xshift = 4.5em] {Fork-Join, etc};
+
+        \path<2-> (res) edge [- triangle 45, dashed, line width = 0.2mm, color = faublue] node {} (execution_pol);
+        \path<3-> (where) edge [- triangle 45, dashed, line width = 0.2mm, color = faublue] node {} (executors);
+        \path<4-> (grain) edge [- triangle 45, dashed, line width = 0.2mm, color = faublue] node {} (executor_param);
+%     \end{scope}
+    \end{tikzpicture}
+\end{standaloneframe}
+\end{document}
