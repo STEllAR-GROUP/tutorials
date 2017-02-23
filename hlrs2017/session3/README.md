@@ -1,7 +1,7 @@
 
 class: center, middle
 
-# Building HPX (on Daint)
+# Building HPX
 ## CMake, Options, Dependencies
 
 [Overview](..)
@@ -28,21 +28,21 @@ HPX uses Boost extensively throughout the code
 
 ---
 ## Dependencies #1
-### Installing Boost (on Daint)
+### Installing Boost
 * Boost is not nearly as hard to install as people think
 
 ```sh
 # download
-wget http://vorboss.dl.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.gz
+wget http://vorboss.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
 
 # untar
-tar -xzf boost_1_61_0.tar.gz
+tar -xzf boost_1_63_0.tar.gz
 
 # build
-cd boost_1_61_0
-./bootstrap.sh --prefix=/apps/daint/boost/1.61.0/gnu_530
-./b2 cxxflags="-std=c++11" \
-  --prefix=/apps/daint/boost/1.61.0/gnu_530 \
+cd boost_1_63_0
+./bootstrap.sh
+./b2 cxxflags="-std=c++14" \
+  --prefix=/path/to/boost/1.63.0 \
   --layout=versioned threading=multi link=shared \
   variant=release,debug \
   address-model=64 -j8 install
@@ -50,6 +50,7 @@ cd boost_1_61_0
 ```
 * It takes 10 minutes or less to build (most is headers)
 * Best to build debug and release if you are tinkering with HPX settings
+* Or just use the preinstalled boost modules
 
 ---
 ## Dependencies #2
@@ -68,16 +69,16 @@ cd boost_1_61_0
 ### Installing hwloc (on Daint)
 
 ```sh
-# download a tarball (version 1.11.4 latest @ Sep 2016)
+# download a tarball (version 1.11.5 latest @ March 2017)
 wget --no-check-certificate \
-https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.4.tar.gz
+https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz
 
 # untar
-tar -xzf hwloc-1.11.4.tar.gz
+tar -xzf hwloc-1.11.5.tar.gz
 
 # configure and install
-cd hwloc-1.11.4
-./configure --prefix=/apps/daint/hwloc/1.11.4/gnu_530
+cd hwloc-1.11.5
+./configure --prefix=/path/to/hwloc/1.11.5
 make -j8 install
 ```
 
@@ -111,10 +112,10 @@ make -j8 install
 # visit https://github.com/jemalloc/jemalloc/releases
 
 # untar
-tar -xzf jemalloc-4.2.1.tar.gz
+tar -xzf jemalloc-4.4.0.tar.gz
 
 # configure and install
-./autogen.sh --prefix=/apps/daint/jemalloc/4.2.1/gnu_530
+./autogen.sh --prefix=/path/to/jemalloc/4.4.0
 make -j8 -k install
 ```
 
@@ -127,7 +128,7 @@ make -j8 -k install
 wget wget http://tau.uoregon.edu/tau.tgz
 tar -xzf tau.tgz
 # note the use of -prefix instead of --prefix
-./configure -pthread -prefix=/apps/daint/hpx/0.9.99/gnu_530/tau-2.25
+./configure -pthread -prefix=/path/to/tau/2.25
 make -j8 install
 ```
 ###OTF2
@@ -135,43 +136,40 @@ make -j8 install
 wget http://www.vi-hps.org/upload/packages/otf2/otf2-2.0.tar.gz
 tar -xzf otf2-2.0.tar.gz
 cd otf2-2.0/
-./configure --prefix=/apps/daint/otf2/2.0/gnu_530 --enable-shared
+./configure --prefix=/path/to/otf2/2.0/ --enable-shared
 make -j8 install
 ```
 ---
 ## Compiling on supercomputers
 
-* Daint has login nodes that are binary compatible with compute nodes
+* Hazelhen has login nodes that are binary compatible with compute nodes
 
     * No need to setup a cross-compiling toolchain
 
 * HPX contains toolchain files for several machines
 
-    * Look in `hpx/cmake/templates/toolchains`
+    * Look in `hpx/cmake/toolchains`
 
 * You can use them to reduce slightly the number of options set by hand
 
     * (HPX cmake is quite good and works on all the machines I've tried)
 
 ---
-## HPX CMake: Release
+## HPX CMake: Release (for Crays)
 ```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=Release \
- -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/release \
- -DCMAKE_CXX_FLAGS=-std=c++11 \
- -DCMAKE_EXE_LINKER_FLAGS=-dynamic \
- -DHWLOC_ROOT=/apps/daint/hwloc/1.11.4/gnu_530 \
+ -DCMAKE_TOOLCHAIN_FILE=/path/to/source/hpx/cmake/toolchains/Cray.cmake \
+ -DCMAKE_INSTALL_PREFIX=/path/to/hpx/master/release \
+ -DHWLOC_ROOT=/path/to/hwloc/1.11.5 \
  -DHPX_WITH_HWLOC=ON \
  -DHPX_WITH_MALLOC=JEMALLOC \
- -DJEMALLOC_INCLUDE_DIR:PATH=/apps/daint/jemalloc/4.2.1/gnu_530/include \
- -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
- -DBOOST_ROOT=$BOOST_ROOT \
+ -DBOOST_ROOT=/path/to/boost/1.63.0 \
+ -DJEMALLOC_ROOT=/path/to/jemalloc/4.4.0 \
  -DHPX_WITH_TESTS=OFF \
  -DHPX_WITH_EXAMPLES=OFF \
- -DHPX_WITH_PARCELPORT_MPI=ON -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
- /apps/daint/hpx/src/hpx
+ /path/to/source/hpx
 ```
 
 ---
@@ -179,24 +177,15 @@ cmake \
 ```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=Debug \
- -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/debug \
- -DCMAKE_CXX_FLAGS=-std=c++11 \
- -DCMAKE_EXE_LINKER_FLAGS=-dynamic \
- -DHWLOC_ROOT=/apps/daint/hwloc/1.11.4/gnu_530 \
- -DHPX_WITH_MALLOC=JEMALLOC \
- -DJEMALLOC_INCLUDE_DIR:PATH=/apps/daint/jemalloc/4.2.1/gnu_530/include \
- -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
- -DBOOST_ROOT=$BOOST_ROOT \
- -DHPX_WITH_TESTS=ON \
- -DHPX_WITH_TESTS_BENCHMARKS=OFF \
- -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
- -DHPX_WITH_TESTS_HEADERS=OFF \
- -DHPX_WITH_TESTS_REGRESSIONS=OFF \
- -DHPX_WITH_TESTS_UNIT=ON \
- -DHPX_WITH_EXAMPLES=ON \
+ -DCMAKE_TOOLCHAIN_FILE=/path/to/source/hpx/cmake/toolchains/Cray.cmake \
+ -DCMAKE_INSTALL_PREFIX=/path/to/hpx/master/debug \
+ -DHWLOC_ROOT=/path/to/hwloc/1.11.5 \
  -DHPX_WITH_HWLOC=ON \
- -DHPX_WITH_PARCELPORT_MPI=ON \
- -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
+ -DHPX_WITH_MALLOC=JEMALLOC \
+ -DBOOST_ROOT=/path/to/boost/1.63.0 \
+ -DJEMALLOC_ROOT=/path/to/jemalloc/4.4.0 \
+ -DHPX_WITH_TESTS=OFF \
+ -DHPX_WITH_EXAMPLES=OFF \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
  /apps/daint/hpx/src/hpx
 ```
@@ -207,25 +196,20 @@ cmake \
 ```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
- -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/profiling \
- -DCMAKE_CXX_FLAGS=-std=c++11 \
- -DCMAKE_EXE_LINKER_FLAGS=-dynamic \
- -DHWLOC_ROOT=/apps/daint/hwloc/1.11.4/gnu_530 \
+ -DCMAKE_TOOLCHAIN_FILE=/path/to/source/hpx/cmake/toolchains/Cray.cmake \
+ -DCMAKE_INSTALL_PREFIX=/path/to/hpx/master/profiling \
+ -DHWLOC_ROOT=/path/to/hwloc/1.11.5 \
  -DHPX_WITH_HWLOC=ON \
  -DHPX_WITH_MALLOC=JEMALLOC \
- -DJEMALLOC_INCLUDE_DIR:PATH=/apps/daint/jemalloc/4.2.1/gnu_530/include \
- -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
- -DBOOST_ROOT=$BOOST_ROOT \
- -DHPX_WITH_TESTS=ON -DHPX_WITH_TESTS_BENCHMARKS=ON \
- -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF -DHPX_WITH_TESTS_HEADERS=OFF \
- -DHPX_WITH_TESTS_REGRESSIONS=ON -DHPX_WITH_TESTS_UNIT=ON \
- -DHPX_WITH_EXAMPLES=ON \
- -DHPX_WITH_PARCELPORT_MPI=ON -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
+ -DBOOST_ROOT=/path/to/boost/1.63.0 \
+ -DJEMALLOC_ROOT=/path/to/jemalloc/4.4.0 \
+ -DHPX_WITH_TESTS=OFF \
+ -DHPX_WITH_EXAMPLES=OFF \
  -DHPX_WITH_PAPI=ON \
  -DHPX_WITH_APEX=ON -DAPEX_WITH_PAPI=ON \
  -DAPEX_WITH_OTF2=ON -DAPEX_WITH_TAU=ON \
- -DOTF2_ROOT=/apps/daint/otf2/2.0/gnu_530 \
- -DTAU_ROOT=/apps/daint/hpx/0.9.99/gnu_530/tau-2.25 \
+ -DOTF2_ROOT=/path/to/otf2/2.0 \
+ -DTAU_ROOT=/path/to/tau/2.25 \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
  /apps/daint/hpx/src/hpx
 ```
@@ -272,7 +256,7 @@ ctest -R tests.unit
 * note that some tests run distributed so you need to first allocate some nodes
 to ensure that mpi works
 ```sh
-salloc _N 2
+salloc -N 2
 ```
 
 ---
@@ -291,29 +275,35 @@ salloc _N 2
 ```
 
 ---
-## Build tutorial examples (on Daint)
+## Build tutorial examples (on Hazelhen)
 ```sh
-# cd to scratch (it's mounted on compute nodes)
-cd $SCRATCH
-
-# get tutorial material
-git clone https://github.com/STEllAR-GROUP/tutorials.git
+# get tutorial material, https://github.com/STEllAR-GROUP/tutorials
+cp -r ~/tutorials ~/personal/space/tutorials
 
 # create a build dir
 mkdir build
 cd build
 
-# make sure you load all the modules we'll use in tutorial
-module swap   PrgEnv-cray PrgEnv-gnu
-module swap   gcc         gcc/5.3.0
-module unload cray-mpich
-module load   cray-mpich/7.3.3
-module load   boost/1.61.0
-module load   cmake/3.5.2
-module load   papi
+# make sure you load all the modules we'll use in tutorial. This is already done
+# for the tutorial account
+module switch PrgEnv-cray/5.2.82 PrgEnv-gnu
+module load tools/cmake/3.4.2
+module load tools/git
+# setup hwloc
+export PATH=$HOME/hpx/hwloc-1.11.5/bin:$PATH
+export LD_LIBRARY_PATH=$HOME/hpx/hwloc-1.11.5/lib:$LD_LIBRARY_PATH
+export PKG_CONFIG_PATH=$HOME/hpx/hwloc-1.11.5/lib/pkgconfig:$PKG_CONFIG_PATH
+# setup jemalloc
+export LD_LIBRARY_PATH=$HOME/hpx/jemalloc-4.4.0/lib:$LD_LIBRARY_PATH
+export PKG_CONFIG_PATH=$HOME/hpx/jemalloc-4.4.0/lib/pkgconfig:$PKG_CONFIG_PATH
 
-# for debug: module load hpx/0.9.99/gnu_530-debug / profiling
-module load hpx/0.9.99/gnu_530-release
+export BOOST_ROOT=/opt/hlrs/tools/boost/1.62.0
+
+
+# for debug: ~/hpx/build/debug/environment.sh
+# for profiling with APEX: ~/hpx/build/profiling-apex/environment.sh
+# for profiling with VTUNE: ~/hpx/build/profiling-itt/environment.sh
+source ~/hpx/build/release/environment.sh
 
 #  CMake with examples path (debug: -DCMAKE_BUILD_TYPE=Debug/RelWithDebInfo)
 cmake -DCMAKE_BUILD_TYPE=Release ../tutorials/examples
@@ -347,9 +337,6 @@ cmake -DHPX_DIR=${path_to_hpx_build}/lib/cmake/HPX
 ```sh
 make -j4
 ```
-
-* Note : HPX on daint is using a number of patches we applied during preparation
-for this tutorial so if doing a clone from github, try `cscs_tutorial` branch
 
 ---
 ## CMakeLists.txt for a set of test projects
