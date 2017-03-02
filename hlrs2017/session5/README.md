@@ -23,7 +23,7 @@ Previous: [Hello World! - Options and Running Applications](../session4)
 
 .right-column[
 * Running a 5 point stencil on each element: <br/>
-  `new(x,y) = 0.25 * (old(x-1,y) + old(x+1,y) + old(x,y-1) + old(x,y+1)) - old(x,y)`
+  `new(x,y) = 0.25 * (old(x-1,y+1) + old(x+1,y+1) + old(x-1,y-1) + old(x+1,y+1)) - old(x,y)`
 * Boundaries are a constant `1`
 * High-Level Modern C++
 ]

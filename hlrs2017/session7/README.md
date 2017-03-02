@@ -1,7 +1,7 @@
 
 class: center, middle
 
-# Debugging And Profiling
+# Debugging And Profiling HPX Applications
 
 [Overview](..)
 
@@ -64,10 +64,4 @@ Previous: [Resource Management and Performance Issues](../session6)
 
   ![2D Stencil - Strong Scaling](images/strong_scaling1.png)
 [Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)
-
----
-class: center, middle
-## Next
-
-[Open for worked examples](../session8)
 

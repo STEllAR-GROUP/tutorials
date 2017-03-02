@@ -381,4 +381,4 @@ semaphore access.
 class: center, middle
 ## Next
 
- [Debugging and Profiling](../session7)
+ [Debugging and Profiling HPX Applications](../session7)

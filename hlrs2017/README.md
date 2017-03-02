@@ -35,7 +35,7 @@ Thursday, March 9 and Friday, March 10, 2017
 * Tea Break, 15 Minutes
 * [10:45 to 13:00: Resource Management and Performance Issues](session6)
 * Lunch, 1 hour
-* [14:00 to 15:30: Debugging HPX Applications](session7)
+* [14:00 to 15:30: Debugging and Profiling HPX Applications](session7)
 
 ---
 ## Acknowledgements
