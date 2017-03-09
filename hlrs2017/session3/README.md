@@ -9,6 +9,25 @@ class: center, middle
 Previous: [Introduction to HPX - Part 2 (API)](../session2)
 
 ---
+## Using Hazelhen for the course
+
+```sh
+ssh -X rzvmpi23@hazelhen.hww.de
+```
+
+* Directory structure:
+    * $HOME/hpx/
+    * $HOME/group[01-17]
+
+* Hazelhen documentation:
+    * https://wickie.hlrs.de/platforms/index.php/Cray_XC40
+    * https://wickie.hlrs.de/platforms/index.php/CRAY_XC40_Using_the_Batch_System
+* Submitting jobs:
+    * qsub -I -X -lnodes=1:ppn=24,walltime=1:00:00 -q R_course
+    * Queue for today: R_course49
+    * Queue for tomorrow: R_course50
+
+---
 ## Dependencies #1
 ### Boost
 HPX uses Boost extensively throughout the code

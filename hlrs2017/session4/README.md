@@ -19,6 +19,16 @@ Previous: [Building HPX](../session3)
 * [Read the docs!](http://stellar-group.github.io/hpx/docs/html/hpx/manual/init.html)
 
 ---
+## Running An HPX application using ALPS
+
+* No difference to a regular MPI application
+* qsub -I -X -lnodes=1:ppn=24,walltime=1:00:00 -q R_course
+* aprun -n 1 -N 1 -d 24 ./my_prog
+    * -n determines the number of nodes
+    * -N The number of localities per node
+    * -d The number of cores to use
+
+---
 ## Overview
 ### Command line parameters
 
