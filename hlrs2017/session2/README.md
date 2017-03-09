@@ -230,7 +230,7 @@ class future
     // Unwrap a future. The new future becomes ready when
     // the inner, and outer futures are ready.
     explicit future(future<future<R>>&& f);
-    explicit future(shared_future<future<R>>&& f);
+    explicit future(future<shared_future<R>>&& f);
 
     // Turn this future into a shared_future. Invalidates the future!
     shared_future<R> share();
