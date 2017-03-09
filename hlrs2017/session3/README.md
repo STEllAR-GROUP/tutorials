@@ -129,28 +129,23 @@ make -j8 install
 ```sh
 # Download
 # visit https://github.com/jemalloc/jemalloc/releases
+JEMALLOC_VER=4.5.0
+wget https://github.com/jemalloc/jemalloc/releases/download/$JEMALLOC_VER/jemalloc-$JEMALLOC_VER.tar.bz2
 
 # untar
-tar -xzf jemalloc-4.4.0.tar.gz
+tar -xjf jemalloc-$JEMALLOC_VER.tar.bz2
 
 # configure and install
-./autogen.sh --prefix=/path/to/jemalloc/4.4.0
+cd jemalloc-$JEMALLOC_VER
+./autogen.sh
+./configure --prefix=$INSTALL_ROOT/jemalloc/$JEMALLOC_VER
 make -j8 -k install
 ```
 
 * It takes a couple of minutes and you just need to pass the path into your HPX CMake
 
 ---
-## OTF2 + TAU (just FYI)
-###TAU
-```sh
-wget wget http://tau.uoregon.edu/tau.tgz
-tar -xzf tau.tgz
-# note the use of -prefix instead of --prefix
-./configure -pthread -prefix=/path/to/tau/2.25
-make -j8 install
-```
-###OTF2
+## OTF2
 ```sh
 wget http://www.vi-hps.org/upload/packages/otf2/otf2-2.0.tar.gz
 tar -xzf otf2-2.0.tar.gz
