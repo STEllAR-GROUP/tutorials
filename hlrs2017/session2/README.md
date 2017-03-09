@@ -43,14 +43,14 @@ HPX represents an innovative mixture of
     * Platforms: x86/64, Xeon/Phi, ARM 32/64, Power, BlueGene/Q
     * Operating systems: Linux, Windows, Android, OS/X
 * Well integrated with compiler’s C++ Standard libraries
-* Enables writing applications which out-perform and out-scale existing 
+* Enables writing applications which out-perform and out-scale existing
   applications based on OpenMP/MPI
 
   http://stellar-group.org/libraries/hpx
 
   http://github.com/STEllAR-GROUP/hpx
 
-* Is published under Boost license and has an open, active, and thriving 
+* Is published under Boost license and has an open, active, and thriving
   developer community.
 * Can be used as a platform for research and experimentation
 
@@ -171,9 +171,9 @@ A future is an object representing a result which has not been calculated yet
 Many ways to get hold of a future, simplest way is to use (std) async:
 
 ```
-int universal_answer() 
+int universal_answer()
 {
-    return 42; 
+    return 42;
 }
 ```
 --
@@ -508,7 +508,7 @@ future<std::string> f2 = hpx::async(...);
 
 auto all_f = hpx::when_all(f1, f2);
 
-future<std::vector<float>> result = 
+future<std::vector<float>> result =
     all_f.then(
         [](auto f) -> std::vector<float>
         {
@@ -528,12 +528,12 @@ future<std::vector<float>> result =
 ```
 std::vector<future<int>> fs = ...;
 
-future<int> fi = 
+future<int> fi =
     hpx::when_any(fs).then(
         [](auto f)
         {
             auto res = f.get();
-            return res.sequence[res.index];
+            return res.futures[res.index];
         });
 ```
 
@@ -562,7 +562,7 @@ struct when_any_result
 future<int> f1 = hpx::async(...);
 future<std::string> f2 = hpx::async(...);
 
-future<double> f3 = 
+future<double> f3 =
     hpx::dataflow(
         [](future<int>, future<std::string>) -> double
         {
@@ -666,7 +666,7 @@ name: executors
 ## Executors
 ### Implementation
 
-* Executors must implement one function: 
+* Executors must implement one function:
 ```
     async_execute(F&& f, Args&&... args)
 ```
@@ -883,7 +883,7 @@ double x = ...;
 ```
 *using hpx::parallel::execution::par;
 *auto policy = par.on(exec);
-hpx::parallel::transform(policy, 
+hpx::parallel::transform(policy,
     b.begin(), b.end(), c.begin(),
     a.begin(),
     [x](double bb, double cc)
@@ -926,7 +926,7 @@ double x = ...;
 ```
 *using hpx::parallel::execution::par;
 *auto policy = par.on(exec);
-hpx::parallel::transform(policy, 
+hpx::parallel::transform(policy,
     b.begin(), b.end(), c.begin(),
     a.begin(),
     [x](double bb, double cc)
