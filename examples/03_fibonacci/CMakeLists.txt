@@ -13,5 +13,5 @@ hpx_setup_target(fibonacci_futures COMPONENT_DEPENDENCIES iostreams)
 
 # for tutorial target
 if (TARGET tutorial)
-  add_hpx_pseudo_dependencies(tutorial.fibonacci_futures fibonacci_futures)
+  add_hpx_pseudo_dependencies(tutorial.fibonacci fibonacci_futures)
 endif()
