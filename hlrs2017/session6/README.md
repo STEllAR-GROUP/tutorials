@@ -66,7 +66,14 @@ passed into the async function.
     these are returned in the callback so you can take action in case of an error)
 
 ---
-##Chunk sizes
+##Granularity
+* Task size makes a difference
+  * Not too big (hard to fill in the gaps)
+  * Not too small (runtime overheads of task creation/managemen)
+![Grid](images/grainsize.png)
+
+---
+##Chunk sizes (Obsolete slide, but still informative)
 * You might call an async parallel::algorithm as follows
 ```
     std::vector<double> dummy;
@@ -79,13 +86,15 @@ passed into the async function.
         }
     }
 ```
-* The runtime performs the first iteration and times it
-
-* Then chooses a chunk size to break the loop into N tasks
+* With dynamic chunk size
+    * `auto_chunk_size()`
+    * The runtime performs the first 1% of iteration and times tmem
+    * Then chooses a chunk size to break the loop into N tasks
 
 * You might want to 'guide' the algorithm if you know better than the runtime
-
-* The chunk_size is the number of iterations to use per task, not the number of tasks
+    * static chunking is now the default
+    * default = N cores*4
+    * The chunk_size is the number of iterations to use per task, not the number of tasks
 
 ---
 ##When are tasks created
@@ -97,6 +106,11 @@ passed into the async function.
 but `another_thing` isn't created until `something` completes, and `yet_more`
 isn't created until `another_thing` completes.
 
+* Likewise, the futures are not created until the tasks are created
+
+---
+##When are tasks created #2
+* Consider the next snippet
 ```
     std::vector<shared_future<T>> futures;
     ...
@@ -117,8 +131,55 @@ isn't created until `another_thing` completes.
 * It looks harmless enough, but each future creation is asynchronous, there are no waits
 in the loop.
 
-* A million futures have just been instantiated and tasks queued for the max value
-returned by my_complex_indexing_scheme
+* A million futures have just been instantiated
+* Tasks queued for the max value at each .then instantiation
+
+---
+##When are tasks created #3
+* Be careful when using async
+```
+    std::vector<shared_future<T>> futures;
+    ...
+    // make_ready_futures in futures to initialize list
+    ...
+    for (int i=0; i<1024) {
+        for (int j=0; j<1024) {
+            int f_index1 = my_complex_indexing_scheme1(i,j);
+            future[f_index1] = async(thing);
+        }
+    }
+```
+* A million futures have just been instantiated
+* ...and a million tasks have been plaxced on the queues
+
+---
+##DAG that needs shared_future's
+* When your DAG needs to spawn N tasks when one task completes
+* You might end up with something like and use shared_future<T>
+![Grid](images/bulge_dist.svg)
+
+---
+##Split future
+* When your DAG needs to spawn N tasks when one task completes
+    * shared_future<T> is your friend
+
+* shared_future gives `const T& reference`
+    * this might make your memory management tricky
+
+* hpx::split_future<> to the rescue
+
+* return a pair/tuple from your function
+```
+        return std::pair<bool, thing>(true, something);
+```
+```
+        auto future_tuple = hpx::split_future(std::move(temp_future));
+        futures[pos] = std::move(hpx::util::get<0>(future_tuple));
+        synchro[pos] = std::move(hpx::util::get<1>(future_tuple));
+```
+* You have converted a `future<pair<T1, T2>>` into a `pair<future<T1>, future<T2>>`
+* Now you can use your raw data and manage memory directly
+* Works with `pair/tuple/std::array` (size known at compile time)
 
 ---
 ##Launch policies : sync
@@ -264,6 +325,7 @@ message(hpx::serialization::serialize_buffer<char> const& receive_buffer)
     return receive_buffer;
 }
 ```
+
 ---
 ##Serialize_Buffer
 * Sending an array can be optimized by using a `serialize_buffer`
@@ -279,103 +341,6 @@ pass the pointer thought without any overheads (it can be zero copied or RDMA'd)
 ```
 * The constructor of the `serialize_buffer` can copy, take ownership or a just take
 a reference to the underlying data.
-
----
-##Latency Example
-* A common benchmark is to ping pong a message back and forth between 2 nodes
-* Using MPI, a thread calls `send` then blocks on `receive`
-    * On the remote node, one blocks on `receive` and then calls `send`
-    * turnaround is fast
-
-* Given what we know about actions : how fast is HPX compared to MPI?
-
-* Caveat : HPX isn't designed to have a fast response to ping-pong type messages
-    * we will instead measure the average time for 1, when N messages are in flight
-    at once
-
----
-##Latency V0
-* Synchronous send and receive of a message
-
-* An action is spawned to do nothing other than send a message back
-    * We wait for the return after every send
-
-* Do this in a loop and find the averaage time
-
-* Using more threads helps slightly as polling the network is faster
-
-* Changing the window size has no effect
-
-[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L75)
-
-* Note the use of DIRECT_ACTION, `serialize_buffer`
-
----
-##Latency V1
-* Vector of futures
-
-* Spawn N actions and store the futures in a vector
-
-* Wait on the vector of futures until all complete
-
-* take the time and compute the average for 1
-
-* Gives a more realistic answer than v0, but we are not really measuring N
-
-[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L111)
-
-* Note : We are actually measuring a sawtooth from 0 to N
-<crop>
-    <img src="images/sawtooth.jpg" alt="" height="300px" >
-</crop>
-
----
-##Latency V2
-* Simple Atomic Counter and Condition Variable
-
-* Spawn N messages, each time one returns, increment a counter
-
-* When the counter reaches N, restart
-
-* Simple, but still a sawtooth
-
-[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L154)
-
----
-##Latency V3
-* Sliding Semaphore
-* Loop over sends, and track how many are in flight with a sliding semaphore
-* This will maintain N in flight using a sliding window, so that when <N are in flight
-the loop continues, when N are in floght, the loop blocks.
-    * Note, we actually set the window to N-1 so that we can measure 1 because
-sliding semaphore uses > and not >= as the test internally
-* we have got past the sawtooth, but there's a nasty bug
-* The Nth message may return before the N-1 (or N-2 etc)th message because when multiple
-threads are used, on the remote node, one might get suspended by the OS and return after
-a later one
-* Our semaphore is therefore 'noisy' and we don't have exactly N in flight
-* Can segfault if one late message returns after the semaphore goes out of scope
-* Add an extra condition variable at the end to make sure we keep semaphore alive
-until the last message has returned
-    * (this also means the timing is correct on the last iteration)
-
-[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L211)
-
----
-##Latency V4
-* Sliding Semaphore with Atomic
-
-* The bug in V3 is caused by the noisy/random return of messages
-
-* We can easily fix this by using an atomic counter instead of the loop index
-for triggering our semaphore.
-
-* We no longer need the condition variable at the end to prevent segfaults on the
-semaphore access.
-
-[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L275)
-
-* V5 : Suggestions welcome for an even better version
 
 ---
 class: center, middle
