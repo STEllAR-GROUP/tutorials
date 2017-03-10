@@ -525,8 +525,8 @@ int main()
 ### Synchronization between Threads of Control
 
 * A Global object you can set and get values from multiple times:
-    * sender uses `channel<T>::get(launch_policy, generation)`
-    * receiver uses `channel<T>::set(launch_policy, value, generation)`
+    * sender uses `channel<T>::set(launch_policy, generation)`
+    * receiver uses `channel<T>::get(launch_policy, value, generation)`
 * Generation can be used to differentiate between iterations!
 * [Use the source, Luke](https://github.com/STEllAR-GROUP/hpx/blob/master/hpx/lcos/channel.hpp#L150-L325)
 
