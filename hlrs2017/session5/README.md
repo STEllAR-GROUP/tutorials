@@ -625,6 +625,18 @@ if (comm.has_neighbor(communicator_type::down))
     * Not a very wise partitioning scheme
     * Easy for demonstration purposes
 
+
+---
+## Task trace using 1 partition per node
+
+![single](images/vampir1.png)
+
+
+---
+## Task trace using 2 partitions per node
+
+![double](images/vampir2.png)
+
 ---
 class: center, middle
 ## Modeling the Stencil in C++ with HPX
