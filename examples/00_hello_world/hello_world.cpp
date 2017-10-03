@@ -14,6 +14,8 @@
 #include <hpx/include/parallel_algorithm.hpp>
 #include <hpx/include/iostreams.hpp>
 
+#include <boost/range/irange.hpp>
+
 void hello_locality()
 {
     // Get the ID of the locality this function is executed on

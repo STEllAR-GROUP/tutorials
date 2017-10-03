@@ -61,8 +61,8 @@ endif()
 # On the cray we need the following flags
 #--------------------------------------------------
 if (NOT WIN32)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -dynamic")
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -dynamic")
 endif()
 
 #--------------------------------------------------
@@ -78,10 +78,11 @@ set(TUTORIAL_DIRS
 )
 
 if (HPX_WITH_CUDA)
+  message("CUDA_LIBRARIES ${CUDA_LIBRARIES}")
   set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
     06_cublas_matmul
   )
-)
+endif()
 
 if(HPX_WITH_APEX)
   set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
