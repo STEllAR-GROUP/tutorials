@@ -51,9 +51,9 @@ message("\n-------\nTutorial using HPX from ${HPX_DIR}\n-------\n")
 # Check we are using the same build type as HPX
 #--------------------------------------------------
 if (NOT "${HPX_BUILD_TYPE}" STREQUAL "${CMAKE_BUILD_TYPE}")
-  message(WARNING "CMAKE_BUILD_TYPE does not match ${HPX_BUILD_TYPE} : "
-    "\"${CMAKE_BUILD_TYPE}\",\"${HPX_BUILD_TYPE}\""
-    "\nPlease add -DCMAKE_BUILD_TYPE=${HPX_BUILD_TYPE} to your cmake command"
+  message(WARNING "CMAKE_BUILD_TYPE does not match ${HPX_BUILD_TYPE} :\n"
+    "this project uses ${CMAKE_BUILD_TYPE}, hpx uses ${HPX_BUILD_TYPE}\n"
+    "Please add -DCMAKE_BUILD_TYPE=${HPX_BUILD_TYPE} to your cmake command"
   )
 endif()
 
@@ -74,6 +74,7 @@ set(TUTORIAL_DIRS
   02_stencil
   03_fibonacci
   04_saxpy
+  05_named_pool_executor
 )
 
 if(HPX_WITH_APEX)
