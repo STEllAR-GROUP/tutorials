@@ -82,6 +82,8 @@ if (HPX_WITH_CUDA)
   set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
     06_cublas_matmul
   )
+  link_directories(${HPX_LIBRARY_DIR})
+  include_directories(${CUDA_TOOLKIT_INCLUDE})
 endif()
 
 if(HPX_WITH_APEX)

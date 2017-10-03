@@ -8,8 +8,11 @@ project(CublasDemo CXX)
 
 find_package(HPX REQUIRED)
  
+include_directories(${CUDA_INCLUDE_DIRS})
+
 add_executable(cublas_matmul cublas_matmul.cpp)
 hpx_setup_target(cublas_matmul COMPONENT_DEPENDENCIES iostreams)
+target_link_libraries(cublas_matmul ${CUDA_LIBRARIES} ${CUDA_cublas_LIBRARY})
 
 # for tutorial target
 if (TARGET tutorial)
@@ -20,8 +23,4 @@ endif()
 if(HPX_WITH_CUDA_CLANG)
 endif()
 
-include_directories(${CUDA_INCLUDE_DIRS})
-
-set(cublas_matmul_FLAGS
-  DEPENDENCIES ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 
