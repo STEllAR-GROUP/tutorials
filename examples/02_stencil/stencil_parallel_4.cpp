@@ -77,7 +77,9 @@ void worker(
     iterator curr(Nx, U[0].begin());
     iterator next(Nx, U[1].begin());
 
-    auto policy = hpx::parallel::par(hpx::parallel::task).on(executor);
+    using namespace hpx::parallel::execution;
+
+    auto policy = par(task).on(executor);
     hpx::future<void> step_future = hpx::make_ready_future();
     for (std::size_t t = 0; t < steps; ++t)
     {

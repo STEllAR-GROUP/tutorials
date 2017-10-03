@@ -77,6 +77,12 @@ set(TUTORIAL_DIRS
   05_named_pool_executor
 )
 
+if (HPX_WITH_CUDA)
+  set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
+    06_cublas_matmul
+  )
+)
+
 if(HPX_WITH_APEX)
   set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
     # 03_apex_stencil_1d
