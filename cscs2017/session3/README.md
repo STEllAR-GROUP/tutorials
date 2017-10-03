@@ -9,6 +9,38 @@ class: center, middle
 Previous: [Introduction to HPX - Part 2 (API)](../session2)
 
 ---
+## Prerequisites
+```sh
+module unload PrgEnv-cray
+module load PrgEnv-gnu
+#
+module unload gcc
+GCC_version=6.2.0
+# Cuda support benefits from gcc 5.3
+# GCC_version=5.3.0
+module load gcc/GCC_version
+
+# use cray compiler wrappers for easy mpi finding
+export CC=/opt/cray/pe/craype/default/bin/cc
+export CXX=/opt/cray/pe/craype/default/bin/CC
+
+# flags for compile and link
+export CFLAGS=-fPIC
+export CXXFLAGS="-fPIC -march=native -mtune=native -ffast-math -std=c++14"
+export LDFLAGS="-dynamic"
+export LDCXXFLAGS="$LDFLAGS -std=c++14"
+
+# Versions of software we use for this build
+INSTALL_ROOT=/apps/daint/UES/6.0.UP04/HPX
+HWLOC_VER=1.11.7
+JEMALLOC_VER=5.0.1
+OTF2_VER=2.0
+BOOST_VER=1.65.0
+BOOST_SUFFIX=1_65_0
+BOOST_ROOT=$INSTALL_ROOT/boost/$GCC_version/$BOOST_VER
+PAPI_VER=5.5.1
+```
+---
 ## Dependencies #1
 ### Boost
 HPX uses Boost extensively throughout the code
@@ -33,19 +65,22 @@ HPX uses Boost extensively throughout the code
 
 ```sh
 # download
-wget http://vorboss.dl.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.gz
+wget http://vorboss.dl.sourceforge.net/project/\
+boost/boost/$BOOST_VER/boost_$BOOST_SUFFIX.tar.gz
 
 # untar
-tar -xzf boost_1_61_0.tar.gz
+tar -xzf boost_$BOOST_SUFFIX.tar.gz
+
+# config
+cd boost_$BOOST_SUFFIX
+./bootstrap.sh
 
 # build
-cd boost_1_61_0
-./bootstrap.sh --prefix=/apps/daint/boost/1.61.0/gnu_530
-./b2 cxxflags="-std=c++11" \
-  --prefix=/apps/daint/boost/1.61.0/gnu_530 \
-  --layout=versioned threading=multi link=shared \
-  variant=release,debug \
-  address-model=64 -j8 install
+./b2 cxxflags="$CXXFLAGS" \
+  threading=multi link=shared variant=debug,release address-model=64 \
+  --prefix=$BOOST_ROOT --layout=versioned \
+  --without-mpi --without-python --without-graph --without-graph_parallel \
+  -j8 install
 
 ```
 * It takes 10 minutes or less to build (most is headers)
@@ -69,15 +104,15 @@ cd boost_1_61_0
 
 ```sh
 # download a tarball (version 1.11.4 latest @ Sep 2016)
-wget --no-check-certificate \
-https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.4.tar.gz
+wget --no-check-certificate https://www.open-mpi.org/software/hwloc/\
+v1.11/downloads/hwloc-$HWLOC_VER.tar.gz
 
 # untar
-tar -xzf hwloc-1.11.4.tar.gz
+tar -xzf hwloc-$HWLOC_VER.tar.gz
 
 # configure and install
-cd hwloc-1.11.4
-./configure --prefix=/apps/daint/hwloc/1.11.4/gnu_530
+cd hwloc-$HWLOC_VER
+./configure --prefix=$INSTALL_ROOT/hwloc/$HWLOC_VER
 make -j8 install
 ```
 
@@ -104,39 +139,52 @@ make -j8 install
 ## Dependencies #3
 ### Installing jemalloc (on Daint)
 
-* jemalloc can be downloaded via github and there isn't a direct link
-
 ```sh
 # Download
-# visit https://github.com/jemalloc/jemalloc/releases
+wget https://github.com/jemalloc/jemalloc/releases/download\
+/$JEMALLOC_VER/jemalloc-$JEMALLOC_VER.tar.bz2
 
 # untar
-tar -xzf jemalloc-4.2.1.tar.gz
+tar -xjf jemalloc-$JEMALLOC_VER.tar.bz2
 
-# configure and install
-./autogen.sh --prefix=/apps/daint/jemalloc/4.2.1/gnu_530
+# configure
+cd jemalloc-$JEMALLOC_VER
+./autogen.sh
+./configure --prefix=$INSTALL_ROOT/jemalloc/$JEMALLOC_VER
+
+# install
 make -j8 -k install
 ```
 
 * It takes a couple of minutes and you just need to pass the path into your HPX CMake
 
 ---
-## OTF2 + TAU (just FYI)
-###TAU
-```sh
-wget wget http://tau.uoregon.edu/tau.tgz
-tar -xzf tau.tgz
-# note the use of -prefix instead of --prefix
-./configure -pthread -prefix=/apps/daint/hpx/0.9.99/gnu_530/tau-2.25
-make -j8 install
-```
+## Dependencies #4
 ###OTF2
+* HPX comes with a utility called APEX (Autonomic Performance
+Environment for eXascale)
+
+    * Collecting traces from task based applications is tricky
+
+        * tasks may swap from one thread to another
+        * other tools don't work well
+        * HPX does not use MPI as other tools expect
+
+    * APEX can use Open Trace Format (OTF-v2) for trace files
+
 ```sh
-wget http://www.vi-hps.org/upload/packages/otf2/otf2-2.0.tar.gz
-tar -xzf otf2-2.0.tar.gz
-cd otf2-2.0/
-./configure --prefix=/apps/daint/otf2/2.0/gnu_530 --enable-shared
+# download
+wget http://www.vi-hps.org/upload/packages\
+/otf2/otf2-$OTF2_VER.tar.gz
+
+# untar
+tar -xzf otf2-$OTF2_VER.tar.gz
+
+# configure and install
+cd otf2-$OTF2_VER
+./configure --prefix=$INSTALL_ROOT/otf2/$OTF2_VER --enable-shared
 make -j8 install
+
 ```
 ---
 ## Compiling on supercomputers
@@ -153,82 +201,64 @@ make -j8 install
 
     * (HPX cmake is quite good and works on all the machines I've tried)
 
+    * Please check dashboard before pulling latest master
+
+        http://rostam.cct.lsu.edu/console
+
 ---
-## HPX CMake: Release
+## HPX CMake: Release (no APEX/profiling etc)
 ```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=Release \
- -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/release \
- -DCMAKE_CXX_FLAGS=-std=c++11 \
- -DCMAKE_EXE_LINKER_FLAGS=-dynamic \
- -DHWLOC_ROOT=/apps/daint/hwloc/1.11.4/gnu_530 \
+ -DCMAKE_INSTALL_PREFIX=$INSTALL_ROOT/hpx/rmaster \
+ -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+ -DCMAKE_EXE_LINKER_FLAGS="$LDCXXFLAGS" \
+ -DHWLOC_ROOT=$INSTALL_ROOT/hwloc/$HWLOC_VER \
+ -DJEMALLOC_ROOT=$INSTALL_ROOT/jemalloc/$JEMALLOC_VER \
+ -DBOOST_ROOT=$BOOST_ROOT \
  -DHPX_WITH_HWLOC=ON \
  -DHPX_WITH_MALLOC=JEMALLOC \
- -DJEMALLOC_INCLUDE_DIR:PATH=/apps/daint/jemalloc/4.2.1/gnu_530/include \
- -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
- -DBOOST_ROOT=$BOOST_ROOT \
  -DHPX_WITH_TESTS=OFF \
  -DHPX_WITH_EXAMPLES=OFF \
- -DHPX_WITH_PARCELPORT_MPI=ON -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
- -DHPX_WITH_THREAD_IDLE_RATES=ON \
- /apps/daint/hpx/src/hpx
-```
-
----
-## HPX CMake : Debug
-```cmake
-cmake \
- -DCMAKE_BUILD_TYPE=Debug \
- -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/debug \
- -DCMAKE_CXX_FLAGS=-std=c++11 \
- -DCMAKE_EXE_LINKER_FLAGS=-dynamic \
- -DHWLOC_ROOT=/apps/daint/hwloc/1.11.4/gnu_530 \
- -DHPX_WITH_MALLOC=JEMALLOC \
- -DJEMALLOC_INCLUDE_DIR:PATH=/apps/daint/jemalloc/4.2.1/gnu_530/include \
- -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
- -DBOOST_ROOT=$BOOST_ROOT \
- -DHPX_WITH_TESTS=ON \
- -DHPX_WITH_TESTS_BENCHMARKS=OFF \
- -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
- -DHPX_WITH_TESTS_HEADERS=OFF \
- -DHPX_WITH_TESTS_REGRESSIONS=OFF \
- -DHPX_WITH_TESTS_UNIT=ON \
- -DHPX_WITH_EXAMPLES=ON \
- -DHPX_WITH_HWLOC=ON \
  -DHPX_WITH_PARCELPORT_MPI=ON \
- -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
- /apps/daint/hpx/src/hpx
+    -DHPX_WITH_MAX_CPU_COUNT=256 \
+    -DHPX_WITH_MORE_THAN_64_THREADS=ON \
+ /project/csvis/biddisco/src/hpx
 ```
 
 ---
-## HPX CMake: RelWithDebInfo (profiling)
-###APEX + TAU + PAPI + OTF2
-```cmake
-cmake \
- -DCMAKE_BUILD_TYPE=RelWithDebInfo \
- -DCMAKE_INSTALL_PREFIX=/apps/daint/hpx/0.9.99/gnu_530/profiling \
- -DCMAKE_CXX_FLAGS=-std=c++11 \
- -DCMAKE_EXE_LINKER_FLAGS=-dynamic \
- -DHWLOC_ROOT=/apps/daint/hwloc/1.11.4/gnu_530 \
- -DHPX_WITH_HWLOC=ON \
- -DHPX_WITH_MALLOC=JEMALLOC \
- -DJEMALLOC_INCLUDE_DIR:PATH=/apps/daint/jemalloc/4.2.1/gnu_530/include \
- -DJEMALLOC_LIBRARY:FILEPATH=/apps/daint/jemalloc/4.2.1/gnu_530/lib/libjemalloc.so \
- -DBOOST_ROOT=$BOOST_ROOT \
- -DHPX_WITH_TESTS=ON -DHPX_WITH_TESTS_BENCHMARKS=ON \
- -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF -DHPX_WITH_TESTS_HEADERS=OFF \
- -DHPX_WITH_TESTS_REGRESSIONS=ON -DHPX_WITH_TESTS_UNIT=ON \
- -DHPX_WITH_EXAMPLES=ON \
- -DHPX_WITH_PARCELPORT_MPI=ON -DHPX_WITH_PARCELPORT_MPI_MULTITHREADED=ON \
- -DHPX_WITH_PAPI=ON \
- -DHPX_WITH_APEX=ON -DAPEX_WITH_PAPI=ON \
- -DAPEX_WITH_OTF2=ON -DAPEX_WITH_TAU=ON \
- -DOTF2_ROOT=/apps/daint/otf2/2.0/gnu_530 \
- -DTAU_ROOT=/apps/daint/hpx/0.9.99/gnu_530/tau-2.25 \
- -DHPX_WITH_THREAD_IDLE_RATES=ON \
- /apps/daint/hpx/src/hpx
+## HPX + Clang + CUDA + APEX/OTF2 + Papi
 ```
+source /apps/daint/UES/6.0.UP04/HPX/clang-setup.sh
+cmake \
+ -DCMAKE_INSTALL_PREFIX=$INSTALL_ROOT/rdmaster \
+ -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+ -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+ -DCMAKE_EXE_LINKER_FLAGS="$LDCXXFLAGS" \
+ -DCMAKE_SHARED_LINKER_FLAGS="$LDCXXFLAGS" \
+    -DHPX_WITH_CUDA=ON \
+    -DHPX_WITH_CUDA_CLANG=ON \
+ -DHPX_WITH_HWLOC=ON -DHWLOC_ROOT=$INSTALL_ROOT/hwloc/$HWLOC_VER \
+ -DHPX_WITH_MALLOC=JEMALLOC -DJEMALLOC_ROOT=$INSTALL_ROOT/jemalloc/$JEMALLOC_VER \
+ -DBOOST_ROOT=$INSTALL_ROOT/boost/$BOOST_VER -DBoost_COMPILER=-clang60 \
+    -DHPX_WITH_APEX=ON -DAPEX_WITH_OTF2=ON \
+    -DHPX_WITH_APEX_NO_UPDATE=ON \
+    -DOTF2_ROOT=$INSTALL_ROOT/otf2/$OTF2_VER \
+    -DHPX_WITH_PAPI=ON \
+    -DPAPI_ROOT=$INSTALL_ROOT/papi/$PAPI_VER \
+ -DHPX_WITH_TESTS=ON -DHPX_WITH_TESTS_UNIT=ON \
+ -DHPX_WITH_TESTS_BENCHMARKS=OFF -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
+ -DHPX_WITH_TESTS_HEADERS=OFF -DHPX_WITH_TESTS_REGRESSIONS=OFF \
+ -DHPX_WITH_EXAMPLES=ON \
+ -DHPX_WITH_THREAD_IDLE_RATES=ON \
+ -DHPX_WITH_PARCELPORT_MPI=ON \
+ -DMPI_C_LIBRARIES=/opt/cray/pe/mpt/default/gni/mpich-cray/8.6/lib/libmpich.so \
+ -DMPI_CXX_LIBRARIES=/opt/cray/pe/mpt/default/gni/mpich-cray/8.6/lib/libmpich.so \
+ -DMPI_INCLUDE_PATH=/opt/cray/pe/mpt/default/gni/mpich-cray/8.6/include \
+ -DMPI_CXX_INCLUDE_PATH=/opt/cray/pe/mpt/default/gni/mpich-cray/8.6/include \
+ /project/csvis/biddisco/src/hpx
+ ```
 
 ---
 ## Release vs Debug
@@ -248,6 +278,23 @@ cmake \
 
     * never profile anything in debug mode except for checking if you made it faster or
     slower than the previous test
+
+---
+## Release Vs Debug - error
+
+* If you get an error that looks like this when you run you test
+
+    * You have probbably compiled your test as debug/release
+    * and HPX as release/debug
+
+```sh
+terminate called after throwing an instance of
+'hpx::detail::exception_with_info<hpx::exception>'
+  what():  failed to insert console_print_action into
+  typename to id registry.: HPX(invalid_status)
+```
+    * symbols that are exported are not the same and this causes trouble like the above
+
 ---
 ## Building tips #1
 
@@ -262,32 +309,66 @@ cmake \
     ```sh
     make tests.unit tests.regression examples
     ```
+* The CMake option `HPX_WITH_PSEUDO_DEPENDENCIES=ON` (default) enables extra rules
+    to make life simpler
+    ```sh
+    make     tests.unit.parallel
+    ctest -R tests.unit.parallel
+
+    ```
 * use `make help` to dump out a list of targets
 
-* run tests
+---
+## Running Tests
+
+* A good idea to do this after a pull from master if dashboard isn't green
+
+    * No need to do it often, after a long gap between pulls etc.
+
+* Give yourself confidence that it's not a bug in the internals
+
+* Run tests
 ```sh
+make     tests.unit
 ctest -R tests.unit
 ```
 
-* note that some tests run distributed so you need to first allocate some nodes
-to ensure that mpi works
+* ctest accpts a regular expression, so (for example) you can check that
+distributed tests are ok
+```sh
+ctest -R distributed
+```
+* note that for distributed tests need to first allocate some nodes
+to ensure that mpi works as expected during the test
 ```sh
 salloc _N 2
+```
+and to NOT run distributed tests
+```sh
+ctest -E distributed
 ```
 
 ---
 ## Building tips #2
-* Note : `make -j8 xxx` can cause problems
+* Note : `make -j xxx` can cause problems
     * HPX uses a _lot_ of templates and the compiler can use all your memory
     * if disk swapping starts during compiling use `make -j2` (or `j4` etc)
+    * the linking phase is usually the biggest culprit :(
 
 * be warned that the CMake `add_hpx_executable` command appends `_exe` to binaries
     * so if you make a test called `my_test` you need to `make -j8 my_test_exe`
+    * we should fix this, it's annoying
 
 * in your own CMakeLists.txt you can
 ```cmake
+    find_package(HPX)
+    ...
     add_executable(my_test ${MY_SRSC})
     hpx_setup_target(my_test)
+```
+Then build it using
+```sh
+    make -j4 my_test
 ```
 
 ---
@@ -303,17 +384,24 @@ git clone https://github.com/STEllAR-GROUP/tutorials.git
 mkdir build
 cd build
 
-# make sure you load all the modules we'll use in tutorial
-module swap   PrgEnv-cray PrgEnv-gnu
-module swap   gcc         gcc/5.3.0
-module unload cray-mpich
-module load   cray-mpich/7.3.3
-module load   boost/1.61.0
-module load   cmake/3.5.2
-module load   papi
+GCC_version=6.2.0
+CMAKE_version=3.8.1
+MPI_version=7.6.0
 
-# for debug: module load hpx/0.9.99/gnu_530-debug / profiling
-module load hpx/0.9.99/gnu_530-release
+# make sure you load all the modules we'll use in tutorial
+module unload PrgEnv-cray
+module load   PrgEnv-gnu
+module load   daint-gpu
+module unload gcc
+module load   gcc/$GCC_version
+module load   papi
+module load   cudatoolkit
+
+# make sure you have clang settings
+source /apps/daint/UES/6.0.UP04/HPX/clang-setup.sh
+
+# and load the module for the HPX we installed for the course
+module load /apps/daint/UES/6.0.UP04/HPX/
 
 #  CMake with examples path (debug: -DCMAKE_BUILD_TYPE=Debug/RelWithDebInfo)
 cmake -DCMAKE_BUILD_TYPE=Release ../tutorials/examples
@@ -468,36 +556,6 @@ at any time (though I recommend using branches in the HPX subdir).
 * The SubProject Macros will not overwrite your loal changes after the initial checkout
 
 ---
-## Superproject build on OSX with Xcode 8
-```sh
-cmake \
- -DCMAKE_BUILD_TYPE=Release \
- -DCMAKE_CXX_FLAGS=-std=c++14 \
- -DCMAKE_INSTALL_PREFIX=/Users/biddisco/apps/tutorial \
- -DHPX_WITH_NATIVE_TLS=ON \
- -DHPX_WITH_PARCELPORT_MPI=ON \
- -DHPX_WITH_PARCELPORT_TCP=ON \
- -DHPX_WITH_THREAD_IDLE_RATES=ON \
- -DHPX_WITH_TESTS=ON \
- -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
- -DHPX_WITH_EXAMPLES=ON \
- -DBOOST_ROOT=/Users/biddisco/apps/boost/1.59.0 \
- -DBoost_COMPILER=-xgcc42 \
- -DHWLOC_ROOT:PATH=/Users/biddisco/apps/hwloc/1.11.4 \
- -DHWLOC_INCLUDE_DIR:PATH=/Users/biddisco/apps/hwloc/1.11.4/include \
- -DHWLOC_LIBRARY:FILEPATH=/Users/biddisco/apps/hwloc/1.11.4/lib/libhwloc.dylib \
- -DHPX_WITH_MALLOC=JEMALLOC \
- -DJEMALLOC_INCLUDE_DIR:PATH=/Users/biddisco/apps/jemalloc/4.2.1/include \
- -DJEMALLOC_LIBRARY:FILEPATH=/Users/biddisco/apps/jemalloc/4.2.1/lib/libjemalloc.dylib \
- -DHPX_DOWNLOAD_AS_SUBPROJECT=ON \
- -DSUBPROJECT_HPX=ON \
- ~/src/tutorials/examples
-
- make -j8 tutorial
-```
-Warning TLS not available on earlier XCode versions - use Boost 1.59.0 only on XCode 7.x
-
----
 ## Main HPX Build options #1
 
 * General format is HPX_WITH_FEATURE_X
@@ -556,11 +614,9 @@ Warning TLS not available on earlier XCode versions - use Boost 1.59.0 only on X
 
 * To generate trace files compatible with Vampir etc.
 ```sh
-export APEX_TAU=1
 export APEX_OTF2=1
 export APEX_PROFILE=1
 export APEX_SCREEN_OUTPUT=1
-export TAU_TRACE=1
 ```
 *   OTF2 trace files generated in OTF2
 ---
