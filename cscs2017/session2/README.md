@@ -14,8 +14,9 @@ Previous: [Introduction to HPX - Part 1](../session1)
 ---
 ## Recap: What's HPX
 
-* Solidly based on a theoretical foundation – a well defined, new execution
-  model (ParalleX)
+* A C++ Standard Library for Concurrency and Parallelism
+
+* Solidly based on a theoretical foundation – a well defined, new execution model
 * Exposes a coherent and uniform, standards-oriented API for ease of
   programming parallel and distributed applications.
     * Enables to write fully asynchronous code using hundreds of millions of threads.
@@ -33,7 +34,25 @@ HPX represents an innovative mixture of
 * Fine grain parallelism and lightweight synchronization
 * Combined with implicit, work queue based, message driven computation
 * Full semantic equivalence of local and remote execution, and
-* Explicit support for hardware accelerators (through percolation)
+* Explicit support for hardware accelerators
+
+---
+## Recap: What's HPX
+
+* Widely portable
+    * Platforms: x86/64, Xeon/Phi, ARM 32/64, Power, BlueGene/Q
+    * Operating systems: Linux, Windows, Android, OS/X
+* Well integrated with compiler’s C++ Standard libraries
+* Enables writing applications which out-perform and out-scale existing
+  applications based on OpenMP/MPI
+
+  http://stellar-group.org/libraries/hpx
+
+  http://github.com/STEllAR-GROUP/hpx
+
+* Is published under Boost license and has an open, active, and thriving
+  developer community.
+* Can be used as a platform for research and experimentation
 
 ---
 ## The HPX Programming Model
@@ -61,8 +80,18 @@ HPX represents an innovative mixture of
 ![The HPX Programming Model](images/model-4.png)
 
 ---
+## HPX - A C++ Standard Library
+
+![...](images/architecture-0.png)
+
+---
+## HPX - A C++ Standard Library
+
+![...](images/architecture-1.png)
+
+---
 ## The HPX API
-### Borrowed from the C++ Standard
+### Strictly conforming to the C++ Standard
 
 Class                           | Description
 --------------------------------|-----------------------------------
@@ -78,7 +107,7 @@ Class                           | Description
 `hpx::tuple`                    | Tuple
 `hpx::any`                      | Type erased object (similar to `void*`)
 `hpx::parallel::for_each`, etc. | Parallel Algorithms
-`hpx::compute::vector`          | Continous storage for N elements
+`hpx::compute::vector`          | Continous storage for N elements, also GPU
 
 Extensions to the standards APIs where necessary, maintaining full compatibility.
 
@@ -87,16 +116,37 @@ Extensions to the standards APIs where necessary, maintaining full compatibility
 ### Lightweight Control Objects (LCOs)
 
  * Objects to synchronize between different threads of execution.
- * Ability to suspend and reactivate Tasks
+ * Ability to suspend and reactivate tasks
  * Examples:
     * `mutex`
     * `condition_variable`
     * `channel`
     * `promise`
+    * `packaged_task`
     * `future`
-    * `when_all`, `when_any`
+    * `when_all`, `when_any`, `wait_all`, `wait_any`
     * ...
  * More on those later
+
+---
+## The HPX API
+
+![The HPX Programming Model](images/api-0.png)
+
+---
+## The HPX API
+
+![The HPX Programming Model](images/api-1.png)
+
+---
+## The HPX API
+
+![The HPX Programming Model](images/api-2.png)
+
+---
+## The HPX API
+
+![The HPX Programming Model](images/api-3.png)
 
 ---
 ## What is a (the) future?
@@ -116,6 +166,29 @@ A future is an object representing a result which has not been calculated yet
 ]
 
 ---
+## What is a (the) future?
+
+Many ways to get hold of a future, simplest way is to use (std) async:
+
+```
+int universal_answer()
+{
+    return 42;
+}
+```
+--
+```
+void deep_thought()
+{
+    future<int> promised_answer = async(&universal_answer);
+
+    // do other things for 7.5 million years
+
+    cout << promised_answer.get() << endl;   // prints 42
+}
+```
+
+---
 ## Diving into the Future - The (basic) API
 
 ```
@@ -126,7 +199,9 @@ class future
     // Query the state
     // Waiting on the result
 };
-
+```
+--
+```
 template <typename R>
 class shared_future
 {
@@ -150,16 +225,15 @@ class future
     future();
 
     // Move a future to a new one
-    future(future&& f);
+    future(future<R>&& f);
 
     // Unwrap a future. The new future becomes ready when
-    // the inner, and outer future are ready.
-    explicit future(future<future>&& f);
-    explicit future(shared_future<future>&& f);
+    // the inner, and outer futures are ready.
+    explicit future(future<future<R>>&& f);
+    explicit future(future<shared_future<R>>&& f);
 
-    // Turn this future into a shared_future. Invalidates
-    // the future!
-    shared_future<T> share();
+    // Turn this future into a shared_future. Invalidates the future!
+    shared_future<R> share();
 
     // Query the state
     // Waiting on the result
@@ -200,11 +274,36 @@ Waiting for the future to become ready
 template <typename R>
 class future
 {
-    // Future constructors
-    // Query the state
+    // Future constructors, Query the state...
 
     // Waiting on the result
-    void wait();
+    void wait() const;
+
+    // Waiting for the result, but not longer than until given time point
+    template <typename Clock, typename Duriation>
+    future_status wait_until(
+        std::chrono::time_point<Clock, Duration> const& abs_time) const;
+
+    // Waiting for the result, but not longer than give duration
+    template <typename Rep, typename Period>
+    future_status wait_for(
+        std::chrono::duration<Rep, Period> const& rel_time) const;
+
+    // Get the result...
+};
+```
+
+---
+## Diving into the Future - The (basic) API
+
+Waiting for the future to become ready
+```
+template <typename R>
+class future
+{
+    // Future constructors, Query the state...
+
+    // Waiting on the result...
 
     // Get the result. This function might block if the result has
     // not been computed yet. Invalidates the future!
@@ -232,14 +331,17 @@ class shared_future
     shared_future();
 
     // Move a future to a new one
-    shared_future(shared_future&& f);
+    shared_future(shared_future<R>&& f);
 
     // Share ownership between two futures
-    shared_future(shared_future&& f);
+    shared_future(shared_future<R> const& f);
 
     // Unwrap a future. The new future becomes ready when
     // the inner, and outer future are ready.
-    explicit future(shared_future<future>&& f);
+    explicit shared_future(shared_future<future<R>>&& f);
+
+    // implicitly share a future
+    shared_future(future<R>&& f);
 
     // Query the state
     // Waiting on the result
@@ -252,13 +354,13 @@ class shared_future
 Waiting for the future to become ready
 ```
 template <typename R>
-class future
+class shared_future
 {
     // Future constructors
     // Query the state
 
     // Waiting on the result
-    void wait();
+    void wait() const;
 
     // Get the result. This function might block if the result has
     // not been computed yet.
@@ -277,26 +379,28 @@ class future
 ### `hpx::async`
 
 ```
-template <typename F, typename...Ts>
-auto async(F&& f, Ts...&&ts)
+template <typename F, typename... Ts>
+auto async(F&& f, Ts&&... ts)
  -> future<decltype(f(std::forward<Ts>(ts)...)>;
 ```
 
 * `F` is anything callable with the passed arguments (actions are callable)
 
+--
 
 ```
-template <typename F, typename...Ts>
-auto async(launch_policy, F&& f, Ts...&&ts)
+template <typename F, typename... Ts>
+auto async(launch_policy, F&& f, Ts&&... ts)
  -> future<decltype(f(std::forward<Ts>(ts)...)>;
 ```
 
 * `launch_policy` can be `async`, `sync`, `fork`, `deferred`
 
+--
 
 ```
-template <typename Executor typename F, typename...Ts>
-auto async(Executor&&, F&& f, Ts...&&ts)
+template <typename Executor typename F, typename... Ts>
+auto async(Executor&&, F&& f, Ts&&...  ts)
  -> future<decltpype(f(std::forward<Ts>(ts)...)>;
 ```
 
@@ -307,9 +411,10 @@ auto async(Executor&&, F&& f, Ts...&&ts)
 ### `hpx::lcos::local::promise`
 
 ```
-hpx::lcos::local::promise<int> p;
+hpx::lcos::local::promise<int> p;       // local only
 hpx::future<int> f = p.get_future();
 // f.is_ready() == false, f.get(); would lead to a deadlock
+
 p.set_value(42);
 
 // Print 42
@@ -318,12 +423,13 @@ std::cout << f.get() << std::endl;
 
 ---
 ## Producing Futures
-### `hpx::lcos::promise`
+### `hpx::promise`
 
 ```
-hpx::lcos::promise<int> p;
+hpx::promise<int> p;                    // globally visible
 hpx::future<int> f = p.get_future();
 // f.is_ready() == false, f.get(); would lead to a deadlock
+
 hpx::async(
     [](hpx::id_type promise_id)
     {
@@ -360,7 +466,7 @@ future<void> make_ready_future();
 
 ---
 ## Composing Futures
-### Sequential Composition
+### Sequential Composition: `future::then`
 
 ```
 future<int> f1 = hpx::async(...);
@@ -378,8 +484,10 @@ future<double> f2 = f1.then(
   will get rethrown on `.get()`
 * `then` accepts launch policies as well as [executors](#executors)
 * `f1` will get invalidated.
+
 --
- No invalidation:
+
+No invalidation:
 
 ```
 shared_future<int> f1 = hpx::async(...);
@@ -392,7 +500,7 @@ future<double> f2 = f1.then(
 
 ---
 ## Composing Futures
-### And Composition
+### And Composition: `when_all`
 
 ```
 future<int> f1 = hpx::async(...);
@@ -400,11 +508,12 @@ future<std::string> f2 = hpx::async(...);
 
 auto all_f = hpx::when_all(f1, f2);
 
-future<std::vector<float>> result = all_f.then(
-    [](auto f) -> std::vector<float>
-    {
-        // ...
-    });
+future<std::vector<float>> result =
+    all_f.then(
+        [](auto f) -> std::vector<float>
+        {
+            // ...
+        });
 ```
 
 --
@@ -414,22 +523,24 @@ future<std::vector<float>> result = all_f.then(
 
 ---
 ## Composing Futures
-### Or Composition
+### Or Composition: `when_any`
 
 ```
 std::vector<future<int>> fs = ...;
 
-future<std::vector<future<int>>> ffs = hpx::when_any(fs).then(
-    [](auto f)
-    {
-        auto res = f.get();
-        return res.sequence;
-    });
+future<int> fi =
+    hpx::when_any(fs).then(
+        [](auto f)
+        {
+            auto res = f.get();
+            return res.futures[res.index];
+        });
 ```
 
---
 * Allows for waiting on *any* of the input futures
 * Returns a `future<when_any_result<Sequence>>`:
+
+--
 
 ```
 template <typename Sequence>
@@ -451,16 +562,18 @@ struct when_any_result
 future<int> f1 = hpx::async(...);
 future<std::string> f2 = hpx::async(...);
 
-future<double> f3 = hpx::dataflow(
-    [](future<int>, future<std::string>) -> double
-    {
-        // ...
-    });
+future<double> f3 =
+    hpx::dataflow(
+        [](future<int>, future<std::string>) -> double
+        {
+            // ...
+        },
+        std::move(f1), std::move(f2));
 
 ```
 
 --
-* Calls the passed function whenever all arguments that were futures are ready
+* Calls the passed function after all arguments that were futures have become ready
 * Returns a future that becomes ready once the function has finished execution
 * Accepts launch policies as well as [executors](#executors) as the first parameter
 
@@ -473,6 +586,7 @@ future<double> f3 = hpx::dataflow(
     * GPUs
 * Task based asynchronous and continuation style parallelism
     * `future<R>`, `async`, etc...
+* General fork/join style parallelism
 * Instruction Level Parallelism
     * SIMD instructions
 
@@ -480,10 +594,10 @@ future<double> f3 = hpx::dataflow(
 ## Concepts of Parallelism
 ### Parallel Execution Properties
 
-* The ***execution restrictions*** applicable for work items
+* The ***execution restrictions*** applicable for work items ('safe to be executed concurrently')
 * In what ***sequence*** work items have to be executed
-* ***Where*** work items should be executed
-* The ***parameters*** of the execution environment
+* ***Where*** work items should be executed (CPU, NUMA domain, Core, GPU)
+* The ***parameters*** of the execution environment (chunk sizes, etc.)
 
 ---
 ## Concepts of Parallelism
@@ -518,19 +632,19 @@ future<double> f3 = hpx::dataflow(
 ---
 ## Execution Policies
 
-### From the C++ Standard
+### From the C++ Standard (C++17)
 
 *  Specify execution guarantees (in terms of thread-safety) for executed parallel tasks:
-    * `sequential_execution_policy: seq`
-    * `parallel_execution_policy: par`
-    * `parallel_vector_execution_policy: par_vec`
+    * `execution::sequenced_policy: seq`
+    * `execution::parallel_policy: par`
+    * `execution::unsequenced_policy: unseq`
 
 --
 ### HPX Extensions
 
 * Asynchronous Execution Policies:
-    * `sequential_task_execution_policy: seq(task)`
-    * `parallel_task_execution_policy: par(task)`
+    * `execution::sequenced_task_policy: seq(task)`
+    * `execution::parallel_task_policy: par(task)`
 * In both cases the formerly synchronous functions return a `future<R>`
 * Instruct the parallel construct to be executed asynchronously
 * Allows integration with asynchronous control flow
@@ -542,7 +656,7 @@ name: executors
 ## Executors
 ### Concept
 
-* Executor are objects responsible for
+* Executors are objects responsible for
     * Creating execution agents on which work is performed (N4466)
     * In N4466 this is limited to parallel algorithms, here much broader use
 * Abstraction of the (potentially platform-specific) mechanisms for launching work
@@ -552,13 +666,16 @@ name: executors
 ## Executors
 ### Implementation
 
-* Executors must implement one function: `async_execute(F&& f, Args&&... args)`
+* Executors must implement one function:
+```
+    async_execute(F&& f, Args&&... args)
+```
 * Invocation of executors happens through `executor_traits` which exposes (emulates) additional functionality:
 
 ```
-    executor_traits<my_executor_type>::execute(
-    my_executor,
-    [](size_t i){ // perform task i }, n);
+    executor_traits<my_executor_type>::async_execute(
+        my_executor,
+        [](size_t i){ // perform task i }, n);
 ```
 
 * Four modes of invocation: single async, single sync, bulk async and bulk sync
@@ -568,7 +685,7 @@ name: executors
 ## Executors
 ### Examples
 
-* `sequential_executor`, `parallel_executor`:
+* `sequenced_executor`, `parallel_executor`:
     * Default executors corresponding to par, seq
 * `this_thread_executor`
 * `thread_pool_executor`
@@ -596,17 +713,22 @@ Execution policies have associated default executor and default executor
 parameters
 
 * `par`: parallel executor, static chunk size
-* `seq`: sequential executor, no chunking
+* `seq`: sequenced executor, no chunking
     * Rebind executor and executor parameters
 
 ```
-numa_executor exec;
 // rebind only executor
+numa_executor exec;
 auto policy1 = par.on(exec);
-static_chunk_size param;
-
+```
+--
+```
 // rebind only executor parameter
+static_chunk_size param;
 auto policy2 = par.with(param);
+```
+--
+```
 // rebind both
 auto policy3 = par.on(exec).with(param);
 ```
@@ -683,12 +805,13 @@ std::vector<double> b = ...;
 std::vector<double> c = ...;
 double x = ...;
 
-std::transform(b.begin(),
-  b.end(), c.begin(), a.begin(),
-  [x](double bb, double cc)
-  {
-*   return bb * x + cc;
-  }
+std::transform(
+    b.begin(), b.end(), c.begin(),
+    a.begin(),
+    [x](double bb, double cc)
+    {
+*       return bb * x + cc;
+    }
 );
 ```
 ]
@@ -712,14 +835,14 @@ std::vector<double> b = ...;
 std::vector<double> c = ...;
 double x = ...;
 
-*using hpx::parallel::par;
-*hpx::parallel::transform(par
-  b.begin(), b.end(), c.begin(),
-  a.begin(),
-  [x](double bb, double cc)
-  {
-    return bb * x + cc;
-  }
+*hpx::parallel::transform(
+*   hpx::parallel::execution::par,
+    b.begin(), b.end(), c.begin(),
+    a.begin(),
+    [x](double bb, double cc)
+    {
+        return bb * x + cc;
+    }
 );
 ```
 ]
@@ -739,8 +862,7 @@ double x = ...;
 ```
 using hpx::compute::host;
 
-typedef block_executor<>
-    executor;
+typedef block_executor<> executor;
 typedef block_allocator<double>
     allocator;
 
@@ -759,15 +881,15 @@ double x = ...;
 
 .right-column[
 ```
-*using hpx::parallel::par;
+*using hpx::parallel::execution::par;
 *auto policy = par.on(exec);
-hpx::parallel::transform(
-  policy, b.begin(),
-  b.end(), c.begin(), a.begin(),
-  [x](double bb, double cc)
-  {
-    return bb * x + cc;
-  }
+hpx::parallel::transform(policy,
+    b.begin(), b.end(), c.begin(),
+    a.begin(),
+    [x](double bb, double cc)
+    {
+        return bb * x + cc;
+    }
 );
 ```
 * Get targets for locality of data and execution
@@ -785,12 +907,10 @@ hpx::parallel::transform(
 ```
 using hpx::compute::cuda;
 
-typedef default_executor<>
-    executor;
-typedef allocator<double>
-    allocator;
+typedef default_executor<> executor;
+typedef allocator<double> allocator;
 
-target device;
+target device("K40");
 executor exec(device);
 allocator alloc(device);
 
@@ -804,16 +924,15 @@ double x = ...;
 ]
 .right-column[
 ```
-*using hpx::parallel::par;
+*using hpx::parallel::execution::par;
 *auto policy = par.on(exec);
-hpx::parallel::transform(
-  policy, b.begin(),
-  b.end(), c.begin(), a.begin(),
-  [x] HPX_DEVICE
-  (double bb, double cc)
-  {
-    return bb * x + cc;
-  }
+hpx::parallel::transform(policy,
+    b.begin(), b.end(), c.begin(),
+    a.begin(),
+    [x](double bb, double cc)
+    {
+        return bb * x + cc;
+    }
 );
 ```
 * Get targets for locality of data and execution
