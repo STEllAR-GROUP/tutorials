@@ -46,7 +46,7 @@ PAPI_VER=5.5.1
 HPX uses Boost extensively throughout the code
 * Considerable amounts of boost code have been absorbed into HPX
     * so dependencies on boost are been gradually decreasing
-    * (more `std::` features are presnt in newer compilers)
+    * (more `std::` features are present in newer compilers)
 
 * Threading components, locks and mutexes
 * Boost.context used for basis of lightweight threads
@@ -250,6 +250,7 @@ cmake \
  -DHPX_WITH_TESTS=ON -DHPX_WITH_TESTS_UNIT=ON \
  -DHPX_WITH_TESTS_BENCHMARKS=OFF -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
  -DHPX_WITH_TESTS_HEADERS=OFF -DHPX_WITH_TESTS_REGRESSIONS=OFF \
+ -DHPX_WITH_MAX_CPU_COUNT=256 -DHPX_WITH_MORE_THAN_64_THREADS=ON \
  -DHPX_WITH_EXAMPLES=ON \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
  -DHPX_WITH_PARCELPORT_MPI=ON \
@@ -328,7 +329,6 @@ and this causes trouble like the above
     * No need to do it often, after a long gap between pulls etc.
 
 * Give yourself confidence that it's not a bug in the internals
-
 * Run tests
 ```sh
 make     tests.unit
@@ -545,6 +545,7 @@ do `find_package(HPX)` everything points to our _in tree_ copy of HPX.
     * No need to worry about wrong compiler flags
     * `make -j8 my_example` will build libhpx etc automatically
     * any changes to HPX after pull/merge automatically trigger a rebuild
+    * Very useful if you are making changes to HPX (devs?)
 
 * When building, you must now pass
 
@@ -581,6 +582,9 @@ at any time (though I recommend using branches in the HPX subdir).
     only root has int main called - to be discussed further
     * HPX_WITH_VC_DATAPAR: latest SIMD code option using Vc library
 
+    * HPX_WITH_NETWORKING - if disabled you get single node HPX
+
+        * ideal for MPI use (See thread pools later/tomorrow)
 ---
 ## Main HPX Build options #3
 * Thread options

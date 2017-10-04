@@ -116,6 +116,7 @@ as quickly as possible as soon as anything
     * synchronizes between/amongst them
     * shouldn't need to worry about low level synchronization primitives
     * (but sometimes needs to - see tutorial 'latency' example)
+    * Threads can be 'managed' with special executors (e.g. OpenGL etc)
 
 * The runtime does its best to schedule tasks
 
@@ -231,7 +232,7 @@ scheduling/runtime can be used for the whole heirarchy of tasks
 ## Suspended tasks
 * A task that is running requires a value from a future
 
-    * the future is not ready :(
+    * the future is not ready (:disappointed:)
 
     * `auto val = future->get()` would block (if we were not HPX)
 
