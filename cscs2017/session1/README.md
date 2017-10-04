@@ -226,7 +226,7 @@ scheduling/runtime can be used for the whole heirarchy of tasks
 
     * schedulers can steal (some do, some don't)
 
-    * you can choose a scheduler when you create an executor
+    * you can choose a scheduler when you create an executor (not really though)
 
 * Tasks can be
 
@@ -241,10 +241,11 @@ scheduling/runtime can be used for the whole heirarchy of tasks
     * Terminated : awaiting cleanup
 
 ---
-## Suspended tasks
+## Suspended tasks #1
 * A task that is running requires a value from a future
 
     * the future is not ready (:disappointed:)
+        * Use CPS - don't call get ever!
 
     * `auto val = future->get()` would block (if we were not HPX)
 
@@ -255,15 +256,27 @@ scheduling/runtime can be used for the whole heirarchy of tasks
     * the future that was needed has the suspended task added to its internal
     (shared state) waiting list
 
-    * when that future become ready, the task will be changed to _pending_
+    * when that future become ready, the task will be changed (back) to _pending_
 
     * and go back onto the queue so that when a worker is free, it can run
 
+---
+## Suspended tasks #2
 * The same process happens when a task tries to take a lock but can't get it
 
     * The shared state inside the mutex will `notify` the task and do the 'right thing'
 
-* This is one reason why all the `std::thread`, `std::mutex` etc code has been reimplemented
+    * the current task cannot progress so it changes state to _suspended_
+        * Look for spinlock mutexes in the HPX source
+        * Spin for a bit, then suspend when some deadline reached
+
+    * the scheduler puts it into the suspended list
+
+
+* This is **one** reason why all the `std::thread`, `std::mutex` etc code has been reimplemented
+
+    * You can use std::lock_guard<> etc, but not the mutexes inside them
+    * the locks are just wrappers around the mutexes where the real work is done
 
 ---
 ## Staged tasks
@@ -285,7 +298,7 @@ but it can't run until the dependencies are satisfied
             `future[i] = future[i-1].then(another_task);`
         * it can be confusing
 
-    * Session tommorow (Resource management) will look again at this question
+    * Session (Resource management) will look again at this question
 
 ---
 ## Active Messages
@@ -305,6 +318,24 @@ but it can't run until the dependencies are satisfied
 
 * Channels
     * More about them later/tomorrow
+    * Work locally or remotely and are a very nice abstraction (Go?)
+
+---
+## AGAS and distributed mode
+* AGAS is the Active Global Address Space
+
+    * A distributed in memory kev/value store
+
+* Active
+    * Objects can move around, but their Id remains the same
+        * Migration of things
+    * execute a task on data object(id)
+    * the task goes to where the data is
+
+* No communicators currently
+    * but "Components" fill this gap.
+    * Components are handles to objects on remote nodes
+    * *this* pointer for distributed mode
 
 ---
 ## Structure of an application
@@ -342,7 +373,8 @@ but it can't run until the dependencies are satisfied
         }
     );
 ```
-* We are still writing C++, but how much is our code any more
+* We are still writing C++, but HPX consumes this lambda and turns it into tasks
+* Those tasks can be as big or as small as you like
 
 ---
 ## HPX is moving towards the future of C++
@@ -352,11 +384,14 @@ but it can't run until the dependencies are satisfied
     * what doesn't, will be subsumed into something else that does
 
     <br />
-    <br />
-    <br />
 
-###"It's no use going back to yesterday, because I was a different person then."
+**<p align="center">
+"It's no use going back to yesterday, because I was a different person then."
+</br></br>
 Lewis Carroll, Alice in Wonderland
+</p>**
+
+<br />
 
 * Watch the film "Memento"
 ---

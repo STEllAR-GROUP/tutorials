@@ -30,7 +30,7 @@ Thursday, October 5 and Friday, October 6, 2017
 
 * [9:00 to 10:30: Resource Management and Performance Issues](session6)
 * Tea Break, 15 Minutes
-* [10:45 to 12:15: Thomas's special session](sessionx)
+* [10:45 to 12:15: Upcoming and Experimental Features](sessionx)
 * Lunch, 1 hour
 * [13:15 to 14:45: Debugging HPX Applications](session7)
 * Tea Break, 15 Minutes

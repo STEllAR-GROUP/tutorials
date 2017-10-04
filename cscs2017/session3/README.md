@@ -273,6 +273,34 @@ cmake \
  ```
 
 ---
+## Super optimized benchmarking
+* Checklist for when you really want to minimize all runtime overheads
+```sh
+ -DCMAKE_BUILD_TYPE=Release \
+ -DHPX_WITH_APEX=OFF \
+ -DHPX_WITH_LOGGING=OFF \
+ -DHPX_WITH_THREAD_IDLE_RATES=OFF \
+ -DHPX_WITH_IO_COUNTERS=OFF \
+ -DHPX_WITH_PARCELPORT_ACTION_COUNTERS=OFF \
+ -DHPX_WITH_PARCEL_PROFILING=OFF \
+ -DHPX_WITH_STACKTRACES=OFF \
+ -DHPX_WITH_THREAD_CUMULATIVE_COUNTS=OFF \
+ -DHPX_WITH_THREAD_IDLE_RATES=OFF \
+ -DHPX_WITH_THREAD_MANAGER_IDLE_BACKOFF=OFF \
+ -DHPX_WITH_THREAD_STEALING_COUNTS=OFF \
+ -DHPX_WITH_VERIFY_LOCKS=OFF \
+```
+* Extreme caution disabling these
+```
+ -DHPX_WITH_TIMER_POOL=OFF \
+ -DHPX_WITH_IO_POOL=OFF \
+ -DHPX_WITH_NETWORKING=OFF \
+```
+    * Note that if you use `hpx::cout << complex_stuff` then you need `HPX_WITH_IO_POOL'
+    to be enabled, otherwise you'll get exceptions thrown about missing io_pool executors
+    and suchlike.
+
+---
 ## Release vs Debug
 * How much faster will a release build be compared to a debug one?
 

@@ -122,7 +122,7 @@ Build:
     * `compact`
     * `scatter`
     * `balanced`
-    * _description_
+    * `numa-balanced`
 ]
 .right-column[
 ![Thread affinities](images/affinities.png)
@@ -144,6 +144,7 @@ distribution:
     'compact'
     'scatter
     'balanced'
+    'numa-balanced'
 
 mapping:
     thread-spec=pu-specs
@@ -250,8 +251,8 @@ locality: 0
                         Expected return codes of all invoked processes
                         (environment variable HPXRUN_EXPECTED)
   -v, --verbose         Verbose output (environment variable HPXRUN_VERBOSE)
-
 ```
+* Pro tip : use `ctest -R test_name -N -V` to get command line params
 
 ---
 ## Batch environments
@@ -263,7 +264,19 @@ locality: 0
     * Number of localities
     * Host names
 * Supported environments: SLURM, PBS, ALPS, MPI
-
+* Internal vars are setup automatically
+```c++
+typedef hpx::id_type id_t; // just to make the lines fit on slide
+//
+id_t                    here = hpx::find_here();
+uint64_t                rank = hpx::naming::get_locality_id_from_id(here);
+std::string             name = hpx::get_locality_name();
+uint64_t              nranks = hpx::get_num_localities().get();
+std::size_t          current = hpx::get_worker_thread_num();
+std::vector<id_t>    remotes = hpx::find_remote_localities();
+std::vector<id_t> localities = hpx::find_all_localities();
+```
+* This stuff is still setup if you don't use slurm, but
 ---
 ## Batch environments
 ### SLURM
@@ -278,6 +291,18 @@ locality: 0
     * `-N`: Number of Nodes to distribute Processes on
     * `-c`: Number of cores
     * `--hint=nomultithread`: Turn of multithreading
+
+```sh
+srun -n 4 /scratch/snx1600/biddisco/build/clang/linalg/bin/check_cholesky_d
+-Ihpx.max_busy_loop_count=500 --hpx:bind=numa-balanced
+--hpx:high-priority-threads=6  --hpx:threads=36 --hpx:run-hpx-main
+--hpx:print-counter /runtime{locality#*/total}/memory/resident
+--hpx:print-counter=/arithmetics/add@/papi{locality#0/worker-thread#*}/PAPI_L3_DCM
+--hpx:print-counter-interval=100
+--hpx:print-counter-destination=/dev/null
+--col-proc=2 --row-proc=2 --size=10240 --nb=512 --use-pools --mpi-threads=2
+--use-scheduler --hp-queues=6 --no-check
+```
 
 ---
 ## Batch environments
@@ -301,6 +326,12 @@ Note: The following only applies if you have the MPI parcelport compiled in
 * `--hpx:list-parcel-ports`: Lists which parcelports are available and enabled
 * Use the INI configuration to explicitly disable/enable Parcelports:
     * `-Ihpx.parcel.tcp.enable=0` will disable the TCP parcelport
+    * `-Ihpx.parcel.mpi.enable=0`
+    * `-Ihpx.parcel.libfabric.enable=0`
+
+* Note libfabric stable but still experimental and only supported on daint
+with assistence from JB
+    * Users wanted for large scale runs of libfabric PP.
 
 ---
 ## Debugging options
@@ -308,8 +339,17 @@ Note: The following only applies if you have the MPI parcelport compiled in
 * Attach a debugger:
     * `--hpx:attach-debugger`: This will stop the HPX application and wait for
         the debugger to be attached and the application being continued
-    * `--hpx:attach-debugger=exception`: Stops the application if there was an
-        exception
+```
+PID: 116544 on daint103 ready for attaching debugger.
+Once attached set i = 1 and continue
+```
+        * Note that this does not scale well.
+        * N>4 = really tedious
+
+    * `--hpx:attach-debugger=exception`: Stops the application if there was an exception
+    * Use this every day - especially on machines like daint where you can
+    ssh into a compute node.
+
 * Logging:
     * `--hpx:debug-hpx-log`
 * Debug command line parsing:
@@ -320,13 +360,22 @@ Note: The following only applies if you have the MPI parcelport compiled in
 
 * List all available performance counters:
     * `--hpx:list-counters`
+    * Use this every day!
 * Print counter:
     * `--hpx:print-counter counter`
     * This will print the counter once the application has been completed
 * Set counter interval:
     * `--hpx:print-counter-interval time`
+    * `--hpx:print-counter-destination=file`
+        * or `/dev/null` is using APEX
 * Print performance counters from your application:
     * `hpx::evaluate_active_counters(bool reset, char const* description)`
+
+* Access a performance counter from code (blocking / using sync policy)
+```c++
+    performance_counter counter("<name>");
+    std::cout << counter.get_counter<double>(hpx::launch::sync);
+```
 
 ---
 ## HPX Application Startup
@@ -346,6 +395,12 @@ int main(int argc, char** argv)
     hpx::init(argc, argv);
 }
 ```
+* Init starts the runtime
+    * `int main` is running on a OS thread
+* return from init by calling finalize
+    * `hpx_main` is running on an HPX thread
+
+* **Warning** : By default, only locality 0 runs `hpx_main`
 
 ---
 ## Adding your own options
@@ -361,6 +416,11 @@ int hpx_main(int argc, char** argv)
     return hpx::finalize()
 }
 ```
+* Allow HPX to take (and hide) main
+    * `hpx_main` is running on an HPX thread
+    * I don't think you should use this!
+
+* **Warning** : By default, only locality 0 runs `hpx_main`
 
 ---
 ## Adding your own options
@@ -417,6 +477,39 @@ int main(int argc, char** argv)
 ```
 
 * Can be combined with an application specific `options_description` as well!
+
+---
+## Complex option setup
+```c++
+int main(int argc, char* argv[])
+{
+    boost::program_options::options_description desc_cmdline("Test options");
+    desc_cmdline.add_options()
+        ( "use-pools,u", "Enable advanced HPX thread pools and executors")
+        ( "pool-threads,m",
+          boost::program_options::value<int>()->default_value(1),
+          "Number of threads to assign to custom pool");
+
+    // HPX uses a boost program options variable map, but we need it before
+    // hpx-main, so we will create another one here and throw it away after use
+    boost::program_options::variables_map vm;
+    boost::program_options::store(
+        boost::program_options::command_line_parser(argc, argv)
+            .allow_unregistered() // IMPORTANT
+            .options(desc_cmdline)
+            .run(),
+        vm);
+
+    if (vm.count("use-pools")) {
+        use_pools = true;
+    }
+    pool_threads = vm["pool-threads"].as<int>();
+
+    // Create the resource partitioner
+    hpx::resource::partitioner rp(desc_cmdline, argc, argv);
+```
+* see examples
+[named_pool_executor](../../examples/05_named_pool_executor/named_pool_executor.cpp)
 
 ---
 ## HPX Application Startup
