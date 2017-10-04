@@ -14,11 +14,13 @@ link_directories(${HPX_LIBRARY_DIR})
 #------------------------------------------------------------------------------
 option(TUTORIAL_WITH_TBB "Enable TBB sort" 1)
 if (TUTORIAL_WITH_TBB)
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
     find_package(TBB)
     if (TBB_FOUND)
       message("TBB supported")
       set(SORT_HAS_TBB 1)
     else()
+      message("TBB was not found")
     endif()
 endif()
 
