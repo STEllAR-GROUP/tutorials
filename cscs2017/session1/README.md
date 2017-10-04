@@ -134,7 +134,8 @@ as quickly as possible as soon as anything
 
 * A future is set by one thread/task (directly, by using a promise)
     * using `promise.set_value(stuff);`
-    * or by returing a value from a task such as `future<T> x = async(...)` call
+    * or by returing a value from a task/call such as </br>
+        `future<T> x = async(...)`
 
 * The value is retrieved by another thread/task
     * using `auto value = future.get();` syntax
@@ -202,6 +203,17 @@ scheduling/runtime can be used for the whole heirarchy of tasks
 * We aim to replace OpenMP+MPI+Acc with a single framework
     * based soundly on C++
     * from top to bottom (of the task tree)
+
+---
+## Performance
+* Same code, same hardware, same compiler, same performance
+* Try to provide abstractions for tasks without excessive overheads.
+<p align="center">
+  <img />
+  <img src="images/results-max.fig_Strong_Matrix.png" alt="" width="200" height="400">
+  Comparison of DPLASMA (PaRSEC scheduler) cholesky decomposition
+  and HPX implementation (Oct 2017)
+</p>
 
 ---
 ## Task scheduling and lifetime
@@ -346,6 +358,7 @@ but it can't run until the dependencies are satisfied
 ###"It's no use going back to yesterday, because I was a different person then."
 Lewis Carroll, Alice in Wonderland
 
+* Watch the film "Memento"
 ---
 ## A quick tour of the HPX resources
 

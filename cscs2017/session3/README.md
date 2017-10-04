@@ -92,10 +92,21 @@ cd boost_$BOOST_SUFFIX
 <img src="images/devel09-pci.png" alt="hwloc" width="150" height="240">
 * HPX needs to know what resources it is running on
 * hwloc provides a mechanism for identifying numa domains, sockets, cores, GPUs
+
+---
+## Dependencies #2
+### Portable Hardware Locality (hwloc)
+
 * HPX uses hwloc for thread pinning
     * at startup - and also in code
+
+* Also for memory binding
+    * e.g. numa_allocator (new feature)
+
 * executors can be bound to cores/domains using hwloc syntax
 * `local_priority_queue_os_executor exec(4, "thread:0-3=core:12-15.pu:0");`
+    * prefer new Resource Partitioner use (may deprecate above)
+
 * startup binding : `--hpx:bind=compact/scatter/balanced`
 
 ---
