@@ -75,6 +75,8 @@ set(TUTORIAL_DIRS
   03_fibonacci
   04_saxpy
   05_named_pool_executor
+  # 06 is cuda test
+  07_sort_test
 )
 
 if (HPX_WITH_CUDA)
