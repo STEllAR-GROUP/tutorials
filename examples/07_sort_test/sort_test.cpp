@@ -234,7 +234,7 @@ int main (int argc, char *argv[] )
     hpx_argv = argv;
 #endif
 
-    for (int i=(1<<19); i<(1<<29); i<<=1) {
+    for (int i=(1<<23); i<(1<<26); i<<=1) {
         Generator<int32_t>(i);
     }
 
