@@ -57,11 +57,10 @@
 #define NMAXSTRING 10000000
 
 using namespace std ;
-namespace hpx_tools = sort_tools;
 
-using hpx_tools::time_point ;
-using hpx_tools::now;
-using hpx_tools::subtract_time ;
+// --------------------------------------------------------------------
+template <class IA>
+void Generator (uint64_t N );
 
 // --------------------------------------------------------------------
 template <class IA>
@@ -96,10 +95,6 @@ void rnd_fill(std::vector<T> &V, const T lower, const T upper, const T seed)
 }
 
 // --------------------------------------------------------------------
-template <class IA>
-void Generator (uint64_t N );
-
-// --------------------------------------------------------------------
 // we need a callback for the HPX runtime to call for this benchmark
 // as we start/stop the HPX runtime for each test.
 #ifdef SORT_HAS_HPX
@@ -122,24 +117,24 @@ template <class IA, class compare  >
 int Test  ( std::vector <IA> & B , compare comp )
 {   //---------------------------- begin --------------------------------
     double duration ;
-    time_point start, finish;
+    test_tools::time_point start, finish;
     std::vector <IA> A ( B);
 
     A = B ;
     cout<<"std::sort                    : ";
-    start = now() ;
+    start = test_tools::now() ;
     std::sort (A.begin() , A.end(), comp );
-    finish = now() ;
-    duration = subtract_time(finish ,start) ;
+    finish = test_tools::now() ;
+    duration = test_tools::subtract_time(finish ,start) ;
     cout<<duration<<" secs\n";
     VERIFY(A);
 
     A = B ;
     cout<<"std::stable_sort             : ";
-    start = now() ;
+    start = test_tools::now() ;
     std::stable_sort (A.begin() , A.end(), comp );
-    finish = now() ;
-    duration = subtract_time(finish ,start) ;
+    finish = test_tools::now() ;
+    duration = test_tools::subtract_time(finish ,start) ;
     cout<<duration<<" secs\n";
     VERIFY(A);
 
@@ -147,20 +142,20 @@ int Test  ( std::vector <IA> & B , compare comp )
     A = B ;
     //------------------- tbb::parallel_sort -----------------------------
     cout<<"TBB parallel sort            : ";
-    start = now() ;
+    start = test_tools::now() ;
     tbb::parallel_sort (A.begin() , A.end(), comp );
-    finish = now() ;
-    duration = subtract_time(finish ,start) ;
+    finish = test_tools::now() ;
+    duration = test_tools::subtract_time(finish ,start) ;
     cout<<duration<<" secs\n";
     VERIFY(A);
 
     //--------------------- tbb lowlevel parallel_stable_sort ------------
     A = B ;
     cout<<"TBB parallel stable sort     : ";
-    start = now() ;
+    start = test_tools::now() ;
     pss::parallel_stable_sort (A.begin() , A.end(), comp );
-    finish = now() ;
-    duration = subtract_time(finish ,start) ;
+    finish = test_tools::now() ;
+    duration = test_tools::subtract_time(finish ,start) ;
     cout<<duration<<" secs\n";
     VERIFY(A);
 #endif
@@ -168,19 +163,19 @@ int Test  ( std::vector <IA> & B , compare comp )
 #ifdef SORT_HAS_GCC_PARALLEL
     A = B;
     cout<<"GCC parallel sort            : ";
-    start = now() ;
+    start = test_tools::now() ;
     __gnu_parallel::sort (A.begin() , A.end(), comp );
-    finish = now() ;
-    duration = subtract_time(finish ,start) ;
+    finish = test_tools::now() ;
+    duration = test_tools::subtract_time(finish ,start) ;
     cout<<duration<<" secs\n";
     VERIFY(A);
 
     A = B ;
     cout<<"GCC parallel stable sort     : ";
-    start = now() ;
+    start = test_tools::now() ;
     __gnu_parallel::stable_sort (A.begin() , A.end(), comp );
-    finish = now() ;
-    duration = subtract_time(finish ,start) ;
+    finish = test_tools::now() ;
+    duration = test_tools::subtract_time(finish ,start) ;
     cout<<duration<<" secs\n";
     VERIFY(A);
 
@@ -251,26 +246,26 @@ template <class IA, class compare  >
 int Test_hpx ( const std::vector <IA> & B , compare comp )
 {
     double duration ;
-    time_point start, finish;
+    test_tools::time_point start, finish;
     std::vector <IA> A;
 
     A = B ;
     //cout<<"---------------- HPX sort (seq) --------------\n";
     cout<<"HPX sort (seq)               : ";
-    start = now() ;
+    start = test_tools::now() ;
     hpx::parallel::v1::sort(hpx::parallel::v1::seq, A.begin() , A.end(), comp );
-    finish = now() ;
-    duration = subtract_time(finish ,start) ;
+    finish = test_tools::now() ;
+    duration = test_tools::subtract_time(finish ,start) ;
     cout<<duration<<" secs\n";
     VERIFY(A);
 
     A = B ;
     //cout<<"---------------- HPX sort (par) --------------\n";
     cout<<"HPX sort (par)               : ";
-    start = now() ;
+    start = test_tools::now() ;
     hpx::parallel::v1::sort(hpx::parallel::v1::par, A.begin() , A.end(), comp );
-    finish = now() ;
-    duration = subtract_time(finish ,start) ;
+    finish = test_tools::now() ;
+    duration = test_tools::subtract_time(finish ,start) ;
     cout<<duration<<" secs\n";
     VERIFY(A);
 

@@ -31,6 +31,22 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
     ${PROJECT_BINARY_DIR}/lib CACHE PATH "Single Directory for all static libraries."
 )
 
+#------------------------------------------------------------------------------
+ # Detect which machine we are running on to setup defaults for convenience
+ #------------------------------------------------------------------------------
+ SITE_NAME(hostname)
+ if(hostname MATCHES "unknown" OR hostname MATCHES "No")
+   message("unknown hostname \"${hostname}\", using ENV$ $ENV{HOSTNAME} instead")
+   set(hostname $ENV{HOSTNAME})
+ endif()
+
+ if(hostname MATCHES daint)
+   set(TBB_ROOT "/opt/intel/compilers_and_libraries_2017.4.196/linux/tbb/")
+   message("Running on Daint")
+ endif()
+ message("CMAKE_SYSTEM is ${CMAKE_SYSTEM} with hostname ${hostname} and processor ${CMAKE_SYSTEM_PROCESSOR}" )
+
+
 #--------------------------------------------------
 # Option to download and build HPX as a sub project
 #--------------------------------------------------

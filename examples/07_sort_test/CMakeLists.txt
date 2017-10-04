@@ -12,9 +12,12 @@ link_directories(${HPX_LIBRARY_DIR})
 #------------------------------------------------------------------------------
 # TBB
 #------------------------------------------------------------------------------
+if (hostname)
+
+
 option(TUTORIAL_WITH_TBB "Enable TBB sort" 1)
 if (TUTORIAL_WITH_TBB)
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}")
     find_package(TBB)
     if (TBB_FOUND)
       message("TBB supported")
