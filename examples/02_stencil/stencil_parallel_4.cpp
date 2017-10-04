@@ -83,7 +83,7 @@ void worker(
     hpx::future<void> step_future = hpx::make_ready_future();
     for (std::size_t t = 0; t < steps; ++t)
     {
-        step_future = step_future.then([&comm, policy, curr, next, Ny, Nx, t](hpx::future<void>&& prev)
+        step_future = step_future.then([&comm, policy, curr, next, Ny, Nx, t](hpx::future<void>&& prev) mutable
         {
             // Trigger possible errors...
             prev.get();
