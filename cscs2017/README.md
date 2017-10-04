@@ -58,7 +58,7 @@ Thursday, October 5 and Friday, October 6, 2017
 ssh ela.cscs.ch
 ssh daint```
 
-**Reservation** : Course longs can use
+**Reservation** : Course logins (and cscs staff) can use
 ```sh
 scontrol show res hpx1
 scontrol show res hpx2
