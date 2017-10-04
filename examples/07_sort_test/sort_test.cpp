@@ -37,7 +37,7 @@
 # include "tbb/tbb_stddef.h"
 # include "tbb/task_scheduler_init.h"
 # include "tbb/parallel_sort.h"
-# include <parallel_stable_sort/tbb-lowlevel/parallel_stable_sort.h>
+# include "tbb/parallel_stable_sort.h"
 #endif
 
 // standard library

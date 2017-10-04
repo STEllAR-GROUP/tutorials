@@ -33,7 +33,7 @@
 #include <algorithm>
 #include <tbb/task.h>
 
-#include "parallel_stable_sort/pss_common.h"
+#include "tbb/pss_common.h"
 
 namespace pss {
 

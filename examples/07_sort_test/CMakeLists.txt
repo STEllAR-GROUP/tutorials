@@ -8,16 +8,14 @@ project(SortTest CXX)
 
 find_package(HPX REQUIRED)
 link_directories(${HPX_LIBRARY_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 #------------------------------------------------------------------------------
 # TBB
 #------------------------------------------------------------------------------
-if (hostname)
-
-
-option(TUTORIAL_WITH_TBB "Enable TBB sort" 1)
+option(TUTORIAL_WITH_TBB "Enable TBB sort" 0)
 if (TUTORIAL_WITH_TBB)
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}")
+    set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}" ${CMAKE_MODULE_PATH})
     find_package(TBB)
     if (TBB_FOUND)
       message("TBB supported")
@@ -50,7 +48,7 @@ endif()
 set(BENCHMARK_LIBRARIES ${BENCHMARK_LIBRARIES} ${Boost_LIBRARIES})
 
 if (SORT_HAS_TBB)
-  include_directories(${TBB_INCLUDE_DIRS})
+  include_directories(${TBB_INCLUDE_DIR})
   add_definitions(-DSORT_HAS_TBB)
   set(BENCHMARK_LIBRARIES ${BENCHMARK_LIBRARIES} ${TBB_LIBRARIES})
 endif()
@@ -70,6 +68,7 @@ endif()
 #------------------------------------------------------------------------------
 add_executable(sort_test sort_test.cpp)
 hpx_setup_target(sort_test COMPONENT_DEPENDENCIES iostreams)
+target_link_libraries(sort_test ${BENCHMARK_LIBRARIES})
 
 # for tutorial target
 if (TARGET tutorial)
