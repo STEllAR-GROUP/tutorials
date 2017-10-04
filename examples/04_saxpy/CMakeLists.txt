@@ -8,6 +8,7 @@ project(Latency CXX)
 
 find_package(HPX REQUIRED)
 link_directories(${HPX_LIBRARY_DIR})
+include_directories(${CUDA_INCLUDE_DIRS})
 
 add_executable(saxpy_serial serial.cpp)
 hpx_setup_target(saxpy_serial)
