@@ -48,7 +48,6 @@
 #include <vector>
 
 #include "int_array.hpp"
-#include "file_vector.hpp"
 #include "time_measure.hpp"
 
 #include <boost/random/mersenne_twister.hpp>
@@ -62,14 +61,6 @@ namespace hpx_tools = sort_tools;
 using hpx_tools::time_point ;
 using hpx_tools::now;
 using hpx_tools::subtract_time ;
-using hpx_tools::fill_vector_uint64;
-using hpx_tools::write_file_uint64;
-//using hpx_tools::NThread ;
-
-// --------------------------------------------------------------------
-void Generator_sorted(void );
-void Generator_uint64(void );
-void Generator_string(void) ;
 
 // --------------------------------------------------------------------
 template <class IA>
@@ -129,9 +120,9 @@ int hpx_test(std::vector<IA> &A, int argc, char ** argv)
 template <class IA, class compare  >
 int Test  ( std::vector <IA> & B , compare comp )
 {   //---------------------------- begin --------------------------------
-	double duration ;
-	time_point start, finish;
-	std::vector <IA> A ( B);
+    double duration ;
+    time_point start, finish;
+    std::vector <IA> A ( B);
 
     A = B ;
     cout<<"std::sort                    : ";
@@ -203,49 +194,6 @@ int Test  ( std::vector <IA> & B , compare comp )
 #endif
 
     return 0 ;
-};
-
-void Generator_sorted(void )
-{   //---------------------------- begin--------------------------------------
-    vector<uint64_t> A  ;
-    A.reserve ( NELEM) ;
-    cout<<"  "<<NELEM<<" uint64_t elements already sorted\n" ;
-    cout<<"=================================================\n";
-    A.clear();
-    for ( size_t i =0 ; i < NELEM ; ++i)
-        A.push_back( i );
-    Test(A, std::less<uint64_t>());
-    cout<<std::endl ;
-}
-
-void Generator_uint64(void )
-{   //---------------------------- begin--------------------------------------
-    vector<uint64_t> A  ;
-    A.reserve ( NELEM) ;
-    cout<<"  "<< NELEM<<" uint64_t elements randomly filled\n" ;
-    cout<<"=================================================\n";
-    A.clear();
-    if ( fill_vector_uint64("input.bin", A, NELEM) != 0)
-    {   std::cout<<"Error in the input file\n";
-        return ;
-    };
-    Test(A,std::less<uint64_t>());
-    cout<<std::endl ;
-}
-
-void Generator_string(void)
-{   //------------------------------- begin ----------------------------------
-    cout<<"  "<< NMAXSTRING<<" strings randomly filled\n" ;
-    cout<<"===============================================\n";
-    std::vector <std::string> A ;
-    A.reserve ( NMAXSTRING);
-    A.clear();
-    if ( hpx_tools::fill_vector_string("input.bin", A, NMAXSTRING) != 0)
-    {   std::cout<<"Error in the input file\n";
-        return ;
-    };
-    Test(A, std::less<std::string>());
-    cout<<std::endl ;
 };
 
 template <class IA>
