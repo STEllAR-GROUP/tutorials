@@ -57,9 +57,7 @@
 #define NELEM 100000000
 #define NMAXSTRING 10000000
 using namespace std ;
-//namespace hpx_util  = hpx::parallel::v2::sort::util ;
-namespace hpx_tools = hpx::parallel::v2::sort::tools ;
-//namespace hpx_sort  = hpx::parallel::v2::sort ;
+namespace hpx_tools = sort_tools;
 
 using hpx_tools::time_point ;
 using hpx_tools::now;

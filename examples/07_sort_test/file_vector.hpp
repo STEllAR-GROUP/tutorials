@@ -30,10 +30,8 @@
 # define HPX_INLINE_NAMESPACE(x) namespace x
 #endif
 
-namespace hpx		{
-namespace parallel	{
-HPX_INLINE_NAMESPACE(v2) { namespace sort		{
-namespace tools		{
+namespace sort_tools {
+
 //
 //-----------------------------------------------------------------------------
 //  function : generate_file
@@ -246,9 +244,6 @@ struct uint64_file_generator
 //
 //****************************************************************************
 }; // end namespace tools
-}; // end namespace parallel
-};}; // end HPX_INLINE_NAMESPACE(v2)
-}; // end namespace boost
 //****************************************************************************
 //
 #endif
