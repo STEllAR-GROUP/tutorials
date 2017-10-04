@@ -55,6 +55,7 @@
 
 #define NELEM 100000000
 #define NMAXSTRING 10000000
+
 using namespace std ;
 namespace hpx_tools = sort_tools;
 
@@ -100,7 +101,7 @@ void Generator (uint64_t N );
 
 // --------------------------------------------------------------------
 // we need a callback for the HPX runtime to call for this benchmark
-// as we start stop the HPX runtime for each test.
+// as we start/stop the HPX runtime for each test.
 #ifdef SORT_HAS_HPX
 template <class IA, class compare>
 int Test_hpx ( const std::vector <IA> & B, compare comp);
@@ -233,7 +234,7 @@ int main (int argc, char *argv[] )
     hpx_argv = argv;
 #endif
 
-    for (int i=4096; i<1073741824; i<<=1) {
+    for (int i=(1<<19); i<(1<<29); i<<=1) {
         Generator<int32_t>(i);
     }
 
