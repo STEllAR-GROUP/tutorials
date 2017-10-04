@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 2.8)
 project(stencil CXX)
 
 find_package(HPX REQUIRED)
+link_directories(${HPX_LIBRARY_DIR})
 
 add_executable(stencil_serial stencil_serial.cpp)
 hpx_setup_target(stencil_serial)

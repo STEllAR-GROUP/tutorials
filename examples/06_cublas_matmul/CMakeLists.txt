@@ -7,7 +7,8 @@ cmake_minimum_required(VERSION 3.0)
 project(CublasDemo CXX)
 
 find_package(HPX REQUIRED)
- 
+link_directories(${HPX_LIBRARY_DIR})
+
 include_directories(${CUDA_INCLUDE_DIRS})
 
 add_executable(cublas_matmul cublas_matmul.cpp)

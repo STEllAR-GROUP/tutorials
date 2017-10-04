@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.0)
 project(Latency CXX)
 
 find_package(HPX REQUIRED)
+link_directories(${HPX_LIBRARY_DIR})
 
 add_executable(latency latency.cpp)
 hpx_setup_target(latency COMPONENT_DEPENDENCIES iostreams)
