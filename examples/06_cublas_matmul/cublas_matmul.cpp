@@ -259,31 +259,7 @@ void matrixMultiply(sMatrixSize &matrix_size, std::size_t device, std::size_t it
 
     using cublas_future    = typename cublas_helper<T>::future_type;
 
-#ifdef HPX_CUBLAS_DEMO_WITH_ALLOCATOR
-    // for convenience
-    using device_allocator = typename cublas_helper<T>::allocator_type;
-    using device_vector    = typename cublas_helper<T>::vector_type;
-    // The policy used in the parallel algorithms
-    auto policy = hpx::parallel::execution::par;
 
-    // Create a cuda allocator
-    device_allocator alloc(cublas.target());
-
-    // Allocate device memory
-    device_vector d_vA(size_A, alloc);
-    device_vector d_vB(size_B, alloc);
-    device_vector d_vC(size_C, alloc);
-
-    // copy host memory to device
-    hpx::parallel::copy(policy, h_A.begin(), h_A.end(), d_vA.begin());
-    hpx::parallel::copy(policy, h_B.begin(), h_B.end(), d_vB.begin());
-
-    // just to make the rest of code the same for both cases
-    T *d_A=d_vA.device_data();
-    T *d_B=d_vB.device_data();
-    T *d_C=d_vC.device_data();
-
-#else
     T *d_A, *d_B, *d_C;
     cublas_helper<T>::cuda_error(
         cudaMalloc((void **) &d_A, size_A*sizeof(T)));
@@ -308,8 +284,6 @@ void matrixMultiply(sMatrixSize &matrix_size, std::size_t device, std::size_t it
     auto copy_future = cublas.get_future().then([](cublas_future &&f){
         std::cout << "The async host->device copy operation completed" << std::endl;
     });
-
-#endif
 
     std::cout << "Computing result using CUBLAS...\n";
     const T alpha = 1.0f;
