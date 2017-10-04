@@ -288,12 +288,14 @@ cmake \
     * and HPX as release/debug
 
 ```sh
-terminate called after throwing an instance of
-'hpx::detail::exception_with_info<hpx::exception>'
-  what():  failed to insert console_print_action into
-  typename to id registry.: HPX(invalid_status)
+    terminate called after throwing an instance of
+    hpx::detail::exception_with_info<hpx::exception>
+      what():  failed to insert console_print_action into
+      typename to id registry.: HPX(invalid_status)
 ```
-    * symbols that are exported are not the same and this causes trouble like the above
+
+* symbols that are exported are not the same in release/debug builds
+and this causes trouble like the above
 
 ---
 ## Building tips #1

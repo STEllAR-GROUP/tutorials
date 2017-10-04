@@ -71,7 +71,7 @@ Configuration after runtime start:
 ... And much more ...
 ```
 * Can be set with `-I...`
-	* Example: `-Ihpx.bind=compact`
+    * Example: `-Ihpx.bind=compact`
 
 ---
 ## Dumping Version Information
@@ -121,8 +121,8 @@ Build:
 * `--hpx:bind=...`
     * `compact`
     * `scatter`
-	* `balanced`
-	* _description_
+    * `balanced`
+    * _description_
 ]
 .right-column[
 ![Thread affinities](images/affinities.png)
@@ -188,7 +188,7 @@ type:
 ```
 # 4 worker threads, running on the first 4 CPUs using the first Hyperthread
 $ ./bin/hello_world --hpx:threads=4 --hpx:print-bind \
-	--hpx:bind="thread:0-3=core:0-3.pu:0"
+    --hpx:bind="thread:0-3=core:0-3.pu:0"
 ****************************************************************
 locality: 0
    0: PU L#0(P#0), Core L#0(P#0), Socket L#0(P#0), Node L#0(P#0)
@@ -202,7 +202,7 @@ locality: 0
 # and third core, worker thread 3 runs on the second NUMA on the 7th core, worker
 # thread 4 on the 2nd NUMA and 8th worker core, using the first Hyperthread
 $ ./bin/hello_world --hpx:threads=4 --hpx:print-bind \
-	--hpx:bind="thread:0-1=socket:0.core:0-2.pu:0;thread:2-3=socket:1.core:6-7.pu:0"
+    --hpx:bind="thread:0-1=socket:0.core:0-2.pu:0;thread:2-3=socket:1.core:6-7.pu:0"
 ****************************************************************
 locality: 0
    0: PU L#0(P#0), Core L#0(P#0), Socket L#0(P#0), Node L#0(P#0)
@@ -218,12 +218,12 @@ locality: 0
 ### General
 
 * HPX itself doesn't come with a dedicated launcher (like `mpirun`)
-	* `--hpx:localities=N`: using N localities
-	* `--hpx:locality=i`: ith locality
-	* `--hpx:agas=host`: The root (locality 0) process host
-	* `--hpx:hpx=host`: The host this HPX process is listening on
+    * `--hpx:localities=N`: using N localities
+    * `--hpx:locality=i`: ith locality
+    * `--hpx:agas=host`: The root (locality 0) process host
+    * `--hpx:hpx=host`: The host this HPX process is listening on
 * Manual setup tedious:
-	* Start N processes, set correct parameters...
+    * Start N processes, set correct parameters...
 
 ---
 ## Distributed Runs
@@ -259,9 +259,9 @@ locality: 0
 
 * The HPX startup routines can detect Batch systems
 * Extracts the needed information to setup the Application:
-	* Number of threads
-	* Number of localities
-	* Host names
+    * Number of threads
+    * Number of localities
+    * Host names
 * Supported environments: SLURM, PBS, ALPS, MPI
 
 ---
@@ -269,15 +269,15 @@ locality: 0
 ### SLURM
 
 * HPX startup parses the various Environment Variables set by SLURM:
-	* Number of Nodes to use
-	* Number of Threads to use
-	* List of nodes of the allocation
+    * Number of Nodes to use
+    * Number of Threads to use
+    * List of nodes of the allocation
 * Use `salloc` to get an allocation, `srun` to start the application
 * Useful parameters
-	* `-n`: Number of Processes
-	* `-N`: Number of Nodes to distribute Processes on
-	* `-c`: Number of cores
-	* `--hint=nomultithread`: Turn of multithreading
+    * `-n`: Number of Processes
+    * `-N`: Number of Nodes to distribute Processes on
+    * `-c`: Number of cores
+    * `--hint=nomultithread`: Turn of multithreading
 
 ---
 ## Batch environments
@@ -291,8 +291,8 @@ Note: The following only applies if you have the MPI parcelport compiled in
  jobs.
 * You usually want one process (==locality) per node!
 * Note to Cray users:
-	* If you have SLURM on your cray, srun will automatically activate MPI
-	* If using plain ALPS, aprun has the same effect
+    * If you have SLURM on your cray, srun will automatically activate MPI
+    * If using plain ALPS, aprun has the same effect
 
 ---
 ## Distributed Runs
@@ -300,33 +300,33 @@ Note: The following only applies if you have the MPI parcelport compiled in
 
 * `--hpx:list-parcel-ports`: Lists which parcelports are available and enabled
 * Use the INI configuration to explicitly disable/enable Parcelports:
-	* `-Ihpx.parcel.tcp.enable=0` will disable the TCP parcelport
+    * `-Ihpx.parcel.tcp.enable=0` will disable the TCP parcelport
 
 ---
 ## Debugging options
 
 * Attach a debugger:
-	* `--hpx:attach-debugger`: This will stop the HPX application and wait for
-		the debugger to be attached and the application being continued
-	* `--hpx:attach-debugger=exception`: Stops the application if there was an
-		exception
+    * `--hpx:attach-debugger`: This will stop the HPX application and wait for
+        the debugger to be attached and the application being continued
+    * `--hpx:attach-debugger=exception`: Stops the application if there was an
+        exception
 * Logging:
-	* `--hpx:debug-hpx-log`
+    * `--hpx:debug-hpx-log`
 * Debug command line parsing:
-	* `--hpx:debug-clp`
+    * `--hpx:debug-clp`
 
 ---
 ## Performance Counters
 
 * List all available performance counters:
-	* `--hpx:list-counters`
+    * `--hpx:list-counters`
 * Print counter:
-	* `--hpx:print-counter counter`
-	* This will print the counter once the application has been completed
+    * `--hpx:print-counter counter`
+    * This will print the counter once the application has been completed
 * Set counter interval:
-	* `--hpx:print-counter-interval time`
+    * `--hpx:print-counter-interval time`
 * Print performance counters from your application:
-	* `hpx::evaluate_active_counters(bool reset, char const* description)`
+    * `hpx::evaluate_active_counters(bool reset, char const* description)`
 
 ---
 ## HPX Application Startup
@@ -337,13 +337,13 @@ Note: The following only applies if you have the MPI parcelport compiled in
 
 int hpx_main()
 {
-	// Initiate HPX shutdown
-	return hpx::finalize()
+    // Initiate HPX shutdown
+    return hpx::finalize()
 }
 
 int main(int argc, char** argv)
 {
-	hpx::init(argc, argv);
+    hpx::init(argc, argv);
 }
 ```
 
@@ -357,8 +357,8 @@ int main(int argc, char** argv)
 // Use regular "C-style-main" and parse non-consumed command line arguments
 int hpx_main(int argc, char** argv)
 {
-	// Initiate HPX shutdown
-	return hpx::finalize()
+    // Initiate HPX shutdown
+    return hpx::finalize()
 }
 ```
 
@@ -373,7 +373,7 @@ int hpx_main(int argc, char** argv)
 int hpx_main(boost::program_options::variables_map& vm)
 {
     std::size_t Nx = vm["Nx"].as<std::size_t>();
-	return hpx::finalize()
+    return hpx::finalize()
 }
 
 int main(int argc, char** argv)
@@ -384,7 +384,7 @@ int main(int argc, char** argv)
     desc_commandline.add_options()
         ("Nx", value<std::uint64_t>()->default_value(1024),
          "Elements in the x direction")
-	hpx::init(desc_commandline, argc, argv);
+    hpx::init(desc_commandline, argc, argv);
 }
 ```
 * [Read the docs!](http://www.boost.org/doc/libs/release/doc/html/program_options.html)
@@ -398,9 +398,9 @@ int main(int argc, char** argv)
 
 int hpx_main()
 {
-	std::string val = hpx::get_config_entry("my.cool.option", "42");
+    std::string val = hpx::get_config_entry("my.cool.option", "42");
 
-	return hpx::finalize()
+    return hpx::finalize()
 }
 
 int main(int argc, char** argv)
@@ -409,7 +409,7 @@ int main(int argc, char** argv)
     // localities. And an application specific setting
     std::vector<std::string> const cfg = {
         "hpx.run_hpx_main!=1",
-		"my.cool.option!=yeha"
+        "my.cool.option!=yeha"
     };
 
     return hpx::init(argc, argv, cfg);
@@ -431,7 +431,7 @@ int main(int argc, char** argv)
 
 int main()
 {
-	return 0;
+    return 0;
 }
 ```
 
@@ -442,7 +442,7 @@ Or:
 
 int main(int argc, char** argv)
 {
-	return 0;
+    return 0;
 }
 ```
 

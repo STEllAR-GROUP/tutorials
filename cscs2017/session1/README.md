@@ -131,10 +131,11 @@ as quickly as possible as soon as anything
 
 * A future is the result of something that hasn't yet run
 
-* A future is set by one thread/task
-    * using `future.set_value(stuff);`
+* A future is set by one thread/task (directly, by using a promise)
+    * using `promise.set_value(stuff);`
+    * or by returing a value from a task such as `future<T> x = async(...)` call
 
-* The value is rettrieved by another thread/task
+* The value is retrieved by another thread/task
     * using `auto value = future.get();` syntax
 
 * Futures in HPX are extended to support continuations

@@ -25,15 +25,16 @@ Thursday, October 5 and Friday, October 6, 2017
 * Tea Break, 15 Minutes
 * [10:45 to 12:15: Introduction to HPX - Part 2 (API)](session2)
 * Lunch, 1 hour
-* [13:15 to 14:45: Building HPX - CMake Options and Dependencies](session3)
+* [13:15 to xx:xx: Building HPX - CMake Options and Dependencies](session3)
+* [xx:xx to 14:45: Hello World! - Options and Running Applications](session4)
 * Tea Break, 15 Minutes
-* [15:00 to 16:30: Hello World! - Options and Running Applications](session4)
+* [15:00 to 16:40: Worked 2D Stencil Example - From Serial to Distributed](session5)
 
 # Friday, September 29, 2016
 
-* [9:00 to 10:30: Worked 2D Stencil Example - From Serial to Distributed](session5)
 * Tea Break, 15 Minutes
-* [10:45 to 12:15: Resource Management and Performance Issues](session6)
+* [9:00 to 10:30: Resource Management and Performance Issues](session6)
+* [10:45 to 12:15: Thomas's special session](sessionx)
 * Lunch, 1 hour
 * [13:15 to 14:45: Debugging HPX Applications](session7)
 * Tea Break, 15 Minutes
@@ -45,10 +46,8 @@ Thursday, October 5 and Friday, October 6, 2017
 * Hartmut Kaiser (LSU)
 * Bryce Lelbach (LBNL)
 * Agustin Berge
-* John Biddiscombe (CSCS)
 * Patrick Diehl (Bonn)
 * Matrin Stumpf (FAU)
 * Arne Hendricks (FAU)
 * Parsa Amini (LSU
 * And many others...
-
