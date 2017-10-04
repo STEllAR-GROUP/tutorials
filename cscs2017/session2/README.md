@@ -578,6 +578,20 @@ future<double> f3 =
 * Accepts launch policies as well as [executors](#executors) as the first parameter
 
 ---
+## Working with Futures
+### Callbacks and futures, oh my
+
+* Handling futures in continuations might get tedious
+    * `vector<future<T>>` -> `std::vector<T>`
+    * `void f(tuple<future<T>, future<U>>)` -> `void f(T, U)`
+* `hpx::util::unwrap`
+    * Automatically unwraps futures
+* `hpx::util::unwrapping`
+    * Wraps a callable taking non-futures
+    * Automatically unwraps future arguments
+* [Unwrapping Fibonacci Example](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/03_fibonacci/fibonacci_futures.cpp#L44)
+
+---
 ## Concepts of Parallelism
 ### Types of Parallelism
 
@@ -941,6 +955,198 @@ hpx::parallel::transform(policy,
 * [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/parallel_cuda.cu)
 * Works only for CUDA version 8 :(
 ]
+
+
+
+---
+## Global Objects in HPX
+### Writing Components
+
+* Goal:
+
+```
+struct hello_world_component;
+struct hello_world;
+
+int main()
+{
+  hello_world hw(hpx::find_here());
+
+  hw.print();
+}
+```
+
+---
+## Global Objects in HPX
+### Writing Components
+
+```
+// Component implementation
+struct hello_world_component
+  : hpx::components::component_base<
+        hello_world_component
+    >
+{
+    // ...
+};
+```
+
+---
+## Global Objects in HPX
+### Writing Components
+
+```
+// Component implementation
+struct hello_world_component
+  : hpx::components::component_base<
+        hello_world_component
+    >
+{
+    void print() { std::cout << "Hello World!\n"; }
+    // define print_action
+    HPX_DEFINE_COMPONENT_ACTION(hello_world_component, print);
+};
+```
+
+---
+## Global Objects in HPX
+### Writing Components
+
+```
+// Component implementation
+struct hello_world_component
+  : hpx::components::component_base<
+        hello_world_component
+    >
+{
+    // ...
+};
+
+// Register component
+typedef hpx::components::component<
+    hello_world_component
+> hello_world_type;
+
+HPX_REGISTER_MINIMAL_COMPONENT_FACTORY(hello_world_type, hello_world);
+```
+
+---
+## Global Objects in HPX
+### Writing Components
+
+```
+// Component implementation
+struct hello_world_component
+  : hpx::components::component_base<
+        hello_world_component
+    >
+{
+    // ...
+};
+
+// Register component ...
+
+// Register action
+HPX_REGISTER_ACTION(print_action);
+```
+
+---
+## Global Objects in HPX
+### Writing Components
+
+```
+struct hello_world_component;
+
+// Client implementation
+struct hello_world
+  : hpx::components::client_base<hello_world, hello_world_component>
+{
+    // ...
+};
+
+int main()
+{
+    // ...
+}
+```
+
+---
+## Global Objects in HPX
+### Writing Components
+
+```
+struct hello_world_component;
+
+// Client implementation
+struct hello_world
+  : hpx::components::client_base<hello_world, hello_world_component>
+{
+    typedef
+        hpx::components::client_base<hello_world, hello_world_component>
+        base_type;
+
+    hello_world(hpx::id_type where)
+      : base_type(
+          hpx::new_<hello_world_component>(where)
+        )
+    {}
+};
+
+int main()
+{
+    // ...
+}
+```
+
+---
+## Global Objects in HPX
+### Writing Components
+
+```
+struct hello_world_component;
+
+// Client implementation
+struct hello_world
+  : hpx::components::client_base<hello_world, hello_world_component>
+{
+    // base_type
+
+    hello_world(hpx::id_type where);
+
+    hpx::future<void> print()
+    {
+        hello_world_component::print_action act;
+        return hpx::async(act, get_gid());
+    }
+};
+
+int main()
+{
+    // ...
+}
+```
+
+---
+## Global Objects in HPX
+### Writing Components
+
+```
+struct hello_world_component;
+
+// Client implementation
+struct hello_world
+  : hpx::components::client_base<hello_world, hello_world_component>
+{
+    hello_world(hpx::id_type where);
+    hpx::future<void> print();
+};
+
+int main()
+{
+    hello_world hw(hpx::find_here());
+    hw.print();
+}
+```
 
 ---
 class: center, middle
