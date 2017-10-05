@@ -18,7 +18,7 @@ module unload gcc
 GCC_version=6.2.0
 # Cuda support benefits from gcc 5.3
 # GCC_version=5.3.0
-module load gcc/GCC_version
+module load gcc/$GCC_version
 
 # use cray compiler wrappers for easy mpi finding
 export CC=/opt/cray/pe/craype/default/bin/cc
@@ -437,7 +437,12 @@ module unload gcc
 module load   gcc/$GCC_version
 module load   papi
 module load   cudatoolkit
+```
 
+---
+##Build on daint #2
+
+```
 # make sure you have clang settings
 source /apps/daint/UES/6.0.UP04/HPX/clang-setup.sh
 
