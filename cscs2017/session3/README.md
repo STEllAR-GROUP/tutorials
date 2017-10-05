@@ -442,10 +442,10 @@ module load   cudatoolkit
 source /apps/daint/UES/6.0.UP04/HPX/clang-setup.sh
 
 # and load the module for the HPX we installed for the course
-module load /apps/daint/UES/6.0.UP04/HPX/
+module load /apps/daint/UES/6.0.UP04/HPX/hpx-clang
 
 #  CMake with examples path (debug: -DCMAKE_BUILD_TYPE=Debug/RelWithDebInfo)
-cmake -DCMAKE_BUILD_TYPE=Release ../tutorials/examples
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ../tutorials/examples
 
 # make the demos
 make -j4
