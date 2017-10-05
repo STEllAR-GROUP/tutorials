@@ -216,6 +216,19 @@ scheduling/runtime can be used for the whole heirarchy of tasks
 </p>
 
 ---
+## Performance
+
+.left-column[
+* Even Microsoft are amazed!
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Dear HPX: How? <a href="https://t.co/12u1n8bBdi">pic.twitter.com/12u1n8bBdi</a></p>&mdash; Billy O&#39;Neal (@MalwareMinigun) <a href="https://twitter.com/MalwareMinigun/status/880299153493970945?ref_src=twsrc%5Etfw">June 29, 2017</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+]
+.right-column[
+![tweet](images/tweet-2.png)
+]
+
+---
 ## Task scheduling and lifetime
 
 * Each task goes onto one of the schedulers
