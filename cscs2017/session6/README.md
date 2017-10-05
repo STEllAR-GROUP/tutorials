@@ -45,12 +45,10 @@ Previous: [Worked 2D Stencil Example](../session5)
 ##Resource Partitioner Basic Creation
 * Create RP and pass in options object, plus command line
 ```
-    // Create the resource partitioner
     hpx::resource::partitioner rp(desc_cmdline, argc, argv);
 ```
 * You want an extra thread pool to do MPI tasks
 ```
-    // Create a thread pool using the default scheduler provided by HPX
     rp.create_thread_pool("mpi",
         hpx::resource::scheduling_policy::local_priority_fifo);
     // Other schedulers are available (but use this one!)
@@ -147,6 +145,8 @@ hpx::threads::scheduled_executor matrix_normal_executor =
     hpx::threads::executors::pool_executor("default",
     hpx::threads::thread_priority_default);
 ```
+* Then use that executor everywhere you would normally use a default one
+(or where nd executor is ommitted)
 
 ---
 ##Resource Partitioner : Custom Scheduler / Default pool
@@ -174,6 +174,33 @@ hpx::threads::scheduled_executor matrix_normal_executor =
                     pool_index, pool_name, mode, thread_offset));
         return pool;
     });
+```
+
+---
+##Rename Default Pool
+* You want N pools, you can loop over
+* 1 per numa domain (let's say 4)
+* The first pool is always called "default"
+
+```
+    // create the resource partitioner
+    hpx::resource::partitioner rp(argc, argv);
+
+    // before adding pools - set the default pool name to "pool-0"
+    rp.set_default_pool_name("pool-0");
+
+    // create N pools
+    int numa_count = 0;
+    for (const hpx::resource::numa_domain& d : rp.numa_domains())
+    {
+        // create pool
+        std::string pool_name = "pool-"+std::to_string(numa_count);
+        rp.create_thread_pool(pool_name,
+            hpx::resource::scheduling_policy::local_priority_fifo);
+        // add domain to it
+        rp.add_resource(d, pool_name);
+        numa_count++;
+    }
 ```
 
 ---
