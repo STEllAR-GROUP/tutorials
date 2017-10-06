@@ -10,6 +10,7 @@
 #include <hpx/include/resource_partitioner.hpp>
 #include <hpx/include/parallel_execution.hpp>
 #include <hpx/runtime/threads/executors/pool_executor.hpp>
+#include <hpx/include/parallel_for_loop.hpp>
 #include <hpx/include/threads.hpp>
 #include <hpx/util/lightweight_test.hpp>
 
@@ -89,6 +90,17 @@ int hpx_main(int argc, char* argv[])
         );
     }
 
+    auto policy =
+
+    hpx::parallel::for_loop(
+        std::forward<ExPolicy>(policy),
+        iterator(std::begin(c)), iterator(std::end(c)),
+        [](iterator it)
+        {
+            *it = 42;
+        });
+
+
     // check that the default executor still works
     hpx::parallel::execution::default_executor large_stack_executor(
         hpx::threads::thread_stacksize_large);
@@ -141,6 +153,33 @@ int main(int argc, char* argv[])
                 }
             }
         }
+    }
+
+    // now run the test
+    HPX_TEST_EQ(hpx::init(), 0);
+    return hpx::util::report_errors();
+}
+
+// this test must be run with 4 threads
+int main_2(int argc, char* argv[])
+{
+    // create the resource partitioner
+    hpx::resource::partitioner rp(argc, argv);
+
+    // before adding pools - set the default pool name to "pool-0"
+    rp.set_default_pool_name("pool-0");
+
+    // create N pools
+    int numa_count = 0;
+    for (const hpx::resource::numa_domain& d : rp.numa_domains())
+    {
+        // create pool
+        std::string pool_name = "pool-"+std::to_string(numa_count);
+        rp.create_thread_pool(pool_name,
+            hpx::resource::scheduling_policy::local_priority_fifo);
+        // add domain to it
+        rp.add_resource(d, pool_name);
+        numa_count++;
     }
 
     // now run the test

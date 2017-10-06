@@ -61,10 +61,7 @@ typedef std::unique_lock<mutex_type>         unique_lock;
 typedef hpx::lcos::local::condition_variable condition_var_type;
 
 // ---------------------------------------------------------------------------------
-// Send a message and receives the reply using a vector<future> to track
-// messages in flight. Guaranteed to wait correctly after each batch of
-// 'window_size' messages, but needs more effort to maintain 'window_size' messages
-// in flight all the time.
+// Send a message and receive the reply using non async invocation
 double receive_v0(
     hpx::naming::id_type dest,
     char * send_buffer,
@@ -76,13 +73,13 @@ double receive_v0(
     buffer_type recv_buffer;
     //
     message_action msg;
-    
+
     // warm up, estimate timing
     hpx::util::high_resolution_timer t;
     for (int s=0; s<SKIP; ++s) {
         recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
     }
-    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP)); 
+    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP));
     //
     t.restart();
     for (std::size_t i = 0; i<num_loops; ++i) {
@@ -91,7 +88,7 @@ double receive_v0(
           recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
         }
     }
-    //    
+    //
     double d = (static_cast<double>(window_size*num_loops));
     return (t.elapsed() * 1e6) / (2.0*d);
 }
@@ -114,15 +111,15 @@ double receive_v1(
     message_action msg;
 
     // vector to store returns in
-    std::vector<hpx::future<hpx::serialization::serialize_buffer<char>>> messages;
+    std::vector<hpx::future<buffer_type>> messages;
     messages.reserve(window_size);
-    
+
     // warm up, estimate timing
     hpx::util::high_resolution_timer t;
     for (int s=0; s<SKIP; ++s) {
         recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
     }
-    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP)); 
+    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP));
     //
     t.restart();
     for (std::size_t i = 0; i<num_loops; ++i) {
@@ -134,7 +131,7 @@ double receive_v1(
         hpx::wait_all(messages);
         messages.clear();
     }
-    //    
+    //
     double d = (static_cast<double>(window_size*num_loops));
     return (t.elapsed() * 1e6) / (2.0*d);
 }
@@ -164,7 +161,7 @@ double receive_v2(
     for (int s=0; s<SKIP; ++s) {
         recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
     }
-    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP)); 
+    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP));
     //
     t.restart();
     for (std::size_t i = 0; i < num_loops; ++i)
@@ -185,7 +182,7 @@ double receive_v2(
         unique_lock lk(mutex_);
         cv.wait(lk, [&]{return counter==window_size;});
     }
-    //    
+    //
     double d = (static_cast<double>(window_size*num_loops));
     return (t.elapsed() * 1e6) / (2.0*d);
 }
@@ -226,7 +223,7 @@ double receive_v3(
     for (int s=0; s<SKIP; ++s) {
         recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
     }
-    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP)); 
+    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP));
     //
     t.restart();
     for (std::size_t i = 0; i < (num_loops*window_size); ++i) {
@@ -252,14 +249,14 @@ double receive_v3(
     }
     unique_lock lk(mutex_);
     cv.wait(lk, [&]{return counter == (num_loops*window_size);});
-    //    
+    //
     double d = (static_cast<double>(window_size*num_loops));
     return (t.elapsed() * 1e6) / (2.0*d);
 }
 
 // ---------------------------------------------------------------------------------
 // Send a message and receives the reply using a sliding_semaphore (as per v3) to
-// track messages in flight, but we trigger the signal using an atomic counter. 
+// track messages in flight, but we trigger the signal using an atomic counter.
 // As before there are always 'window_size' messages in transit
 // at any time
 // The use of the atomic counter means that we always signal with the correct
@@ -290,7 +287,7 @@ double receive_v4(
     for (int s=0; s<SKIP; ++s) {
         recv_buffer = msg(dest,buffer_type(send_buffer, size, buffer_type::reference));
     }
-    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP)); 
+    std::size_t num_loops = 1 + (0.001*test_time/(window_size*t.elapsed()/SKIP));
     //
     t.restart();
     for (std::size_t i = 0; i < (num_loops*window_size); ++i) {
@@ -358,7 +355,7 @@ void run_benchmark(boost::program_options::variables_map & vm)
         }
         hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     }
-    
+
     if ((flags & 2) == 2) {
         print_header("Vector of futures");
         timer.restart();
@@ -370,10 +367,10 @@ void run_benchmark(boost::program_options::variables_map & vm)
         }
         hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     }
-    
-        
+
+
     if ((flags & 4) == 4) {
-        print_header("Atomic counter");    
+        print_header("Atomic counter");
         timer.restart();
         for (std::size_t size = min_size; size <= max_size; size *= 2)
         {
@@ -383,7 +380,7 @@ void run_benchmark(boost::program_options::variables_map & vm)
         }
         hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     }
-        
+
     if ((flags & 8) == 8) {
         print_header("Sliding semaphore");
         timer.restart();
@@ -395,7 +392,7 @@ void run_benchmark(boost::program_options::variables_map & vm)
         }
         hpx::cout << "Total time (s) : " << timer.elapsed_nanoseconds()/1E9 << "\n\n";
     }
-    
+
     if ((flags & 16) == 16) {
         print_header("Sliding atomic");
         timer.restart();

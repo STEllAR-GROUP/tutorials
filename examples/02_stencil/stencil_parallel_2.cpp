@@ -16,6 +16,9 @@
 
 #include <hpx/util/high_resolution_timer.hpp>
 
+// APEX
+#include "hpx/util/annotated_function.hpp"
+
 #include <array>
 #include <algorithm>
 #include <vector>
@@ -116,6 +119,8 @@ int hpx_main(boost::program_options::variables_map& vm)
             hpx::parallel::induction(next.middle + Nx, Nx),
             [Nx](iterator it, data_type::iterator result)
             {
+                hpx::util::annotate_function apex_profiler("line_update");
+
                 line_update(*it, *it + Nx, result);
             }
         );

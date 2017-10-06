@@ -16,6 +16,9 @@
 
 #include <hpx/util/high_resolution_timer.hpp>
 
+// APEX
+#include "hpx/util/annotated_function.hpp"
+
 #include <array>
 #include <algorithm>
 #include <vector>
@@ -97,6 +100,8 @@ void worker(
                 top_boundary_future = comm.get(communicator_type::up, t).then(
                     [&comm, curr, next, Ny, Nx, t](hpx::future<std::vector<double>>&& up_future)
                     {
+                        hpx::util::annotate_function apex_profiler("line_update");
+
                         // Get the first row.
                         auto result = next.middle;
                         std::vector<double> up = up_future.get();
@@ -129,6 +134,7 @@ void worker(
                     hpx::parallel::induction(next.middle + Nx, Nx),
                     [Nx](iterator it, data_type::iterator result)
                     {
+                        hpx::util::annotate_function apex_profiler("line_update (for)");
                         line_update(*it, *it + Nx, result);
                     }
                 );
@@ -141,6 +147,7 @@ void worker(
                 bottom_boundary_future = comm.get(communicator_type::down, t).then(
                     [&comm, curr, next, Ny, Nx, t](hpx::future<std::vector<double>>&& bottom_future)
                     {
+                        hpx::util::annotate_function apex_profiler("line_update - for2");
                         // Get the last row.
                         auto result = next.middle + (Ny - 2) * Nx;
                         // retrieve the row which is 'down' from our last row.

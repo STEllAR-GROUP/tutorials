@@ -47,7 +47,7 @@ Previous: [Worked 2D Stencil Example](../session5)
 ```
     hpx::resource::partitioner rp(desc_cmdline, argc, argv);
 ```
-* You want an extra thread pool to do MPI tasks
+* You want an extra thread pool to do MPI tasks (HPX_WITH_NETWORKING=OFF)
 ```
     rp.create_thread_pool("mpi",
         hpx::resource::scheduling_policy::local_priority_fifo);
@@ -116,8 +116,10 @@ Previous: [Worked 2D Stencil Example](../session5)
         comm2D_ft, diag_block_sf
     );
 ```
-* This example is using `dataflow == when_all(comm2D_ft, diag_block_sf).then(lambda)`
-
+* This example is using
+```
+dataflow == when_all(comm2D_ft, diag_block_sf).then(lambda)
+```
 ---
 ##Resource Partitioner : Caution
 * Continuation Tasks are launched on the pool that the parent is running on
@@ -204,6 +206,15 @@ hpx::threads::scheduled_executor matrix_normal_executor =
 ```
 
 ---
+##Other examples of Executors on pool
+* Use the executor with different priorities
+
+* Use executor with algorithms etc
+
+```
+```
+
+---
 ##Move semantics
 * async functions don't happen _right now_
     * async calls go onto the thread queue and are executed later
@@ -254,7 +265,6 @@ or been RDMA'd to a remote node, etc)
 ```
 * `my_callback` will be triggered when it is safe to use the arguments that were
 passed into the async function.
-
     * (the placeholders refer to an error code and a parcel reference -
     these are returned in the callback so you can take action in case of an error)
 
@@ -266,7 +276,7 @@ passed into the async function.
 ![Grid](images/grainsize.png)
 
 ---
-##Chunk sizes (Obsolete slide, but still informative)
+##Chunk sizes (Obsolete slide, still useful)
 * You might call an async parallel::algorithm as follows
 ```
     std::vector<double> dummy;
@@ -554,6 +564,7 @@ a reference to the underlying data.
 
 * An action is spawned to do nothing other than send a message back
     * We wait for the return after every send
+    * Note we call the action directly without using async
 
 * Do this in a loop and find the averaage time
 
@@ -561,7 +572,7 @@ a reference to the underlying data.
 
 * Changing the window size has no effect
 
-[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L75)
+[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L64)
 
 * Note the use of DIRECT_ACTION, `serialize_buffer`
 
@@ -577,7 +588,7 @@ a reference to the underlying data.
 
 * Gives a more realistic answer than v0, but we are not really measuring N
 
-[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L111)
+[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L97)
 
 * Note : We are actually measuring a sawtooth from 0 to N
 <crop>
@@ -594,7 +605,7 @@ a reference to the underlying data.
 
 * Simple, but still a sawtooth
 
-[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L154)
+[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L140)
 
 ---
 ##Latency V3
@@ -614,7 +625,7 @@ a later one
 until the last message has returned
     * (this also means the timing is correct on the last iteration)
 
-[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L211)
+[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L191)
 
 ---
 ##Latency V4
@@ -628,7 +639,7 @@ for triggering our semaphore.
 * We no longer need the condition variable at the end to prevent segfaults on the
 semaphore access.
 
-[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L275)
+[See the source code](https://github.com/STEllAR-GROUP/tutorials/blob/master/examples/01_latency/latency.cpp#L258)
 
 * V5 : Suggestions welcome for an even better version
 

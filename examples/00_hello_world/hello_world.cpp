@@ -30,6 +30,9 @@ void hello_locality()
     using hpx::parallel::for_loop;
     using hpx::parallel::par;
 
+
+
+
     // Iterate over the range in parallel
     for_loop(
         par,
@@ -42,6 +45,7 @@ void hello_locality()
             hpx::cout
               << "Hello, I am HPX Thread " << num_thread
               << " executed on Locality " << id << std::endl;
+
         }
     );
 }

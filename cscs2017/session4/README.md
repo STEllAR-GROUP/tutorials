@@ -297,7 +297,7 @@ srun -n 4 /scratch/snx1600/biddisco/build/clang/linalg/bin/check_cholesky_d
 -Ihpx.max_busy_loop_count=500 --hpx:bind=numa-balanced
 --hpx:high-priority-threads=6  --hpx:threads=36 --hpx:run-hpx-main
 --hpx:print-counter /runtime{locality#*/total}/memory/resident
---hpx:print-counter=/arithmetics/add@/papi{locality#0/worker-thread#*}/PAPI_L3_DCM
+--hpx:print-counter=/arithmetics/add@/papi{locality#0/worker-thread#*}/PAPI_L1_DCM
 --hpx:print-counter-interval=100
 --hpx:print-counter-destination=/dev/null
 --col-proc=2 --row-proc=2 --size=10240 --nb=512 --use-pools --mpi-threads=2
