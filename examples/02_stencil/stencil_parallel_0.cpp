@@ -38,7 +38,7 @@ int hpx_main(boost::program_options::variables_map& vm)
     iterator curr(Nx, U[0].begin());
     iterator next(Nx, U[1].begin());
 
-    auto policy = hpx::parallel::par;
+    auto policy = hpx::parallel::execution::par;
     for (std::size_t t = 0; t < steps; ++t)
     {
         // We store the result of our update in the next middle line.

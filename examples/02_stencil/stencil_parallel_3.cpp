@@ -77,7 +77,7 @@ void worker(
     iterator curr(Nx, U[0].begin());
     iterator next(Nx, U[1].begin());
 
-    auto policy = hpx::parallel::par.on(executor);
+    auto policy = hpx::parallel::execution::par.on(executor);
     for (std::size_t t = 0; t < steps; ++t)
     {
         // Update our upper boundary if we have an interior partition and an

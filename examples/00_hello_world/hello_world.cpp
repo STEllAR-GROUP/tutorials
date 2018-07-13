@@ -28,10 +28,7 @@ void hello_locality()
         << " (" << name << ")" << std::endl;
 
     using hpx::parallel::for_loop;
-    using hpx::parallel::par;
-
-
-
+    using hpx::parallel::execution::par;
 
     // Iterate over the range in parallel
     for_loop(

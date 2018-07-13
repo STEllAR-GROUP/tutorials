@@ -253,7 +253,7 @@ int Test_hpx ( const std::vector <IA> & B , compare comp )
     //cout<<"---------------- HPX sort (seq) --------------\n";
     cout<<"HPX sort (seq)               : ";
     start = test_tools::now() ;
-    hpx::parallel::v1::sort(hpx::parallel::v1::seq, A.begin() , A.end(), comp );
+    hpx::parallel::sort(hpx::parallel::execution::seq, A.begin() , A.end(), comp );
     finish = test_tools::now() ;
     duration = test_tools::subtract_time(finish ,start) ;
     cout<<duration<<" secs\n";
@@ -263,7 +263,7 @@ int Test_hpx ( const std::vector <IA> & B , compare comp )
     //cout<<"---------------- HPX sort (par) --------------\n";
     cout<<"HPX sort (par)               : ";
     start = test_tools::now() ;
-    hpx::parallel::v1::sort(hpx::parallel::v1::par, A.begin() , A.end(), comp );
+    hpx::parallel::sort(hpx::parallel::execution::par, A.begin() , A.end(), comp );
     finish = test_tools::now() ;
     duration = test_tools::subtract_time(finish ,start) ;
     cout<<duration<<" secs\n";

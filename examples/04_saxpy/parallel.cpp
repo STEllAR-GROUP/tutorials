@@ -26,7 +26,7 @@ int hpx_main(boost::program_options::variables_map& vm)
     hpx::util::high_resolution_timer t;
     for (std::size_t t = 0; t < steps; ++t)
     {
-        using hpx::parallel::par;
+        using hpx::parallel::execution::par;
         hpx::parallel::transform(par,
             b.begin(), b.end(), c.begin(), a.begin(),
             [x](double bb, double cc)

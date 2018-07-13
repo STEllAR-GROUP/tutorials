@@ -90,7 +90,7 @@ set(TUTORIAL_DIRS
   02_stencil
   03_fibonacci
   04_saxpy
-  05_named_pool_executor
+#  05_named_pool_executor
   # 06 is cuda test
   07_sort_test
 )
