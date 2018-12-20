@@ -235,7 +235,7 @@ class shared_future
     shared_future(shared_future&& f);
 
     // Share ownership between two futures
-    shared_future(shared_future&& f);
+    shared_future(shared_future const & f);
 
     // Unwrap a future. The new future becomes ready when
     // the inner, and outer future are ready.
