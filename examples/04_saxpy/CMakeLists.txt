@@ -19,9 +19,9 @@ hpx_setup_target(saxpy_parallel)
 add_executable(saxpy_parallel_numa parallel_numa.cpp)
 hpx_setup_target(saxpy_parallel_numa)
 
-if (HPX_WITH_CUDA)
+# disabled for the time being
+if (0 AND HPX_WITH_CUDA)
   add_executable(saxpy_parallel_cuda parallel_cuda.cu)
-  link_directories(/opt/apps/x86_64/cuda/8rc/lib64)
   hpx_setup_target(saxpy_parallel_cuda)
   if (TARGET tutorial)
     add_hpx_pseudo_dependencies(tutorial.saxpy saxpy_parallel_cuda)
