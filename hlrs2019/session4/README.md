@@ -1,15 +1,14 @@
 
 class: center, middle
 
-# Hello World!
-## Options and Running Applications
+# Exercises
 
 [Overview](..)
 
 Previous: [Building HPX](../session3)
 
 ???
-[Click here to view the Presentation](https://stellar-group.github.io/tutorials/cscs2016/session4/)
+[Click here to view the Presentation](https://stellar-group.github.io/tutorials/hlrs2019/session4/)
 
 ---
 ## General

@@ -9,7 +9,7 @@ class: center, middle
 Previous: [Hello World! - Options and Running Applications](../session4)
 
 ???
-[Click here to view the Presentation](https://stellar-group.github.io/tutorials/cscs2016/session5/)
+[Click here to view the Presentation](https://stellar-group.github.io/tutorials/hlrs2019/session5/)
 
 ---
 ## The Problem we want to solve
@@ -646,5 +646,5 @@ class: center, middle
 class: center, middle
 ## Next
 
-[Resource managment - Keeping things under control](../session6)
+ [Debugging and Profiling HPX Applications](../session6)
 
