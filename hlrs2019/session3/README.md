@@ -1,7 +1,7 @@
 
 class: center, middle
 
-# Building HPX
+# Building and Running HPX
 ## CMake, Options, Dependencies
 
 [Overview](..)
@@ -12,23 +12,11 @@ Previous: [Introduction to HPX - Part 2 (API)](../session2)
 [Click here to view the Presentation](https://stellar-group.github.io/tutorials/hlrs2019/session3/)
 
 ---
-## Using Hazelhen for the course
+## Dependencies
 
-```sh
-ssh -X rzvmpi23@hazelhen.hww.de
-```
-
-* Directory structure:
-    * $HOME/hpx/
-    * $HOME/group[01-17]
-
-* Hazelhen documentation:
-    * https://wickie.hlrs.de/platforms/index.php/Cray_XC40
-    * https://wickie.hlrs.de/platforms/index.php/CRAY_XC40_Using_the_Batch_System
-* Submitting jobs:
-    * qsub -I -X -lnodes=1:ppn=24,walltime=1:00:00 -q R_course
-    * Queue for today: R_course49
-    * Queue for tomorrow: R_course50
+* Boost
+* Hwloc
+* A good allocator
 
 ---
 ## Dependencies #1
@@ -36,7 +24,7 @@ ssh -X rzvmpi23@hazelhen.hww.de
 HPX uses Boost extensively throughout the code
 * Considerable amounts of boost code have been absorbed into HPX
     * so dependencies on boost are been gradually decreasing
-    * (more `std::` features are presnt in newer compilers)
+    * (more `std::` features are present in newer compilers)
 
 * Threading components, locks and mutexes
 * Boost.context used for basis of lightweight threads
@@ -255,7 +243,7 @@ cmake \
 * Building _all_ of HPX can take a long time
 
 * On your first build, enable `HPX_WITH_EXAMPLES` and `HPX_WITH_TESTS`
-    * `make -j8 hello_world_exe`
+    * `make -j8 hello_world_1_exe`
     * check it compiles
     * check it runs
 
@@ -281,9 +269,6 @@ salloc -N 2
 * Note : `make -j8 xxx` can cause problems
     * HPX uses a _lot_ of templates and the compiler can use all your memory
     * if disk swapping starts during compiling use `make -j2` (or `j4` etc)
-
-* be warned that the CMake `add_hpx_executable` command appends `_exe` to binaries
-    * so if you make a test called `my_test` you need to `make -j8 my_test_exe`
 
 * in your own CMakeLists.txt you can
 ```cmake
@@ -367,7 +352,7 @@ Main requirement of CMakeLists is
 
 and for targets
 
-`hpx_setup_target(target [COMPONENTS iostreams])`
+`hpx_setup_target(target [COMPONENT_DEPENDENCIES iostreams])`
 
 * Note that `NO_CMAKE_PACKAGE_REGISTRY` is there to stop CMake from looking in
 user build/install dirs in preference to module paths etc.
@@ -425,6 +410,9 @@ your test project, and allow CMake to create a subdir for HPX too
     * you can work on an HPX branch ...
     * ... merge fixes in, make local changes freely
     * push and pull from the origin
+
+* Or, you can use a released version of HPX
+    * We aim to release a new version every 6 months
 
 ---
 ## Building tips #3 : An HPX superproject
@@ -510,7 +498,7 @@ Warning TLS not available on earlier XCode versions - use Boost 1.59.0 only on X
     * in build dir, config `#defines` written `<hpx/config/defines.hpp>`
 
 * All options are documented on
-[this page of HPX build options](http://stellar-group.github.io/hpx/docs/html/hpx/manual/build_system/building_hpx/cmake_variables.html)
+[this page of HPX build options](https://stellar-group.github.io/hpx/docs/sphinx/latest/html/manual/building_hpx.html#cmake-variables-used-to-configure-hpx)
 
 ---
 ## Main HPX Build options #2
@@ -574,7 +562,7 @@ export TAU_TRACE=1
 
 * HPX comes with a large set of options you can pass through the command line
 * We will cover a few
-* [Read the docs!](http://stellar-group.github.io/hpx/docs/html/hpx/manual/init.html)
+* [Read the docs!](http://stellar-group.github.io/hpx/docs/sphinx/latest/html/index.html)
 
 ---
 ## Running An HPX application using ALPS
@@ -591,7 +579,7 @@ export TAU_TRACE=1
 ### Command line parameters
 
 ```INI
-$ ./bin/hello_world --hpx:help
+$ ./bin/hello_world_1 --hpx:help
 
 Usage: unknown HPX application [options]:
 
@@ -1013,6 +1001,8 @@ int main(int argc, char** argv)
 	return 0;
 }
 ```
+
+---
 class: center, middle
 ## Next
 
