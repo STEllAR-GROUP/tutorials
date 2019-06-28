@@ -90,17 +90,6 @@ int hpx_main(int argc, char* argv[])
         );
     }
 
-    auto policy =
-
-    hpx::parallel::for_loop(
-        std::forward<ExPolicy>(policy),
-        iterator(std::begin(c)), iterator(std::end(c)),
-        [](iterator it)
-        {
-            *it = 42;
-        });
-
-
     // check that the default executor still works
     hpx::parallel::execution::default_executor large_stack_executor(
         hpx::threads::thread_stacksize_large);

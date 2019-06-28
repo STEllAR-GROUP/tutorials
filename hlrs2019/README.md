@@ -35,7 +35,7 @@ Thursday, July 4 and Friday, July 5, 2019
 * Tea Break, 15 Minutes
 * [10:45 to 13:00: Debugging and Profiling HPX Applications](session6)
 * Lunch, 1 hour
-* [14:00 to 15:30: Resource Management and Performance Issues](session7)
+* [14:00 to 15:30: Resource Management, Performance and Future Directions](session7)
 
 ---
 ## Acknowledgements

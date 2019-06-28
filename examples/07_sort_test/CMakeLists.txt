@@ -68,7 +68,7 @@ endif()
 #------------------------------------------------------------------------------
 add_executable(sort_test sort_test.cpp)
 hpx_setup_target(sort_test COMPONENT_DEPENDENCIES iostreams)
-target_link_libraries(sort_test ${BENCHMARK_LIBRARIES})
+target_link_libraries(sort_test PRIVATE ${BENCHMARK_LIBRARIES})
 
 # for tutorial target
 if (TARGET tutorial)

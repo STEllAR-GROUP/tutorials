@@ -13,7 +13,7 @@ include_directories(${CUDA_INCLUDE_DIRS})
 
 add_executable(cublas_matmul cublas_matmul.cpp)
 hpx_setup_target(cublas_matmul COMPONENT_DEPENDENCIES iostreams)
-target_link_libraries(cublas_matmul ${CUDA_LIBRARIES} ${CUDA_cublas_LIBRARY})
+target_link_libraries(cublas_matmul PRIVATE ${CUDA_LIBRARIES} ${CUDA_cublas_LIBRARY})
 
 # for tutorial target
 if (TARGET tutorial)
