@@ -58,6 +58,7 @@ HPX_PLAIN_DIRECT_ACTION(message);
 // ---------------------------------------------------------------------------------
 typedef hpx::lcos::local::mutex              mutex_type;
 typedef std::unique_lock<mutex_type>         unique_lock;
+typedef std::lock_guard<mutex_type>          lock_guard;
 typedef hpx::lcos::local::condition_variable condition_var_type;
 
 // ---------------------------------------------------------------------------------
@@ -151,10 +152,10 @@ double receive_v2(
     typedef hpx::serialization::serialize_buffer<char> buffer_type;
     buffer_type recv_buffer;
 
-    message_action            msg;
-    condition_var_type        cv;
-    mutex_type                mutex_;
-    std::atomic<unsigned int> counter;
+    message_action                      msg;
+    auto cv = std::make_shared<condition_var_type>();
+    mutex_type                          mutex_;
+    std::atomic<unsigned int>           counter;
 
     // warm up, estimate timing
     hpx::util::high_resolution_timer t;
@@ -171,16 +172,16 @@ double receive_v2(
         for (std::size_t i=0; i< window_size; ++i) {
             hpx::async(
                 msg, dest, buffer_type(send_buffer, size, buffer_type::reference)).then(
-                [&](auto && f){
+                [&, cv](auto && f){
                     if (++counter == window_size) {
-                        cv.notify_one();
+                      cv->notify_one();
                     }
                 }
             );
         }
         // wait until all are done
         unique_lock lk(mutex_);
-        cv.wait(lk, [&]{return counter==window_size;});
+        cv->wait(lk, [&]{return counter==window_size;});
     }
     //
     double d = (static_cast<double>(window_size*num_loops));
