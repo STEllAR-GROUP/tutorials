@@ -1,8 +1,8 @@
 
 class: center, middle
 
-# Building and Running HPX
-## CMake, Options, Dependencies
+# Building and running HPX applications
+## Dependencies, HPX projects, command-line options
 
 [Overview](..)
 
@@ -10,6 +10,11 @@ Previous: [Introduction to HPX - Part 2 (API)](../session2)
 
 ???
 [Click here to view the Presentation](https://stellar-group.github.io/tutorials/hlrs2019/session3/)
+
+---
+# Building HPX
+
+* Can seem intimidating, but easier than it looks
 
 ---
 ## Dependencies
@@ -43,16 +48,16 @@ HPX uses Boost extensively throughout the code
 
 ```sh
 # download
-wget http://vorboss.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
+wget https://sourceforge.net/projects/boost/files/boost/1.69.0/boost_1_69_0.tar.gz
 
 # untar
-tar -xzf boost_1_63_0.tar.gz
+tar -xzf boost_1_69_0.tar.gz
 
 # build
-cd boost_1_63_0
+cd boost_1_69_0
 ./bootstrap.sh
-./b2 cxxflags="-std=c++14" \
-  --prefix=/path/to/boost/1.63.0 \
+./b2 cxxflags="-std=c++17" \
+  --prefix=/path/to/boost/1.69.0 \
   --layout=versioned threading=multi link=shared \
   variant=release,debug \
   address-model=64 -j8 install
@@ -81,14 +86,14 @@ cd boost_1_63_0
 ```sh
 # download a tarball (version 1.11.5 latest @ March 2017)
 wget --no-check-certificate \
-https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz
+https://www.open-mpi.org/software/hwloc/v2.0/downloads/hwloc-2.0.4.tar.gz
 
 # untar
-tar -xzf hwloc-1.11.5.tar.gz
+tar -xzf hwloc-2.0.4.tar.gz
 
 # configure and install
-cd hwloc-1.11.5
-./configure --prefix=/path/to/hwloc/1.11.5
+cd hwloc-2.0.4
+./configure --prefix=/path/to/hwloc/2.0.4
 make -j8 install
 ```
 
@@ -120,7 +125,7 @@ make -j8 install
 ```sh
 # Download
 # visit https://github.com/jemalloc/jemalloc/releases
-JEMALLOC_VER=4.5.0
+JEMALLOC_VER=5.2.0
 wget https://github.com/jemalloc/jemalloc/releases/download/$JEMALLOC_VER/jemalloc-$JEMALLOC_VER.tar.bz2
 
 # untar
@@ -136,7 +141,12 @@ make -j8 -k install
 * It takes a couple of minutes and you just need to pass the path into your HPX CMake
 
 ---
-## OTF2
+## Dependencies #4
+### Profiling
+* APEX downloaded as a dependency by the HPX build system
+* OTF2 provides task plots, but needs to be enabled separately
+## Dependencies #4
+### Installing OTF2
 ```sh
 wget http://www.vi-hps.org/upload/packages/otf2/otf2-2.0.tar.gz
 tar -xzf otf2-2.0.tar.gz
@@ -167,8 +177,7 @@ cmake \
  -DCMAKE_TOOLCHAIN_FILE=/path/to/source/hpx/cmake/toolchains/Cray.cmake \
  -DCMAKE_INSTALL_PREFIX=/path/to/hpx/master/release \
  -DHWLOC_ROOT=/path/to/hwloc/1.11.5 \
- -DHPX_WITH_HWLOC=ON \
- -DHPX_WITH_MALLOC=JEMALLOC \
+ -DHPX_WITH_MALLOC=jemalloc \
  -DBOOST_ROOT=/path/to/boost/1.63.0 \
  -DJEMALLOC_ROOT=/path/to/jemalloc/4.4.0 \
  -DHPX_WITH_TESTS=OFF \
@@ -178,17 +187,16 @@ cmake \
 ```
 
 ---
-## HPX CMake : Debug
+## HPX CMake: Debug
 ```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=Debug \
  -DCMAKE_TOOLCHAIN_FILE=/path/to/source/hpx/cmake/toolchains/Cray.cmake \
  -DCMAKE_INSTALL_PREFIX=/path/to/hpx/master/debug \
- -DHWLOC_ROOT=/path/to/hwloc/1.11.5 \
- -DHPX_WITH_HWLOC=ON \
- -DHPX_WITH_MALLOC=JEMALLOC \
- -DBOOST_ROOT=/path/to/boost/1.63.0 \
- -DJEMALLOC_ROOT=/path/to/jemalloc/4.4.0 \
+ -DHWLOC_ROOT=/path/to/hwloc/2.0.4 \
+ -DHPX_WITH_MALLOC=jemalloc \
+ -DBOOST_ROOT=/path/to/boost/1.69.0 \
+ -DJEMALLOC_ROOT=/path/to/jemalloc/5.2.0 \
  -DHPX_WITH_TESTS=OFF \
  -DHPX_WITH_EXAMPLES=OFF \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
@@ -197,24 +205,22 @@ cmake \
 
 ---
 ## HPX CMake: RelWithDebInfo (profiling)
-###APEX + TAU + PAPI + OTF2
+###APEX + PAPI + OTF2
 ```cmake
 cmake \
  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
  -DCMAKE_TOOLCHAIN_FILE=/path/to/source/hpx/cmake/toolchains/Cray.cmake \
  -DCMAKE_INSTALL_PREFIX=/path/to/hpx/master/profiling \
- -DHWLOC_ROOT=/path/to/hwloc/1.11.5 \
- -DHPX_WITH_HWLOC=ON \
- -DHPX_WITH_MALLOC=JEMALLOC \
- -DBOOST_ROOT=/path/to/boost/1.63.0 \
- -DJEMALLOC_ROOT=/path/to/jemalloc/4.4.0 \
+ -DHWLOC_ROOT=/path/to/hwloc/2.0.4 \
+ -DHPX_WITH_MALLOC=jemalloc \
+ -DBOOST_ROOT=/path/to/boost/1.69.0 \
+ -DJEMALLOC_ROOT=/path/to/jemalloc/5.2.0 \
  -DHPX_WITH_TESTS=OFF \
  -DHPX_WITH_EXAMPLES=OFF \
  -DHPX_WITH_PAPI=ON \
  -DHPX_WITH_APEX=ON -DAPEX_WITH_PAPI=ON \
- -DAPEX_WITH_OTF2=ON -DAPEX_WITH_TAU=ON \
+ -DAPEX_WITH_OTF2=ON \
  -DOTF2_ROOT=/path/to/otf2/2.0 \
- -DTAU_ROOT=/path/to/tau/2.25 \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
  /apps/daint/hpx/src/hpx
 ```
@@ -243,155 +249,38 @@ cmake \
 * Building _all_ of HPX can take a long time
 
 * On your first build, enable `HPX_WITH_EXAMPLES` and `HPX_WITH_TESTS`
-    * `make -j8 hello_world_1_exe`
+    * `make -j8 hello_world_1`
     * check it compiles
     * check it runs
 
-* if hello world is ok, then build the rest (at your discretion)
+* If hello world is ok, then build the rest (at your discretion)
     ```sh
     make tests.unit tests.regression examples
     ```
-* use `make help` to dump out a list of targets
+* Use `make help` to dump out a list of targets
 
-* run tests
+* Run tests
 ```sh
 ctest -R tests.unit
 ```
 
-* note that some tests run distributed so you need to first allocate some nodes
-to ensure that mpi works
+* Note that some tests run distributed so you need to first allocate some nodes
+to ensure that MPI works
 ```sh
 salloc -N 2
 ```
 
 ---
 ## Building tips #2
-* Note : `make -j8 xxx` can cause problems
+* Note: `make -j8 xxx` can cause problems
     * HPX uses a _lot_ of templates and the compiler can use all your memory
     * if disk swapping starts during compiling use `make -j2` (or `j4` etc)
 
-* in your own CMakeLists.txt you can
-```cmake
-    add_executable(my_test ${MY_SRSC})
-    hpx_setup_target(my_test)
-```
-
----
-## Build tutorial examples (on Hazelhen)
-```sh
-# get tutorial material, https://github.com/STEllAR-GROUP/tutorials
-cp -r ~/tutorials ~/personal/space/tutorials
-
-# create a build dir
-mkdir build
-cd build
-
-# make sure you load all the modules we'll use in tutorial. This is already done
-# for the tutorial account
-module switch PrgEnv-cray/5.2.82 PrgEnv-gnu
-module load tools/cmake/3.4.2
-module load tools/git
-# setup hwloc
-export PATH=$HOME/hpx/hwloc-1.11.5/bin:$PATH
-export LD_LIBRARY_PATH=$HOME/hpx/hwloc-1.11.5/lib:$LD_LIBRARY_PATH
-export PKG_CONFIG_PATH=$HOME/hpx/hwloc-1.11.5/lib/pkgconfig:$PKG_CONFIG_PATH
-# setup jemalloc
-export LD_LIBRARY_PATH=$HOME/hpx/jemalloc-4.4.0/lib:$LD_LIBRARY_PATH
-export PKG_CONFIG_PATH=$HOME/hpx/jemalloc-4.4.0/lib/pkgconfig:$PKG_CONFIG_PATH
-
-export BOOST_ROOT=/opt/hlrs/tools/boost/1.62.0
-
-
-# for debug: ~/hpx/build/debug/environment.sh
-# for profiling with APEX: ~/hpx/build/profiling-apex/environment.sh
-# for profiling with VTUNE: ~/hpx/build/profiling-itt/environment.sh
-source ~/hpx/build/release/environment.sh
-
-#  CMake with examples path (debug: -DCMAKE_BUILD_TYPE=Debug/RelWithDebInfo)
-cmake -DCMAKE_BUILD_TYPE=Release ../tutorials/examples
-
-# make the demos
-make -j4
-```
-
----
-## Build tutorial on laptop etc
-
-* Clone tutorial repo as before
-
-* Create build dir
-
-* invoke CMake with PATH to HPX (build tree or install tree)
-
-```sh
-cmake -DHPX_DIR=${path_to_hpx_install} ${path_to_tutorials}/examples
-cmake -DHPX_DIR=${path_to_hpx_build}   ${path_to_tutorials}/examples
-```
-* note that for a build tree you might want
-
-```sh
-cmake -DHPX_DIR=${path_to_hpx_build}/lib/cmake/HPX
-  ${path_to_tutorials}/examples
-```
-
-* ...and set a build going
-
-```sh
-make -j4
-```
-
----
-## CMakeLists.txt for a set of test projects
-
-Follow this link to see the
-[CMakeLists for (top level) tutorial superproject](../../examples/CMakeLists.txt)
-
-Main requirement of CMakeLists is
-
-`find_package(HPX REQUIRED)`
-
-and for targets
-
-`hpx_setup_target(target [COMPONENT_DEPENDENCIES iostreams])`
-
-* Note that `NO_CMAKE_PACKAGE_REGISTRY` is there to stop CMake from looking in
-user build/install dirs in preference to module paths etc.
-    * if you build a lot of versions, CMake tries to help by creating a registry
-    that can cause the wrong one to be chosen (despite any overiding options you use)
-
-* Top level CMakeLists calls `find_package` once to save each example dir finding again
-    * recall that scope of vars by default in CMake is directory based
-    * and subdirs inherit from parents
-
----
-## CMakeLists.txt for a simple test project
-Follow this link [CMakeLists for Stencil](../../examples/02_stencil/CMakeLists.txt)
-to see the CMakeLists file for one of the examples
-
-This example contains multiple binaries, all are added using the same simple syntax
-
-```cmake
-add_executable(stencil_serial stencil_serial.cpp)
-hpx_setup_target(stencil_serial)
-```
-
-`hpx_setup_target` should get all the link dirs/lib and dependencies that you need
-
-Occasionally you might need to add additional components such as the hpx iostreams
-library, but in this example, `hpx::cout` is not being used and it is therefore not
-needed. See [CMakeLists for Hello World](../../examples/00_hello_world/CMakeLists.txt) for
-an example of how it is used
-
-If you require other links to be added, you can continue to use
-```cmake
-target_link_libraries(solver_reference
-    solver_mini_lib
-    ${ALGEBRA_LIBS}
-)
-```
-
 ---
 ## Building tips #3
+
+* __Use a released version of HPX__
+    * We aim to release a new version every 6 months
 
 * HPX is a changing target as many commits are being made daily
 
@@ -410,84 +299,6 @@ your test project, and allow CMake to create a subdir for HPX too
     * you can work on an HPX branch ...
     * ... merge fixes in, make local changes freely
     * push and pull from the origin
-
-* Or, you can use a released version of HPX
-    * We aim to release a new version every 6 months
-
----
-## Building tips #3 : An HPX superproject
-* Add an option to download and build HPX as a subproject in a top level CMakeLists.txt
-as follows
-
-```cmake
-option(HPX_DOWNLOAD_AS_SUBPROJECT OFF) # default is no
-if (HPX_DOWNLOAD_AS_SUBPROJECT)
-  list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-  include(hpx_download)
-  add_subproject(HPX hpx)
-endif()
-```
-
-* The contents of the [hpx_download](../../examples/cmake/hpx_download.cmake)
-make use of two additional script/macro files
-[GitExternal](../../examples/cmake/GitExternal.cmake),
-[SubProject](../../examples/cmake/SubProject.cmake)
-
-    * Note that SHALLOW and VERBOSE are options that may be removed
-
----
-## Building tips #3 : An HPX superproject #2
-
-* A superproject allow us to add HPX as a subdirectory in our top level source tree,
-build HPX and set HPX\_DIR to the binary location so that later when our example projects
-do `find_package(HPX)` everything points to our _in tree_ copy of HPX.
-
-    * No need to worry about Release/Debug incompatibility
-    * No need to worry about wrong versions of boost/hwloc/jemalloc
-    * No need to worry about wrong compiler flags
-    * `make -j8 my_example` will build libhpx etc automatically
-    * any changes to HPX after pull/merge automatically trigger a rebuild
-
-* When building, you must now pass
-
-    * `-DHPX_DOWNLOAD_AS_SUBPROJECT=ON`
-    * all `HPX_XXX` CMake options/variables that you need (as before)
-    * all your own options/variables to the CMake invocation
-
-* You can enable/disable the HPX subproject and switch back to a system/custom HPX
-at any time (though I recommend using branches in the HPX subdir).
-
-* The SubProject Macros will not overwrite your loal changes after the initial checkout
-
----
-## Superproject build on OSX with Xcode 8
-```sh
-cmake \
- -DCMAKE_BUILD_TYPE=Release \
- -DCMAKE_CXX_FLAGS=-std=c++14 \
- -DCMAKE_INSTALL_PREFIX=/Users/biddisco/apps/tutorial \
- -DHPX_WITH_NATIVE_TLS=ON \
- -DHPX_WITH_PARCELPORT_MPI=ON \
- -DHPX_WITH_PARCELPORT_TCP=ON \
- -DHPX_WITH_THREAD_IDLE_RATES=ON \
- -DHPX_WITH_TESTS=ON \
- -DHPX_WITH_TESTS_EXTERNAL_BUILD=OFF \
- -DHPX_WITH_EXAMPLES=ON \
- -DBOOST_ROOT=/Users/biddisco/apps/boost/1.59.0 \
- -DBoost_COMPILER=-xgcc42 \
- -DHWLOC_ROOT:PATH=/Users/biddisco/apps/hwloc/1.11.4 \
- -DHWLOC_INCLUDE_DIR:PATH=/Users/biddisco/apps/hwloc/1.11.4/include \
- -DHWLOC_LIBRARY:FILEPATH=/Users/biddisco/apps/hwloc/1.11.4/lib/libhwloc.dylib \
- -DHPX_WITH_MALLOC=JEMALLOC \
- -DJEMALLOC_INCLUDE_DIR:PATH=/Users/biddisco/apps/jemalloc/4.2.1/include \
- -DJEMALLOC_LIBRARY:FILEPATH=/Users/biddisco/apps/jemalloc/4.2.1/lib/libjemalloc.dylib \
- -DHPX_DOWNLOAD_AS_SUBPROJECT=ON \
- -DSUBPROJECT_HPX=ON \
- ~/src/tutorials/examples
-
- make -j8 tutorial
-```
-Warning TLS not available on earlier XCode versions - use Boost 1.59.0 only on XCode 7.x
 
 ---
 ## Main HPX Build options #1
@@ -544,37 +355,236 @@ Warning TLS not available on earlier XCode versions - use Boost 1.59.0 only on X
     parcel traces/dependencies to help with profiling
 
 ---
-## Apex trace output
+# Building HPX projects
 
-* To generate trace files compatible with Vampir etc.
-```sh
-export APEX_TAU=1
-export APEX_OTF2=1
-export APEX_PROFILE=1
-export APEX_SCREEN_OUTPUT=1
-export TAU_TRACE=1
+* Building HPX projects straightforward with the help of a few functions provided by HPX
+
+---
+## HPX project: CMakeLists.txt for a set of test projects
+
+Follow this link to see the
+[CMakeLists for (top level) tutorial superproject](../../examples/CMakeLists.txt)
+
+Main requirement of CMakeLists is
+
+`find_package(HPX REQUIRED)`
+
+and for targets
+
+* `add_hpx_executable(target SOURCES source.cpp [COMPONENT_DEPENDENCIES])`, or
+* `hpx_setup_target(target [COMPONENT_DEPENDENCIES iostreams])`
+
+* Top level CMakeLists calls `find_package` once to save each example dir finding again
+    * recall that scope of vars by default in CMake is directory based
+    * and subdirs inherit from parents
+
+* Note that `NO_CMAKE_PACKAGE_REGISTRY` is there to stop CMake from looking in
+user build/install dirs in preference to module paths etc.
+    * if you build a lot of versions, CMake tries to help by creating a registry
+    that can cause the wrong one to be chosen (despite any overiding options you use)
+
+---
+## HPX project: CMakeLists.txt for a simple test project
+
+Follow this link [CMakeLists for Stencil](../../examples/00_exercises/CMakeLists.txt)
+to see the CMakeLists file for one of the examples
+
+This example contains multiple binaries, all are added using the same simple syntax
+
+```cmake
+add_hpx_executable(my_executable SOURCES my_source.cpp)
 ```
-*   OTF2 trace files generated in OTF2
+
+* `add_hpx_executable` for new targets
+* `hpx_setup_target` can be used on existing targets
+
+Occasionally you might need to add additional components such as the HPX
+iostreams library. See [CMakeLists for Hello
+World](../../examples/00_exercises/CMakeLists.txt) for an example of how it is
+used
+
+If you require other links to be added, you can continue to use
+```cmake
+target_link_libraries(solver_reference
+    solver_mini_lib
+    ${ALGEBRA_LIBS}
+)
+```
+
+---
+## HPX project: An HPX superproject
+* Add an option to download and build HPX as a subproject in a top level CMakeLists.txt
+as follows
+
+```cmake
+option(HPX_DOWNLOAD_AS_SUBPROJECT OFF) # default is no
+if (HPX_DOWNLOAD_AS_SUBPROJECT)
+  list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+  include(hpx_download)
+  add_subproject(HPX hpx)
+endif()
+```
+
+* The contents of the [hpx_download](../../examples/cmake/hpx_download.cmake)
+make use of two additional script/macro files
+[GitExternal](../../examples/cmake/GitExternal.cmake),
+[SubProject](../../examples/cmake/SubProject.cmake)
+
+    * Note that SHALLOW and VERBOSE are options that may be removed
+
+---
+## HPX project: An HPX superproject #2
+
+* A superproject allow us to add HPX as a subdirectory in our top level source tree,
+build HPX and set HPX\_DIR to the binary location so that later when our example projects
+do `find_package(HPX)` everything points to our _in tree_ copy of HPX.
+
+    * No need to worry about Release/Debug incompatibility
+    * No need to worry about wrong versions of boost/hwloc/jemalloc
+    * No need to worry about wrong compiler flags
+    * `make -j8 my_example` will build libhpx etc automatically
+    * any changes to HPX after pull/merge automatically trigger a rebuild
+
+* When building, you must now pass
+
+    * `-DHPX_DOWNLOAD_AS_SUBPROJECT=ON`
+    * all `HPX_XXX` CMake options/variables that you need (as before)
+    * all your own options/variables to the CMake invocation
+
+* You can enable/disable the HPX subproject and switch back to a system/custom HPX
+at any time (though I recommend using branches in the HPX subdir).
+
+* The SubProject Macros will not overwrite your loal changes after the initial checkout
 
 ---
 # Hello World!
 ## Options and Running Applications
 
+* HPX applications can be started in a few different ways
 * HPX comes with a large set of options you can pass through the command line
 * We will cover a few
 * [Read the docs!](http://stellar-group.github.io/hpx/docs/sphinx/latest/html/index.html)
 
 ---
-## Running An HPX application using ALPS
+## HPX Application Startup
+### `hpx::init`
 
-* No difference to a regular MPI application
-* qsub -I -X -lnodes=1:ppn=24,walltime=1:00:00 -q R_course
-* aprun -n 1 -N 1 -d 24 ./my_prog
-    * -n determines the number of nodes
-    * -N The number of localities per node
-    * -d The number of cores to use
+```
+#include <hpx/hpx_init.hpp>
+
+int hpx_main()
+{
+	// Initiate HPX shutdown
+	return hpx::finalize()
+}
+
+int main(int argc, char** argv)
+{
+	hpx::init(argc, argv);
+}
+```
 
 ---
+## Adding your own options
+### Use C-style main
+
+```
+#include <hpx/hpx_init.hpp>
+
+// Use regular "C-style-main" and parse non-consumed command line arguments
+int hpx_main(int argc, char** argv)
+{
+	// Initiate HPX shutdown
+	return hpx::finalize()
+}
+```
+
+---
+## Adding your own options
+### Using Boost.ProgramOptions
+
+```
+#include <hpx/hpx_init.hpp>
+
+// Use Boost.ProgramOptions to retrieved non-consumed command line arguments
+int hpx_main(boost::program_options::variables_map& vm)
+{
+    std::size_t Nx = vm["Nx"].as<std::size_t>();
+	return hpx::finalize()
+}
+
+int main(int argc, char** argv)
+{
+    using namespace boost::program_options;
+
+    options_description desc_commandline;
+    desc_commandline.add_options()
+        ("Nx", value<std::uint64_t>()->default_value(1024),
+         "Elements in the x direction")
+	hpx::init(desc_commandline, argc, argv);
+}
+```
+* [Read the docs!](http://www.boost.org/doc/libs/release/doc/html/program_options.html)
+
+---
+## Adding your own options
+### Using The HPX INI Config
+
+```
+#include <hpx/hpx_init.hpp>
+
+int hpx_main()
+{
+	std::string val = hpx::get_config_entry("my.cool.option", "42");
+
+	return hpx::finalize()
+}
+
+int main(int argc, char** argv)
+{
+    // Initialize and run HPX, this example requires to run hpx_main on all
+    // localities. And an application specific setting
+    std::vector<std::string> const cfg = {
+        "hpx.run_hpx_main!=1",
+		"my.cool.option!=yeha"
+    };
+
+    return hpx::init(argc, argv, cfg);
+}
+```
+
+* Can be combined with an application specific `options_description` as well!
+
+---
+## HPX Application Startup
+### Alternative "replacing" main
+
+* Alternative for providing `hpx_main` and calling `hpx_init`
+* The HPX runtime gets set up in the background
+* The application still accepts all regular HPX parameters
+
+```
+#include <hpx/hpx_main.hpp>
+
+int main()
+{
+	return 0;
+}
+```
+
+Or:
+
+```
+#include <hpx/hpx_main.hpp>
+
+int main(int argc, char** argv)
+{
+	return 0;
+}
+```
+
+---
+class: center, middle
 ## Overview
 ### Command line parameters
 
@@ -626,39 +636,39 @@ Configuration after runtime start:
 
 ... And much more ...
 ```
-* Can be set with `-I...`
+* Can be set with `-I...`/`--hpx:ini`
 	* Example: `-Ihpx.bind=compact`
+* Or `--hpx:config=/path/to/hpx.ini`
 
 ---
-## Dumping Version Information
+## Version Information
 ### `--hpx:version`
 
 ```
-$ ./bin/hello_world --hpx:version
+$ ./bin/hello_world_1 --hpx:version
 
-HPX - High Performance ParalleX
-A general purpose parallel C++ runtime system for distributed applications
-of any scale.
+HPX - The C++ Standard Library for Parallelism and Concurrency
+(A general purpose parallel C++ runtime system for distributed applications
+of any scale).
 
-Copyright (c) 2007-2016, The STE||AR Group,
+Copyright (c) 2007-2019, The STE||AR Group,
 http://stellar-group.org, email:hpx-users@stellar.cct.lsu.edu
 
 Distributed under the Boost Software License, Version 1.0. (See accompanying
 file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 Versions:
-  HPX: V1.0.0-trunk (AGAS: V3.0), Git: 4f281039e4
-  Boost: V1.61.0
-  Hwloc: V1.11.0
-  MPI: MPICH V3.2rc1, MPI V3.1
+  HPX: V1.4.0-trunk (AGAS: V3.0), Git: b692046feb
+  Boost: V1.67.0
+  Hwloc: V2.0.0
 
 Build:
-  Type: debug
-  Date: Sep 28 2016 11:42:06
+  Type: release
+  Date: Jan  1 1970 00:00:01
   Platform: linux
-  Compiler: GNU C++ version 5.3.0 20151204 (Cray Inc.)
-  Standard Library: GNU libstdc++ version 20151204
-  Allocator: JEMALLOC
+  Compiler: GNU C++ version 9.1.0
+  Standard Library: GNU libstdc++ version 20190503
+  Allocator: tcmalloc
 ```
 
 ---
@@ -837,6 +847,17 @@ locality: 0
 
 ---
 ## Batch environments
+### ALPS
+
+* Similar to SLURM
+* qsub -I -X -lnodes=1:ppn=24,walltime=1:00:00 -q R_course
+* aprun -n 1 -N 1 -d 24 ./my_prog
+    * -n determines the number of nodes
+    * -N The number of localities per node
+    * -d The number of cores to use
+
+---
+## Batch environments
 ### MPI
 
 Note: The following only applies if you have the MPI parcelport compiled in
@@ -885,125 +906,17 @@ Note: The following only applies if you have the MPI parcelport compiled in
 	* `hpx::evaluate_active_counters(bool reset, char const* description)`
 
 ---
-## HPX Application Startup
-### `hpx::init`
+## Apex trace output
 
+* To generate trace files compatible with Vampir etc.
+```sh
+export APEX_OTF2=1
+export APEX_PROFILE=1
+export APEX_SCREEN_OUTPUT=1
 ```
-#include <hpx/hpx_init.hpp>
-
-int hpx_main()
-{
-	// Initiate HPX shutdown
-	return hpx::finalize()
-}
-
-int main(int argc, char** argv)
-{
-	hpx::init(argc, argv);
-}
-```
+*   OTF2 trace files generated in OTF2
 
 ---
-## Adding your own options
-### Use C-style main
-
-```
-#include <hpx/hpx_init.hpp>
-
-// Use regular "C-style-main" and parse non-consumed command line arguments
-int hpx_main(int argc, char** argv)
-{
-	// Initiate HPX shutdown
-	return hpx::finalize()
-}
-```
-
----
-## Adding your own options
-### Using Boost.ProgramOptions
-
-```
-#include <hpx/hpx_init.hpp>
-
-// Use Boost.ProgramOptions to retrieved non-consumed command line arguments
-int hpx_main(boost::program_options::variables_map& vm)
-{
-    std::size_t Nx = vm["Nx"].as<std::size_t>();
-	return hpx::finalize()
-}
-
-int main(int argc, char** argv)
-{
-    using namespace boost::program_options;
-
-    options_description desc_commandline;
-    desc_commandline.add_options()
-        ("Nx", value<std::uint64_t>()->default_value(1024),
-         "Elements in the x direction")
-	hpx::init(desc_commandline, argc, argv);
-}
-```
-* [Read the docs!](http://www.boost.org/doc/libs/release/doc/html/program_options.html)
-
----
-## Adding your own options
-### Using The HPX INI Config
-
-```
-#include <hpx/hpx_init.hpp>
-
-int hpx_main()
-{
-	std::string val = hpx::get_config_entry("my.cool.option", "42");
-
-	return hpx::finalize()
-}
-
-int main(int argc, char** argv)
-{
-    // Initialize and run HPX, this example requires to run hpx_main on all
-    // localities. And an application specific setting
-    std::vector<std::string> const cfg = {
-        "hpx.run_hpx_main!=1",
-		"my.cool.option!=yeha"
-    };
-
-    return hpx::init(argc, argv, cfg);
-}
-```
-
-* Can be combined with an application specific `options_description` as well!
-
----
-## HPX Application Startup
-### Alternative "replacing" main
-
-* Alternative for providing `hpx_main` and calling `hpx_init`
-* The HPX runtime gets set up in the background
-* The application still accepts all regular HPX parameters
-
-```
-#include <hpx/hpx_main.hpp>
-
-int main()
-{
-	return 0;
-}
-```
-
-Or:
-
-```
-#include <hpx/hpx_main.hpp>
-
-int main(int argc, char** argv)
-{
-	return 0;
-}
-```
-
----
-class: center, middle
 ## Next
 
 [Exercises](../session4)

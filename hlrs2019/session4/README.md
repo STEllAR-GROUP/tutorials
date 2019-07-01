@@ -11,6 +11,13 @@ Previous: [Building and Running HPX](../session3)
 [Click here to view the Presentation](https://stellar-group.github.io/tutorials/hlrs2019/session4/)
 
 ---
+## Goals
+
+* (Optional: build HPX)
+* Configure project with HPX
+* Very basic to intermediate exercises (fill in the gaps)
+
+---
 ## Using Hazelhen for the course
 
 ```sh
@@ -30,11 +37,54 @@ ssh -X rzvmpi23@hazelhen.hww.de
     * Queue for tomorrow: R_course97
 
 ---
-## Goals
+## Build tutorial examples (on Hazelhen)
+```sh
+# get tutorial material, https://github.com/STEllAR-GROUP/tutorials
+cp -r ~/tutorials ~/personal/space/tutorials
 
-* (Optional: build HPX)
-* Configure project with HPX
-* Very basic to intermediate exercises (fill in the gaps)
+# create a build dir
+mkdir build
+cd build
+
+# Environment already set up in ~/.bashrc
+
+# for debug: ~/hpx/build/debug/environment.sh
+# for profiling with APEX: ~/hpx/build/profiling-apex/environment.sh
+# for profiling with VTUNE: ~/hpx/build/profiling-itt/environment.sh
+source ~/hpx/build/release/environment.sh
+
+#  CMake with examples path (debug: -DCMAKE_BUILD_TYPE=Debug/RelWithDebInfo)
+cmake -DCMAKE_BUILD_TYPE=Release ../tutorials/examples
+
+# make the demos
+make -j4
+```
+
+---
+## Build tutorial on laptop etc
+
+* Clone tutorial repo as before
+
+* Create build dir
+
+* invoke CMake with PATH to HPX (build tree or install tree)
+
+```sh
+cmake -DHPX_DIR=${path_to_hpx_install} ${path_to_tutorials}/examples
+cmake -DHPX_DIR=${path_to_hpx_build}   ${path_to_tutorials}/examples
+```
+* note that for a build tree you might want
+
+```sh
+cmake -DHPX_DIR=${path_to_hpx_build}/lib/cmake/HPX
+  ${path_to_tutorials}/examples
+```
+
+* ...and set a build going
+
+```sh
+make -j4
+```
 
 ---
 ## Exercises
