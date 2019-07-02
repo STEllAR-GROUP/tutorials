@@ -33,8 +33,8 @@ ssh -X rzvmpi23@hazelhen.hww.de
     * https://wickie.hlrs.de/platforms/index.php/CRAY_XC40_Using_the_Batch_System
 * Submitting jobs:
     * qsub -I -X -lnodes=1:ppn=24,walltime=1:00:00 -q R_courseXX
-    * Queue for today: R_course96
-    * Queue for tomorrow: R_course97
+    * Queue for today: R_course95
+    * Queue for tomorrow: R_course96
 
 ---
 ## Build tutorial examples (on Hazelhen)
@@ -50,7 +50,6 @@ cd build
 
 # for debug: ~/hpx/build/debug/environment.sh
 # for profiling with APEX: ~/hpx/build/profiling-apex/environment.sh
-# for profiling with VTUNE: ~/hpx/build/profiling-itt/environment.sh
 source ~/hpx/build/release/environment.sh
 
 #  CMake with examples path (debug: -DCMAKE_BUILD_TYPE=Debug/RelWithDebInfo)
@@ -89,7 +88,7 @@ make -j4
 ---
 ## Exercises
 
-* Exercises are in the tutorials repo https://stellar-group.github.io/tutorials/examples/exercises
+* Exercises are in the tutorials repo https://github.com/STEllAR-GROUP/tutorials/tree/master/examples
 * `cmake [-DHPX_ROOT=/path/to/hpx] /path/to/tutorials/examples`
 * `make tutorials.exercises.exercises` builds exercises
     * most fail to build, fix them

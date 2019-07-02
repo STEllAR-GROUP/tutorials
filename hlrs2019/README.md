@@ -11,7 +11,7 @@ Thursday, July 4 and Friday, July 5, 2019
 ### Presenters
 * **John Biddiscombe**, Swiss National Supercomputing Centre (CSCS)
 * **Mikael Simberg**, Swiss National Supercomputing Centre (CSCS)
-* **Thomas Heller**, Computer Architecture, Friedrich-Alexander-University Erlangen-Nuremberg (FAU
+* **Thomas Heller**
 
 [https://github.com/STEllAR-GROUP/tutorials](https://github.com/STEllAR-GROUP/tutorials)
 ???
