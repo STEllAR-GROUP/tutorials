@@ -145,11 +145,13 @@ make -j8 -k install
 ### Profiling
 * APEX downloaded as a dependency by the HPX build system
 * OTF2 provides task plots, but needs to be enabled separately
+
+---
 ## Dependencies #4
 ### Installing OTF2
 ```sh
-wget http://www.vi-hps.org/upload/packages/otf2/otf2-2.0.tar.gz
-tar -xzf otf2-2.0.tar.gz
+wget http://www.vi-hps.org/cms/upload/packages/otf2/otf2-2.1.1.tar.gz
+tar -xzf otf2-2.1.1.tar.gz
 cd otf2-2.0/
 ./configure --prefix=/path/to/otf2/2.0/ --enable-shared
 make -j8 install
@@ -176,10 +178,10 @@ cmake \
  -DCMAKE_BUILD_TYPE=Release \
  -DCMAKE_TOOLCHAIN_FILE=/path/to/source/hpx/cmake/toolchains/Cray.cmake \
  -DCMAKE_INSTALL_PREFIX=/path/to/hpx/master/release \
- -DHWLOC_ROOT=/path/to/hwloc/1.11.5 \
+ -DHWLOC_ROOT=/path/to/hwloc/2.0.4 \
  -DHPX_WITH_MALLOC=jemalloc \
- -DBOOST_ROOT=/path/to/boost/1.63.0 \
- -DJEMALLOC_ROOT=/path/to/jemalloc/4.4.0 \
+ -DBOOST_ROOT=/path/to/boost/1.69.0 \
+ -DJEMALLOC_ROOT=/path/to/jemalloc/5.2.0 \
  -DHPX_WITH_TESTS=OFF \
  -DHPX_WITH_EXAMPLES=OFF \
  -DHPX_WITH_THREAD_IDLE_RATES=ON \
