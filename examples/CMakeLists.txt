@@ -85,15 +85,14 @@ endif()
 # Each example goes into its own subdir
 #--------------------------------------------------
 set(TUTORIAL_DIRS
-  00_exercises
   01_hello_world
-  02_latency
+  02_overhead
   03_stencil
   04_fibonacci
   05_saxpy
-  #06_named_pool_executor
-  #07 is cuda test
-  #08_sort_test
+#  05_named_pool_executor
+  # 06 is cuda test
+  07_sort_test
 )
 
 if (HPX_WITH_CUDA)
