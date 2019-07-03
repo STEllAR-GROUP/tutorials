@@ -99,7 +99,7 @@ set(TUTORIAL_DIRS
 if (HPX_WITH_CUDA)
   message("CUDA_LIBRARIES ${CUDA_LIBRARIES}")
   set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
-    06_cuda_futures
+    07_cuda_futures
   )
   link_directories(${HPX_LIBRARY_DIR})
   include_directories(${CUDA_TOOLKIT_INCLUDE})
