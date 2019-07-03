@@ -151,7 +151,7 @@ in the loop.
     }
 ```
 * A million futures have just been instantiated
-* ...and a million tasks have been plaxced on the queues
+* ...and a million tasks have been placed on the queues
 
 ---
 ##DAG that needs shared_future's
@@ -301,6 +301,29 @@ for each will keep incrementing until there's an overflow.
 new one can begin.
 
 * Note that this is a contrived example and real-world use might require more thought
+
+---
+##Limiting Executor
+* Sliding semaphore is good, but (for example) Cholesky algorithm has non constant loops
+    * Each iteration decreases N
+    * Makes it hard to choose the right amount to use for semaphore 
+    * examples/02_overhead/future_overhead.cpp
+
+```
+     {
+         hpx::threads::executors::limiting_executor<Executor> signal_exec(
+             exec, tasks, tasks + 1000);
+         for (std::uint64_t i = 0; i < count; ++i) {
+             hpx::apply(signal_exec, [&](){
+                 null_function();
+                 sanity_check--;
+             });
+         }
+     }
+```
+* The executor will block/wait when `tasks` in flight exceeds max threshold (`tasks+1000`)
+  * and unblock when it drops to min threshold (`tasks`)
+* Blocking the executor that is spawning tasks achives our goal
 
 ---
 ##Plain and Direct Actions
