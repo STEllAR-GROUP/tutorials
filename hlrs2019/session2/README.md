@@ -820,7 +820,7 @@ std::transform(
 * `bb` is `b[i]`
 * `cc` is `c[i]`
 * the calculated value gets written to `a[i]`
-* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/serial.cpp)
+* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/05_saxpy/serial.cpp)
 ]
 
 ---
@@ -850,7 +850,7 @@ double x = ...;
 .right-column[
 * Replace the standard algorithm with a parallel one
 * Set parallel exeuction policy
-* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/parallel.cpp)
+* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/05_saxpy/parallel.cpp)
 ]
 
 ---
@@ -895,7 +895,7 @@ hpx::parallel::transform(policy,
 * Get targets for locality of data and execution
 * Setup Executor and Allocator
 * Run on the allocator
-* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/parallel_numa.cpp)
+* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/05_saxpy/parallel_numa.cpp)
 ]
 
 ---
@@ -938,7 +938,7 @@ hpx::parallel::transform(policy,
 * Get targets for locality of data and execution
 * Setup Executor and Allocator
 * Run on the allocator
-* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/04_saxpy/parallel_cuda.cu)
+* [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/05_saxpy/parallel_cuda.cu)
 * Works only for CUDA version 8 :(
 ]
 
@@ -946,5 +946,5 @@ hpx::parallel::transform(policy,
 class: center, middle
 ## Next
 
-[Building HPX and Applications](../session3)
+[Building and running HPX applications](../session3)
 

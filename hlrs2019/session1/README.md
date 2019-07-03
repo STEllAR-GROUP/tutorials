@@ -339,7 +339,7 @@ Subscribe and post your questions here hpx-users@stellar.cct.lsu.edu
 (hardly anyone does, they use IRC and github issues)
 
 ### HPX Docs
-[http://stellar-group.github.io/hpx/docs/html](http://stellar-group.github.io/hpx/docs/html)<br />
+[http://stellar-group.github.io/hpx/docs/sphinx/latest/html/index.html](http://stellar-group.github.io/hpx/docs/sphinx/latest/html/index.html)<br />
 The best place to look for a first try
 
 ---

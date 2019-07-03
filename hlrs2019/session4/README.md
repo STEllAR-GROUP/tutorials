@@ -14,8 +14,10 @@ Previous: [Building and Running HPX](../session3)
 ## Goals
 
 * (Optional: build HPX)
-* Configure project with HPX
-* Very basic to intermediate exercises (fill in the gaps)
+* Configure tutorial examples with HPX
+* (Optional: configure your own project with HPX)
+* Very basic to intermediate exercises
+* Ask all the questions you didn't get to ask yet
 
 ---
 ## Using Hazelhen for the course
