@@ -91,8 +91,9 @@ set(TUTORIAL_DIRS
   03_stencil
   04_fibonacci
   05_saxpy
-  #06_named_pool_executor
-  #07 is cuda test
+  06_named_pool_executor
+  # if HPX_WITH_CUDA is enabled, then 07 will be included below
+  # 07_cuda_futures
   #08_sort_test
 )
 
@@ -105,7 +106,7 @@ if (HPX_WITH_CUDA)
   include_directories(${CUDA_TOOLKIT_INCLUDE})
 endif()
 
-if(HPX_WITH_APEX)
+if (HPX_WITH_APEX)
   set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
     # 03_apex_stencil_1d
   )

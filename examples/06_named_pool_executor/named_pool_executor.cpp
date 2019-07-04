@@ -7,6 +7,8 @@
 // pool and executor
 
 #include <hpx/hpx_init.hpp>
+#include <hpx/include/async.hpp>
+#include <hpx/lcos/when_all.hpp>
 #include <hpx/include/resource_partitioner.hpp>
 #include <hpx/include/parallel_execution.hpp>
 #include <hpx/runtime/threads/executors/pool_executor.hpp>
@@ -35,10 +37,10 @@ int hpx_main(int argc, char* argv[])
     HPX_TEST_EQ(std::size_t(4), hpx::resource::get_num_threads());
     HPX_TEST_EQ(std::size_t(4), hpx::resource::get_num_thread_pools());
     HPX_TEST_EQ(std::size_t(0), hpx::resource::get_pool_index("default"));
-    HPX_TEST_EQ(std::size_t(0), hpx::resource::get_pool_index("pool-0"));
+    HPX_TEST_EQ(std::size_t(0), hpx::resource::get_pool_index("pool:0"));
 
     for (int i=0; i<max_threads; ++i) {
-        std::string pool_name = "pool-"+std::to_string(i);
+        std::string pool_name = "pool:"+std::to_string(i);
         HPX_TEST_EQ(pool_name , hpx::resource::get_pool_name(i));
         HPX_TEST_EQ(std::size_t(1), hpx::resource::get_num_threads(i));
     }
@@ -69,7 +71,7 @@ int hpx_main(int argc, char* argv[])
     std::vector<hpx::threads::scheduled_executor> execs_hp;
     //
     for (int i=0; i<max_threads; ++i) {
-        std::string pool_name = "pool-"+std::to_string(i);
+        std::string pool_name = "pool:"+std::to_string(i);
         execs.push_back(
             hpx::threads::executors::pool_executor(pool_name,
             hpx::threads::thread_priority_default)
@@ -81,7 +83,7 @@ int hpx_main(int argc, char* argv[])
     }
 
     for (int i=0; i<max_threads; ++i) {
-        std::string pool_name = "pool-"+std::to_string(i);
+        std::string pool_name = "pool:"+std::to_string(i);
         lotsa_futures.push_back(
             hpx::async(execs[i], &dummy_task, 3, pool_name + " normal")
         );
@@ -99,7 +101,7 @@ int hpx_main(int argc, char* argv[])
     );
 
     // just wait until everything is done
-    when_all(lotsa_futures).get();
+    hpx::when_all(lotsa_futures).get();
 
     return hpx::finalize();
 }
@@ -114,12 +116,12 @@ int main(int argc, char* argv[])
     // create the resource partitioner
     hpx::resource::partitioner rp(argc, argv, std::move(cfg));
 
-    // before adding pools - set the default pool name to "pool-0"
-    rp.set_default_pool_name("pool-0");
+    // before adding pools - set the default pool name to "pool:0"
+    rp.set_default_pool_name("pool:0");
 
     // create N pools
     for (int i=0; i<max_threads; i++) {
-        std::string pool_name = "pool-"+std::to_string(i);
+        std::string pool_name = "pool:"+std::to_string(i);
         rp.create_thread_pool(pool_name,
             hpx::resource::scheduling_policy::local_priority_fifo);
     }
@@ -134,7 +136,7 @@ int main(int argc, char* argv[])
             {
                 if (thread_count < max_threads)
                 {
-                    std::string pool_name = "pool-" + std::to_string(thread_count);
+                    std::string pool_name = "pool:" + std::to_string(thread_count);
                     std::cout << "Added pu " << thread_count
                               << " to " << pool_name << "\n";
                     rp.add_resource(p, pool_name);
@@ -155,15 +157,15 @@ int main_2(int argc, char* argv[])
     // create the resource partitioner
     hpx::resource::partitioner rp(argc, argv);
 
-    // before adding pools - set the default pool name to "pool-0"
-    rp.set_default_pool_name("pool-0");
+    // before adding pools - set the default pool name to "pool:0"
+    rp.set_default_pool_name("pool:0");
 
     // create N pools
     int numa_count = 0;
     for (const hpx::resource::numa_domain& d : rp.numa_domains())
     {
         // create pool
-        std::string pool_name = "pool-"+std::to_string(numa_count);
+        std::string pool_name = "pool:"+std::to_string(numa_count);
         rp.create_thread_pool(pool_name,
             hpx::resource::scheduling_policy::local_priority_fifo);
         // add domain to it
