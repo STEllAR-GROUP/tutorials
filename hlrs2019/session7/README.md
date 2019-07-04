@@ -365,3 +365,6 @@ pass the pointer thought without any overheads (it can be zero copied or RDMA'd)
 ```
 * The constructor of the `serialize_buffer` can copy, take ownership or a just take
 a reference to the underlying data.
+
+* reference of interest
+    * "Zero copy serialization using RMA in the HPX distributed task-based runtime"
