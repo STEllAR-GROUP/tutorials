@@ -1,0 +1,45 @@
+version: 2
+jobs:
+  setup:
+    docker:
+      - image: stellargroup/hpx:dev
+    working_directory: /tutorials
+    steps:
+      - checkout:
+          path: /tutorials
+      - run:
+          name: Configuring
+          command: |
+            mkdir -p build
+            cd build
+            cmake -G"Ninja" -DCMAKE_BUILD_TYPE=Debug /tutorials
+      - persist_to_workspace:
+           root: /tutorials
+  build:
+    docker:
+      - image: stellargroup/hpx:dev
+    working_directory: /tutorials/build
+    steps:
+      - attach_workspace:
+          at: /tutorials
+      - run:
+          name: Building examples
+          command: |
+            ninja tutorial
+
+workflows:
+  version: 2
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * * "
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - setup
+      - build:
+          requires:
+            - setup
+
