@@ -12,7 +12,7 @@ jobs:
           command: |
             mkdir -p build
             cd build
-            cmake -G"Ninja" -DCMAKE_BUILD_TYPE=Debug /tutorials
+            cmake -G"Ninja" -DCMAKE_BUILD_TYPE=Debug /tutorials/examples
       - persist_to_workspace:
            root: /tutorials
   build:
