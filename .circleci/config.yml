@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  setup:
+  build-examples:
     docker:
       - image: stellargroup/hpx:dev
     working_directory: /tutorials
@@ -30,14 +30,8 @@ workflows:
               only:
                 - master
     jobs:
-      - setup
-      - build:
-          requires:
-            - setup
+      - build-examples
   build-examples-push:
     jobs:
-      - setup
-      - build:
-          requires:
-            - setup
+      - build-examples
 
