@@ -35,9 +35,9 @@ int hpx_main(boost::program_options::variables_map& vm)
             }
         );
     }
-    double elapsed = t.elapsed();
+    double elapsed = t.elapsed() / steps;
 
-    double bandwidth = ((steps * N * sizeof(double)) / elapsed) / 1e6;
+    double bandwidth = ((3 * N * sizeof(double)) / elapsed) / 1e6;
     std::cout << "Bandwidth: " << bandwidth << " MB/s\n";
 
     return hpx::finalize();
