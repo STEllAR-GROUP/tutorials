@@ -1,0 +1,34 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="./../style.css">
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <title></title>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <script src="./../js/remark-latest.min.js"></script>
+        <script src="./../js/jquery-3.1.0.js"></script>
+    </head>
+    <body>
+        <script>
+            var slideshow = remark.create(
+                {
+                    sourceUrl: 'README.md',
+                    highlightLanguage: 'cpp',
+                    highlightLines: true,
+                    highlightStyle: 'github'
+                }
+            );
+            slideshow.on('afterShowSlide', function (slide) {
+                if ($("div.remark-slide-content").find("div.logo").length == 0)
+                {
+                    var stellar = "<img src=\"./../stellar.svg\" class=\"logo-img\"></img>";
+                    var fau = "<img src=\"./../fau-logo-tech.png\" class=\"logo-img-fau\"></img>";
+                    var cscs = "<img src=\"./../CSCS_2_CMYK.jpg\" class=\"logo-img-cscs\"></img>";
+                    var ethz = "<img src=\"./../eth_logo_kurz_pos.jpg\" class=\"logo-img-ethz\"></img>";
+                    var lsu  = "<img src=\"./../lsu_purple.png\" class=\"logo-img-lsu\"></img>";
+                    var logo = $("<div class=\"logo\">" + stellar + fau + cscs + ethz + lsu + "</div>")
+                    $("div.remark-slide-content").append(logo);
+                }
+            });
+        </script>
+    </body>
+</html>

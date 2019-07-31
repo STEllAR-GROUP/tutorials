@@ -1,0 +1,23 @@
+\begin{tikzpicture}[overlay]
+%     \begin{scope}[shift={(-0.5,0)}]
+        \node (application) [draw = gray, xshift=16em, yshift=6em, minimum width = 20em] {Application};
+        \node (middle) [minimum width = 20em, minimum height = 13em, yshift = -6em, draw =gray, below of = application] {};
+        \node (concepts) [minimum width = 18em, minimum height = 6em, yshift = -6.5em, draw =gray, below of = application, label=\textit{Concepts}, fill= gray!25] {};
+        \node (execution_pol) [yshift = -8em, draw =gray, below of = application, yshift = 1.5em, fill = gray!25, draw = gray!25] {Execution Policies};
+        \node (executors) [xshift = -5.5em, yshift = -8.5em, draw =gray, below of = application, fill = white] {Executors};
+        \node (executor_param) [xshift = 3em, yshift = -8.5em, draw =gray, below of = application, fill = white] {Executor Parameters};
+        \node<2-> (res) [left of = execution_pol, xshift = -12em, yshift=5em] {Restrictions};
+        \node<3-> (where) [left of = execution_pol, xshift = -10em, yshift=-8em] {Sequence, Where};
+        \node<4-> (grain) [left of = execution_pol, xshift = 12em, yshift=-10em] {Grain Size};
+
+        \node<5-> (futures) [fill = faublue!50, below of = concepts, minimum width = 18em, yshift = -2em] {Futures, Async, Dataflow};
+
+        \node<6-> (futures) [fill = faublue!50, below of = concepts, minimum width = 8.5em, yshift = 8em, xshift = -4.5em] {Parallel Algorithms};
+        \node<6-> (futures) [fill = faublue!50, below of = concepts, minimum width = 8.5em, yshift = 8em, xshift = 4.5em] {Fork-Join, etc};
+
+        \path<2-> (res) edge [- triangle 45, dashed, line width = 0.2mm, color = faublue] node {} (execution_pol);
+        \path<3-> (where) edge [- triangle 45, dashed, line width = 0.2mm, color = faublue] node {} (executors);
+        \path<4-> (grain) edge [- triangle 45, dashed, line width = 0.2mm, color = faublue] node {} (executor_param);
+%     \end{scope}
+    \end{tikzpicture}
+\beamerclosesubstitutedenvironement {standaloneframe}
