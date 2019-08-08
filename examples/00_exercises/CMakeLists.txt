@@ -16,8 +16,7 @@ set(solutions
   solution5
   solution6
   solution7
-  solution8
-  solution9)
+  solution8)
 
 set(exercises
   exercise1
@@ -27,19 +26,18 @@ set(exercises
   exercise5
   exercise6
   exercise7
-  exercise8
-  exercise9)
+  exercise8)
 
 foreach(exercise ${exercises})
   add_hpx_executable(${exercise}
     SOURCES ${exercise}.cpp
-    COMPONENT_DEPENDENCIES iostreams)
+    COMPONENT_DEPENDENCIES iostreams partitioned_vector)
 endforeach()
 
 foreach(solution ${solutions})
   add_hpx_executable(${solution}
     SOURCES ${solution}.cpp
-    COMPONENT_DEPENDENCIES iostreams)
+    COMPONENT_DEPENDENCIES iostreams partitioned_vector)
 endforeach()
 
 if(TARGET tutorial)

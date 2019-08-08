@@ -1,28 +1,43 @@
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (c) 2019 Mikael Simberg
+//
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying
+//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+///////////////////////////////////////////////////////////////////////////////
+
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/async.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/include/lcos.hpp>
 #include <hpx/include/util.hpp>
 
-void fun(hpx::future<hpx::util::tuple<hpx::future<double>, hpx::future<int>>> f)
+void fun1(double x, int y)
 {
-    auto t = f.get();
-    hpx::cout
-        << "The value of f is "
-        << hpx::util::get<0>(t).get() << hpx::endl;
-    hpx::cout
-        << "The value of g is "
-        << hpx::util::get<1>(t).get() << hpx::endl;
+    hpx::cout << "hello from fun1" << hpx::endl;
+}
+
+void fun2(hpx::future<hpx::util::tuple<hpx::shared_future<double>,
+          hpx::shared_future<int>>> f)
+{
+    hpx::cout << "hello from fun2" << hpx::endl;
+}
+
+void fun3(hpx::shared_future<double> x, hpx::shared_future<int> y)
+{
+    hpx::cout << "hello from fun3" << hpx::endl;
 }
 
 int main()
 {
-    auto f = hpx::async([]() -> double { std::cout << "1\n"; return 3.14; });
-    auto g = hpx::async([]() -> int { std::cout << "2\n"; return 42; });
+    hpx::shared_future<double> f = hpx::make_ready_future(3.14);
+    hpx::shared_future<int> g = hpx::make_ready_future(42);
 
-    // when_all produces a future<tuple<future<double>, future<int>>>. dataflow
-    // can also be used to avoid having to take a tuple as an argument in fun.
-    hpx::when_all(f, g).then(&fun);
+    // hpx::util::unwrapping and hpx::dataflow are convenient.
+    hpx::async(&fun1, 3.14, 42);
+    hpx::async(&fun1, f.get(), g.get());
+    hpx::when_all(f, g).then(&fun2);
+    hpx::dataflow(&fun3, f, g);
+    hpx::dataflow(hpx::util::unwrapping(&fun1), f, g);
 
     return 0;
 }

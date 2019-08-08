@@ -1,36 +1,65 @@
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (c) 2019 Mikael Simberg
+//
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying
+//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+///////////////////////////////////////////////////////////////////////////////
+
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/async.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/include/lcos.hpp>
 #include <hpx/include/util.hpp>
 
-void fun1(double x, int y)
-{
-    hpx::cout << "hello from fun1" << hpx::endl;
-}
+#include <memory>
 
-void fun2(hpx::future<hpx::util::tuple<hpx::shared_future<double>,
-          hpx::shared_future<int>>> f)
-{
-    hpx::cout << "hello from fun2" << hpx::endl;
-}
+struct node {
+    std::shared_ptr<node> left;
+    std::shared_ptr<node> right;
+    double value;
 
-void fun3(hpx::shared_future<double> x, hpx::shared_future<int> y)
+    node(double value) : value(value) {};
+    node(std::shared_ptr<node> left, std::shared_ptr<node> right)
+        : left(left), right(right), value(0.0) {};
+};
+
+template <typename Transformer, typename Reducer>
+hpx::future<double> tree_transform_reduce(std::shared_ptr<node> n,
+    Transformer t, Reducer r)
 {
-    hpx::cout << "hello from fun3" << hpx::endl;
+    assert(n);
+
+    if (!n->left || !n->right)
+    {
+        return hpx::make_ready_future(t(n->value));
+    }
+
+    hpx::future<double> left_result =
+        hpx::async(&tree_transform_reduce<Transformer, Reducer>, n->left, t, r);
+    hpx::future<double> right_result =
+        hpx::async(&tree_transform_reduce<Transformer, Reducer>, n->right, t, r);
+
+    return hpx::dataflow(hpx::util::unwrapping(r), left_result, right_result);
 }
 
 int main()
 {
-    hpx::shared_future<double> f = hpx::make_ready_future(3.14);
-    hpx::shared_future<int> g = hpx::make_ready_future(42);
+    auto n =
+        std::make_shared<node>(
+            std::make_shared<node>(
+                std::make_shared<node>(7.1),
+                std::make_shared<node>(
+                    std::make_shared<node>(3.2),
+                    std::make_shared<node>(9.111))),
+            std::make_shared<node>(
+                std::make_shared<node>(54.23),
+                std::make_shared<node>(1.0)));
 
-    // hpx::util::unwrapping and hpx::dataflow are convenient.
-    hpx::async(&fun1, 3.14, 42);
-    hpx::async(&fun1, f.get(), g.get());
-    hpx::when_all(f, g).then(&fun2);
-    hpx::dataflow(&fun3, f, g);
-    hpx::dataflow(hpx::util::unwrapping(&fun1), f, g);
+    auto result = tree_transform_reduce(n,
+        [](double x) { return x * x; },
+        [](double x, double y) { return x + y; });
+
+    hpx::cout << "futurized result is " << result.get() << hpx::endl;
 
     return 0;
 }

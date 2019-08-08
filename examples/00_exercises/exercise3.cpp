@@ -1,24 +1,54 @@
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (c) 2019 Mikael Simberg
+//
+//  Distributed under the Boost Software License, Version 1.0. (See accompanying
+//  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+///////////////////////////////////////////////////////////////////////////////
+
 #include <hpx/hpx_main.hpp>
 #include <hpx/include/async.hpp>
 #include <hpx/include/iostreams.hpp>
 #include <hpx/include/lcos.hpp>
 #include <hpx/include/util.hpp>
 
-// This program does not compile. Try to fix it. There are multiple correct
-// solutions.
+// This program does not compile. Replace the uses of funX below with a fitting
+// function.
 
-void fun(hpx::future<double> f, hpx::future<int> g)
+void fun1(double x, int y)
 {
-    hpx::cout << "The value of f is " << f.get();
-    hpx::cout << "The value of g is " << g.get();
+    hpx::cout << "hello from fun1" << hpx::endl;
+}
+
+void fun2(hpx::future<hpx::util::tuple<hpx::shared_future<double>,
+    hpx::shared_future<int>>> f)
+{
+    hpx::cout << "hello from fun2" << hpx::endl;
+}
+
+void fun3(hpx::shared_future<double> x, hpx::shared_future<int> y)
+{
+    hpx::cout << "hello from fun3" << hpx::endl;
+}
+
+void fun4(hpx::future<std::vector<hpx::shared_future<int>>> f)
+{
+    hpx::cout << "hello from fun4" << hpx::endl;
 }
 
 int main()
 {
-    auto f = hpx::async([]() -> double { std::cout << "1\n"; return 3.14; });
-    auto g = hpx::async([]() -> int { std::cout << "2\n"; return 42; });
+    hpx::shared_future<double> f = hpx::make_ready_future(3.14);
+    hpx::shared_future<int> g = hpx::make_ready_future(42);
+    hpx::shared_future<int> h = hpx::make_ready_future(1);
+    std::vector<hpx::shared_future<int>> v{g, h};
 
-    hpx::when_all(f, g).then(&fun);
+    hpx::async(&funX, 3.14, 42);
+    hpx::async(&funX, f.get(), g.get());
+    hpx::when_all(f, g).then(&funX);
+    hpx::when_all(v).then(&funX);
+    hpx::dataflow(&funX, f, g);
+    hpx::dataflow(hpx::util::unwrapping(&funX), f, g);
+    hpx::dataflow(hpx::util::unwrapping(&funX), f, 3.14);
 
     return 0;
 }
