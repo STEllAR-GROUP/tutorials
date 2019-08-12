@@ -16,7 +16,8 @@ set(solutions
   solution5
   solution6
   solution7
-  solution8)
+  solution8
+  solution9)
 
 set(exercises
   exercise1
@@ -26,7 +27,8 @@ set(exercises
   exercise5
   exercise6
   exercise7
-  exercise8)
+  exercise8
+  exercise9)
 
 foreach(exercise ${exercises})
   add_hpx_executable(${exercise}
