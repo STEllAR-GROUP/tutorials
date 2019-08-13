@@ -16,8 +16,7 @@ set(solutions
   solution5
   solution6
   solution7
-  solution8
-  solution9)
+  solution8)
 
 set(exercises
   exercise1
@@ -27,8 +26,7 @@ set(exercises
   exercise5
   exercise6
   exercise7
-  exercise8
-  exercise9)
+  exercise8)
 
 foreach(exercise ${exercises})
   add_hpx_executable(${exercise}
@@ -42,6 +40,11 @@ foreach(solution ${solutions})
     COMPONENT_DEPENDENCIES iostreams partitioned_vector)
 endforeach()
 
+if(HPX_WITH_CUDA)
+  add_hpx_executable(solution9 SOURCES solution9.cu)
+  add_hpx_executable(exercise9 SOURCES exercise9.cu)
+endif()
+
 if(TARGET tutorial)
   add_hpx_pseudo_target(tutorial.exercises.exercises)
   add_hpx_pseudo_target(tutorial.exercises.solutions)
@@ -54,4 +57,9 @@ if(TARGET tutorial)
   foreach(solution ${solutions})
     add_hpx_pseudo_dependencies(tutorial.exercises.solutions ${solution})
   endforeach()
+
+  if(HPX_WITH_CUDA)
+    add_hpx_pseudo_dependencies(tutorial.exercises.exercises exercise9)
+    add_hpx_pseudo_dependencies(tutorial.exercises.solutions solution9)
+  endif()
 endif()
