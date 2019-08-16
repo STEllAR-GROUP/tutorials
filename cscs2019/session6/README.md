@@ -1,14 +1,14 @@
 
 class: center, middle
 
-# Debugging And Profiling HPX Applications
+# Debugging and profiling HPX applications
 
 [Overview](..)
 
 Previous: [Worked 2D Stencil Example](../session5)
 
 ???
-[Click here to view the Presentation](https://stellar-group.github.io/tutorials/hlrs2019/session6/)
+[Click here to view the Presentation](https://stellar-group.github.io/tutorials/cscs2019/session6/)
 
 ---
 ## Topics covered
@@ -19,14 +19,14 @@ Previous: [Worked 2D Stencil Example](../session5)
 
 ---
 ## Revisiting the Stencil
-### How good does it scale?
+### How well does it scale?
 
   ![2D Stencil - Weak Scaling](images/weak_scaling0.png)
 [Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)
 
 ---
 ## Revisiting the Stencil
-### How good does it scale?
+### How well does it scale?
 
   ![2D Stencil - Strong Scaling](images/strong_scaling0.png)
 [Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)
@@ -56,14 +56,14 @@ Previous: [Worked 2D Stencil Example](../session5)
 
 ---
 ## Revisiting the Stencil
-### How good does it scale now?
+### How well does it scale now?
 
   ![2D Stencil - Weak Scaling](images/weak_scaling1.png)
 [Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)
 
 ---
 ## Revisiting the Stencil
-### How good does it scale now?
+### How well does it scale now?
 
   ![2D Stencil - Strong Scaling](images/strong_scaling1.png)
 [Raw Data](https://docs.google.com/spreadsheets/d/14e9B92e9USF03kFlKlxUzVf_Ctm05nMoayTzchybY_8/edit?usp=sharing)

@@ -1,7 +1,7 @@
 
 class: center, middle
 
-# Worked 2D Stencil Example
+# Worked 2D stencil example
 ## From Serial to Distributed
 
 [Overview](..)
@@ -9,10 +9,10 @@ class: center, middle
 Previous: [Hello World! - Options and Running Applications](../session4)
 
 ???
-[Click here to view the Presentation](https://stellar-group.github.io/tutorials/hlrs2019/session5/)
+[Click here to view the Presentation](https://stellar-group.github.io/tutorials/cscs2019/session5/)
 
 ---
-## The Problem we want to solve
+## The problem we want to solve
 ### "Solving" a PDE on a 2D Grid
 
 * DISCLAIMER: This has no real physics or mathematical background. Left as an excercise for the reader ;)
@@ -29,7 +29,7 @@ Previous: [Hello World! - Options and Running Applications](../session4)
 ]
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Memory structure
 
 * Goal: Store Grid as `std::vector<double>`
@@ -37,7 +37,7 @@ Previous: [Hello World! - Options and Running Applications](../session4)
 ![Grid](images/grid.png)
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Memory structure
 
 * Goal: Store Grid as `std::vector<double>`
@@ -45,7 +45,7 @@ Previous: [Hello World! - Options and Running Applications](../session4)
 ![Grid Row Access](images/grid_row_access.png)
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Memory structure
 
 * Goal: Store Grid as `std::vector<double>`
@@ -53,7 +53,7 @@ Previous: [Hello World! - Options and Running Applications](../session4)
 ![Grid Element Access](images/grid_element_access.png)
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Iterating the Grid: Applying the stencil
 
 * We want to update line by line
@@ -80,7 +80,7 @@ OutIter line_update(InIter begin, InIter end, OutIter result)
 ```
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Iterating the Grid: Designing the Iterator
 
 * Feasible to make it hierarchical:
@@ -90,7 +90,7 @@ OutIter line_update(InIter begin, InIter end, OutIter result)
         `line_iterator`
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Iterating the Grid: The Line Iterator
 
 ```
@@ -122,7 +122,7 @@ struct line_iterator
 ```
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Iterating the Grid: The Line Iterator, make it a proper iterator
 
 ```
@@ -158,7 +158,7 @@ struct line_iterator
 
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Iterating the Grid: The Row Iterator
 
 ```
@@ -190,7 +190,7 @@ struct row_iterator
 ```
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Iterating the Grid: The Row Iterator, continued
 
 ```
@@ -220,7 +220,7 @@ struct row_iterator
 * [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/row_iterator.hpp)
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Putting it all together - Initialization
 
 ```
@@ -237,7 +237,7 @@ struct row_iterator
 
 
 ---
-## Modeling the Stencil in C++
+## Modeling the stencil in C++
 ### Putting it all together - The solver
 
 ```
@@ -267,7 +267,7 @@ struct row_iterator
 
 
 ---
-## Modeling the Stencil in C++ with HPX
+## Modeling the stencil in C++ with HPX
 ### Adding shared memory parallelism
 
 * Instead of using a for loop, use a Parallel Algorithm.
@@ -277,7 +277,7 @@ struct row_iterator
 * One we I haven't shown: `for_loop`
 
 ---
-## Modeling the Stencil in C++ with HPX
+## Modeling the stencil in C++ with HPX
 ### Adding shared memory parallelism
 
 * `for_loop`
@@ -300,7 +300,7 @@ struct row_iterator
 * [Complete code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/stencil_parallel_0.cpp)
 
 ---
-## Modeling the Stencil in C++ with HPX
+## Modeling the stencil in C++ with HPX
 ### Adding NUMA awareness
 
 * Get the NUMA targets
@@ -311,7 +311,7 @@ struct row_iterator
 * [Solution](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/stencil_parallel_1.cpp)
 
 ---
-## Modeling the Stencil in C++ with HPX
+## Modeling the stencil in C++ with HPX
 ### Going distributed
 
 * Synchronization between partitions
@@ -320,7 +320,7 @@ struct row_iterator
     * Use neighborhood synchronization and let every locality do the same <br/> &nbsp;
 
 ---
-## Modeling the Stencil in C++ with HPX
+## Modeling the stencil in C++ with HPX
 ### Going distributed
 
 * Synchronization between partitions
@@ -557,7 +557,7 @@ int main()
 * [Full Code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/communicator.hpp)
 
 ---
-## Modeling the Stencil in C++ with HPX
+## Modeling the stencil in C++ with HPX
 ### First Distributed Version
 
 * Update first row boundary
@@ -585,7 +585,7 @@ if (comm.has_neighbor(communicator_type::up))
 * [Full Code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/stencil_parallel_2.cpp#L88-L105)
 
 ---
-## Modeling the Stencil in C++ with HPX
+## Modeling the stencil in C++ with HPX
 ### First Distributed Version
 
 * Update last row boundary
@@ -615,7 +615,7 @@ if (comm.has_neighbor(communicator_type::down))
 * [Full Code](https://github.com/STEllAR-GROUP/tutorials/tree/master/examples/02_stencil/stencil_parallel_2.cpp#L120-L136)
 
 ---
-## Modeling the Stencil in C++ with HPX
+## Modeling the stencil in C++ with HPX
 ### Notes on running the example
 
 * The default problem size is pretty small.
@@ -639,7 +639,7 @@ if (comm.has_neighbor(communicator_type::down))
 
 ---
 class: center, middle
-## Modeling the Stencil in C++ with HPX
+## Modeling the stencil in C++ with HPX
 ### How good does it scale?
 
 ---

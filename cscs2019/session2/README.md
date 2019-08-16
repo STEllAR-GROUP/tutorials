@@ -9,7 +9,7 @@ class: center, middle
 Previous: [Introduction to HPX - Part 1](../session1)
 
 ???
-[Click here to view the Presentation](https://stellar-group.github.io/tutorials/hlrs2019/session2/)
+[Click here to view the Presentation](https://stellar-group.github.io/tutorials/cscs2019/session2/)
 
 ---
 ## Recap: What's HPX

@@ -9,7 +9,7 @@ class: center, middle
 Previous: [Debugging and Profiling HPX Applications](../session6)
 
 ???
-[Click here to view the Presentation](https://stellar-group.github.io/tutorials/hlrs2019/session7/)
+[Click here to view the Presentation](https://stellar-group.github.io/tutorials/cscs2019/session7/)
 
 ---
 ##Move semantics
