@@ -10,7 +10,6 @@
 #include <hpx/include/util.hpp>
 #include <hpx/include/lcos.hpp>
 #include <hpx/include/iostreams.hpp>
-#include <hpx/util/unwrapped.hpp>
 
 #include <cstddef>
 #include <cstdint>
