@@ -14,7 +14,7 @@ Previous: [Introduction to HPX - Part 2 (API)](../session2)
 ---
 # Building HPX
 
-* Can seem intimidating, but easier than it looks
+* Building HPX can seem intimidating, but it's easier than it looks.
 
 ---
 ## Dependencies
@@ -26,9 +26,9 @@ Previous: [Introduction to HPX - Part 2 (API)](../session2)
 ---
 ## Dependencies #1
 ### Boost
-HPX uses Boost extensively throughout the code
-* Considerable amounts of boost code have been absorbed into HPX
-    * so dependencies on boost are been gradually decreasing
+HPX uses Boost extensively throughout the code.
+* Considerable amounts of Boost code have been absorbed into HPX
+    * so dependencies on Boost have been gradually decreasing
     * (more `std::` features are present in newer compilers)
 
 * Threading components, locks and mutexes
@@ -65,11 +65,11 @@ cd boost_1_69_0
 ```
 * It takes 10 minutes or less to build (most is headers)
 * Best to build debug and release if you are tinkering with HPX settings
-* Or just use the preinstalled boost modules
+* Or just use the preinstalled Boost modules
 
 ---
 ## Dependencies #2
-### Portable Hardware Locality (hwloc)
+### Portable Hardware Locality (hwloc) 
 <img src="images/devel09-pci.png" alt="hwloc" width="150" height="240">
 * HPX needs to know what resources it is running on
 * hwloc provides a mechanism for identifying numa domains, sockets, cores, GPUs
@@ -97,7 +97,7 @@ cd hwloc-2.0.4
 make -j8 install
 ```
 
-* It takes a couple of minutes and you just need to pass the path into your HPX CMake
+* It takes a couple of minutes, and then you just need to pass the path into your HPX CMake
 
 ---
 ## Dependencies #3
@@ -109,7 +109,7 @@ make -j8 install
 
 * HPX is C++ - new/delete are used everywhere.
     * `vector<>/queue<>` and friends are used for storage inside the
-    runtime, schedulers, parcelports
+    runtime, schedulers, and parcelports
     * user tasks are likely to contain allocation of memory for objects
 
 * built in malloc is inefficient when used in multithreaded environments
@@ -120,7 +120,7 @@ make -j8 install
 ## Dependencies #3
 ### Installing jemalloc
 
-* jemalloc can be downloaded via github and there isn't a direct link
+* jemalloc can be downloaded via GitHub; there isn't a direct link
 
 ```sh
 # Download
@@ -138,7 +138,7 @@ cd jemalloc-$JEMALLOC_VER
 make -j8 -k install
 ```
 
-* It takes a couple of minutes and you just need to pass the path into your HPX CMake
+* It takes a couple of minutes, and then you just need to pass the path into your HPX CMake
 
 ---
 ## Dependencies #4
@@ -167,9 +167,8 @@ make -j8 install
 
     * Look in `hpx/cmake/toolchains`
 
-* You can use them to reduce slightly the number of options set by hand
+* You can use them to slightly reduce the number of options set by hand
 
-    * (HPX cmake is quite good and works on all the machines I've tried)
 
 ---
 ## HPX CMake: Release (for Crays)
