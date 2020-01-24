@@ -19,7 +19,7 @@ Previous: [Introduction to HPX - Part 1](../session1)
 * Solidly based on a theoretical foundation – a well defined, new execution model
 * Exposes a coherent and uniform, standards-oriented API for ease of
   programming parallel and distributed applications.
-    * Enables to write fully asynchronous code using hundreds of millions of threads.
+    * Enables users to write fully asynchronous code using hundreds of millions of threads.
     * Provides unified syntax and semantics for local and remote operations.
 * Developed to run at any scale
 * Compliant C++ Standard implementation (and more)
@@ -43,7 +43,7 @@ HPX represents an innovative mixture of
     * Platforms: x86/64, Xeon/Phi, ARM 32/64, Power, BlueGene/Q
     * Operating systems: Linux, Windows, Android, OS/X
 * Well integrated with compiler’s C++ Standard libraries
-* Enables writing applications which out-perform and out-scale existing
+* Enables writing applications that out-perform and out-scale existing
   applications based on OpenMP/MPI
 
   http://stellar-group.org/libraries/hpx
@@ -168,7 +168,7 @@ A future is an object representing a result which has not been calculated yet
 ---
 ## What is a (the) future?
 
-Many ways to get hold of a future, simplest way is to use (std) async:
+There are many ways to get hold of a future. The simplest way is to use (std) async:
 
 ```
 int universal_answer()
@@ -768,7 +768,7 @@ auto policy3 = par.on(exec).with(param);
 ---
 ## Execution Targets
 
-* Opaque type which represent a place in the system
+* Opaque type that represent a place in the system
     * Used to identify data placement
     * Used to specify execution site close to data
 * Targets encapsulate architecture specifics
