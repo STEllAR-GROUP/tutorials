@@ -228,21 +228,20 @@ cmake \
 
 ---
 ## Release vs Debug
-* How much faster will a release build be compared to a debug one?
+* A release build will be significantly faster than a debug build.
 
-    * Lots faster
 
-    * When building release mode, the compiler will inline all the function invocation
-    code that is used by the template instantiations to specialize on different types etc.
+    * When building in release mode, the compiler will inline all the function invocation
+    code that is used by the template instantiations to specialize on different types, etc.
 
     * Stack traces in debug mode can be 50-70 funcion calls deep
 
-    * in release mode they might be only 5-7
+    * In release mode they might be only 5-7
 
-    * nearly all of HPX is headers with extensive specializations of functions/algorithms
-    and huge amounts of this are optimized away by the compiler in release mode
+    * Nearly all of HPX is headers with extensive specializations of functions/algorithms
+    and large amounts of this are optimized away by the compiler in release mode
 
-    * never profile anything in debug mode except for checking if you made it faster or
+    * Never profile anything in debug mode except for checking if you made it faster or
     slower than the previous test
 ---
 ## Building tips #1
@@ -251,8 +250,8 @@ cmake \
 
 * On your first build, enable `HPX_WITH_EXAMPLES` and `HPX_WITH_TESTS`
     * `make -j8 hello_world_1`
-    * check it compiles
-    * check it runs
+    * check if it compiles
+    * check if it runs
 
 * If hello world is ok, then build the rest (at your discretion)
     ```sh
@@ -275,7 +274,7 @@ salloc -N 2
 ## Building tips #2
 * Note: `make -j8 xxx` can cause problems
     * HPX uses a _lot_ of templates and the compiler can use all your memory
-    * if disk swapping starts during compiling use `make -j2` (or `j4` etc)
+    * If disk swapping starts during compiling use `make -j2` (or `j4` etc)
 
 ---
 ## Building tips #3
@@ -285,21 +284,20 @@ salloc -N 2
 
 * HPX is a changing target as many commits are being made daily
 
-* You may find bugs [cue laughter] and submit issues to the github tracker
+* You may find bugs [cue laughter] and submit issues to the GitHub tracker
 
 * When they are fixed (often quickly) you will want to pull the changes
 
 * You need to maintain a good synchronization between your HPX build and your
 test project build
 
-* You can setup a top level CMakeLists.txt containing subdirs, one for
+* You can set up a top level CMakeLists.txt containing subdirs, one for
 your test project, and allow CMake to create a subdir for HPX too
 
-* You can build HPX and your test code in a single CMake based setup
-    * Like a git submodule, but managed by CMake rather than git
-    * you can work on an HPX branch ...
-    * ... merge fixes in, make local changes freely
-    * push and pull from the origin
+* You can build HPX and your test code in a single CMake-based setup
+    * This is ike a git submodule, but managed by CMake rather than git
+    * You can work on an HPX branch, merge fixes in, and make local changes freely
+    * Push and pull from the origin as needed
 
 ---
 ## Main HPX Build options #1
@@ -318,12 +316,12 @@ your test project, and allow CMake to create a subdir for HPX too
     * HPX_WITH_CUDA: Enables latest features to interface with GPUs using CUDA.
     * HPX_WITH_GENERIC_CONTEXT_COROUTINES: when ON, uses Boost.context for
     lightweitht threads, otherwise some platform provided lib (windows=fibers)
-    * HPX_WITH_LOGGING: when enabled can produce huge amounts of debug info
+    * HPX_WITH_LOGGING: When enabled can produce huge amounts of debug info
     * HPX_WITH_NATIVE_TLS: Thread local storage, turn on unless on Xcode<8
-    * HPX_WITH_PARCEL_COALESCING: gathers messages together when they can't be sent immediately
-    * HPX_WITH_RUN_MAIN_EVERYWHERE: when on, main is called on all localities, when off,
+    * HPX_WITH_PARCEL_COALESCING: Gathers messages together when they can't be sent immediately
+    * HPX_WITH_RUN_MAIN_EVERYWHERE: When on, main is called on all localities, when off,
     only root has int main called - to be discussed further
-    * HPX_WITH_VC_DATAPAR: latest SIMD code option using Vc library
+    * HPX_WITH_VC_DATAPAR: Latest SIMD code option using Vc library
 
 ---
 ## Main HPX Build options #3
@@ -333,12 +331,12 @@ your test project, and allow CMake to create a subdir for HPX too
     backtrace for debugging. (wasn't working last time I tried it - but need it).
     * HPX_WITH_THREAD_CREATION_AND_CLEANUP_RATES: HPX_WITH_THREAD_CUMULATIVE_COUNTS:
     HPX_WITH_THREAD_QUEUE_WAITTIME: HPX_WITH_THREAD_STEALING_COUNTS:
-    * HPX_WITH_THREAD_IDLE_RATES: performance counters for threading subsytem -
-    Enable measuring the percentage of overhead times spent in the scheduler
+    * HPX_WITH_THREAD_IDLE_RATES: Performance counters for threading subsytem -
+    Enables measuring the percentage of overhead times spent in the scheduler
     * HPX_WITH_THREAD_LOCAL_STORAGE:On everywhere except OSX pre Xcode 8
     * HPX_WITH_THREAD_MANAGER_IDLE_BACKOFF: Performance tweaking -
     HPX scheduler threads are backing off on idle queues
-    * HPX_WITH_THREAD_SCHEDULERS: enable different thread schedulers -
+    * HPX_WITH_THREAD_SCHEDULERS: Enables different thread schedulers -
     Options are: all, abp-priority, local, static-priority, static, hierarchy,
     and periodic-priority.
 
@@ -346,17 +344,17 @@ your test project, and allow CMake to create a subdir for HPX too
 ## Main HPX Build options #4
 * Parcelport options
     * HPX_WITH_PARCELPORT_MPI: Yes
-    * HPX_WITH_PARCELPORT_MPI_ENV: allows you to control the Env vars used to detect
-    nodes etc
+    * HPX_WITH_PARCELPORT_MPI_ENV: Allows you to control the Env vars used to detect
+    nodes, etc.
     * HPX_WITH_PARCELPORT_MPI_MULTITHREADED: Yes
-    * HPX_WITH_PARCELPORT_TCP: depends, but usually Yes
+    * HPX_WITH_PARCELPORT_TCP: Depends, but usually Yes
     * HPX_WITH_PARCEL_PROFILING: (still under development), but will give details about
     parcel traces/dependencies to help with profiling
 
 ---
 # Building HPX projects
 
-* Building HPX projects straightforward with the help of a few functions provided by HPX
+This section discuses how to build HPX projects with the help of a few functions provided by HPX
 
 ---
 ## HPX project: CMakeLists.txt for a set of test projects
@@ -383,7 +381,7 @@ and for targets
 Follow this link [CMakeLists for Exercises](../../examples/00_exercises/CMakeLists.txt)
 to see the CMakeLists file for one of the examples
 
-This example contains multiple binaries, all are added using the same simple syntax
+This example contains multiple binaries. All are added using the same simple syntax
 
 ```cmake
 add_hpx_executable(my_executable SOURCES my_source.cpp)
@@ -434,16 +432,16 @@ build HPX and set HPX\_DIR to the binary location so that later when our example
 do `find_package(HPX)` everything points to our _in tree_ copy of HPX.
 
     * No need to worry about Release/Debug incompatibility
-    * No need to worry about wrong versions of boost/hwloc/jemalloc
+    * No need to worry about wrong versions of Boost/hwloc/jemalloc
     * No need to worry about wrong compiler flags
-    * `make -j8 my_example` will build libhpx etc automatically
-    * any changes to HPX after pull/merge automatically trigger a rebuild
+    * `make -j8 my_example` will build libhpx, etc. automatically
+    * Any changes to HPX after pull/merge automatically trigger a rebuild
 
 * When building, you must now pass
 
     * `-DHPX_DOWNLOAD_AS_SUBPROJECT=ON`
-    * all `HPX_XXX` CMake options/variables that you need (as before)
-    * all your own options/variables to the CMake invocation
+    * All `HPX_XXX` CMake options/variables that you need (as before)
+    * All your own options/variables to the CMake invocation
 
 * You can enable/disable the HPX subproject and switch back to a system/custom HPX
 at any time (though I recommend using branches in the HPX subdir).
@@ -454,10 +452,7 @@ at any time (though I recommend using branches in the HPX subdir).
 # Hello World!
 ## Options and Running Applications
 
-* HPX applications can be started in a few different ways
-* HPX comes with a large set of options you can pass through the command line
-* We will cover a few
-* [Read the docs!](http://stellar-group.github.io/hpx/docs/sphinx/latest/html/index.html)
+HPX applications can be started in a few different ways, and HPX comes with a large set of options you can pass through the command line. This section will cover a few different methods, but it is recommended you read the full documentation for HPX for a better understanding: [Read the docs!](http://stellar-group.github.io/hpx/docs/sphinx/latest/html/index.html)
 
 ---
 ## HPX Application Startup
