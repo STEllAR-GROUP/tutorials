@@ -22,7 +22,7 @@
 
 #ifdef SORT_HAS_HPX
 # include <hpx/hpx.hpp>
-# include <hpx/parallel/algorithms/sort.hpp>
+# include <hpx/include/parallel_sort.hpp>
 #endif
 
 #ifdef SORT_HAS_GCC_PARALLEL

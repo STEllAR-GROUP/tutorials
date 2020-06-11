@@ -7,7 +7,7 @@
 #include "output.hpp"
 
 #include <hpx/hpx_init.hpp>
-#include <hpx/util/high_resolution_timer.hpp>
+#include <hpx/include/util.hpp>
 
 #include <boost/program_options.hpp>
 

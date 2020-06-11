@@ -7,23 +7,15 @@
 // TODO: Update
 
 #include <hpx/hpx_init.hpp>
-#include <hpx/lcos/wait_each.hpp>
-#include <hpx/runtime/actions/plain_action.hpp>
-#include <hpx/runtime/actions/continuation.hpp>
-#include <hpx/util/format.hpp>
-#include <hpx/util/high_resolution_timer.hpp>
+#include <hpx/include/lcos.hpp>
+#include <hpx/include/actions.hpp>
+#include <hpx/include/util.hpp>
 #include <hpx/include/apply.hpp>
 #include <hpx/include/async.hpp>
 #include <hpx/include/iostreams.hpp>
-#include <hpx/include/threads.hpp>
-#include <hpx/util/yield_while.hpp>
-#include <hpx/util/lightweight_test.hpp>
-#include <hpx/util/annotated_function.hpp>
-
 #include <hpx/include/parallel_execution.hpp>
-#include <hpx/lcos/local/sliding_semaphore.hpp>
-#include <hpx/runtime/threads/executors/limiting_executor.hpp>
-#include <hpx/runtime/threads/executors/pool_executor.hpp>
+#include <hpx/include/threads.hpp>
+#include <hpx/util/lightweight_test.hpp>
 
 #include <array>
 #include <atomic>
@@ -78,10 +70,13 @@ const char* ExecName(const hpx::parallel::execution::parallel_executor& exec)
 {
     return "parallel_executor";
 }
+
+#if HPX_VERSION_FULL <= 0x010401
 const char* ExecName(const hpx::parallel::execution::default_executor& exec)
 {
     return "default_executor";
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // we use globals here to prevent the delay from being optimized away
@@ -233,6 +228,7 @@ void measure_function_futures_thread_count(
     print_stats("apply", "ThreadCount", ExecName(exec), count, duration, csv);
 }
 
+#if HPX_VERSION_FULL >= 0x010500
 template <typename Executor>
 void measure_function_futures_limiting_executor(
     std::uint64_t count, bool csv, Executor exec)
@@ -264,6 +260,7 @@ void measure_function_futures_limiting_executor(
     const double duration = walltime.elapsed();
     print_stats("apply", "limiting-Exec", ExecName(exec), count, duration, csv);
 }
+#endif
 
 template <typename Executor>
 void measure_function_futures_sliding_semaphore(
@@ -330,8 +327,10 @@ int hpx_main(variables_map& vm)
                 measure_function_futures_sliding_semaphore(count, csv, def);
                 measure_function_futures_sliding_semaphore(count, csv, par);
             }
+#if HPX_VERSION_FULL >= 0x010500
             measure_function_futures_limiting_executor(count, csv, def);
             measure_function_futures_limiting_executor(count, csv, par);
+#endif
         }
     }
 

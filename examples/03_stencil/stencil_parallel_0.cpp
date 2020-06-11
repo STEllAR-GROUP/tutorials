@@ -8,7 +8,7 @@
 
 #include <hpx/hpx_init.hpp>
 #include <hpx/include/parallel_algorithm.hpp>
-#include <hpx/util/high_resolution_timer.hpp>
+#include <hpx/include/util.hpp>
 
 #include <array>
 #include <vector>
