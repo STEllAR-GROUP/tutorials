@@ -7,6 +7,7 @@
 // a Fibonacci number asynchronous.
 
 #include <hpx/config.hpp>
+#include <hpx/chrono.hpp>
 #include <hpx/future.hpp>
 #include <hpx/include/util.hpp>
 #include <hpx/init.hpp>
@@ -78,7 +79,7 @@ int hpx_main(hpx::program_options::variables_map& vm)
     std::uint64_t result = 0;
 
     // Keep track of the time required to execute.
-    std::uint64_t start = hpx::util::high_resolution_clock::now();
+    std::uint64_t start = hpx::chrono::high_resolution_clock::now();
 
     for (std::size_t i = 0; i != max_runs; ++i)
     {
@@ -87,7 +88,7 @@ int hpx_main(hpx::program_options::variables_map& vm)
         result = fibonacci_futures(n).get();
     }
 
-    std::uint64_t d = hpx::util::high_resolution_clock::now() - start;
+    std::uint64_t d = hpx::chrono::high_resolution_clock::now() - start;
     hpx::cout
         << "fibonacci_future(" << n << ") == " << result << ", "
         << "elapsed time: " << (d / max_runs);
