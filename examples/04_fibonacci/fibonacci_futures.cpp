@@ -6,10 +6,12 @@
 // This is a purely local version demonstrating how to make the calculation of
 // a Fibonacci number asynchronous.
 
-#include <hpx/hpx_init.hpp>
+#include <hpx/config.hpp>
+#include <hpx/future.hpp>
 #include <hpx/include/util.hpp>
-#include <hpx/include/lcos.hpp>
-#include <hpx/include/iostreams.hpp>
+#include <hpx/init.hpp>
+#include <hpx/iostream.hpp>
+#include <hpx/program_options.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -49,7 +51,7 @@ hpx::future<std::uint64_t> fibonacci_futures(std::uint64_t n)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-int hpx_main(boost::program_options::variables_map& vm)
+int hpx_main(hpx::program_options::variables_map& vm)
 {
     // extract command line argument, i.e. fib(N)
     std::uint64_t n = vm["n-value"].as<std::uint64_t>();
@@ -97,8 +99,8 @@ int hpx_main(boost::program_options::variables_map& vm)
 int main(int argc, char* argv[])
 {
     // Configure application-specific options
-    boost::program_options::options_description
-       desc_commandline("Usage: " HPX_APPLICATION_STRING " [options]");
+    hpx::program_options::options_description desc_commandline(
+        "Usage: " HPX_APPLICATION_STRING " [options]");
 
     using boost::program_options::value;
     desc_commandline.add_options()
@@ -110,6 +112,9 @@ int main(int argc, char* argv[])
           "threshold for switching to serial code")
     ;
 
+    hpx::init_params init_args;
+    init_args.desc_cmdline = desc_commandline;
+
     // Initialize and run HPX
-    return hpx::init(desc_commandline, argc, argv);
+    return hpx::init(argc, argv);
 }

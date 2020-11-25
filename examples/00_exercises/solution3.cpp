@@ -1,23 +1,24 @@
 ///////////////////////////////////////////////////////////////////////////////
-//  Copyright (c) 2019 Mikael Simberg
+//  Copyright (c) 2019-2020 ETH Zurich
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <hpx/hpx_main.hpp>
-#include <hpx/include/async.hpp>
-#include <hpx/include/iostreams.hpp>
-#include <hpx/include/lcos.hpp>
+#include <hpx/future.hpp>
 #include <hpx/include/util.hpp>
+#include <hpx/iostream.hpp>
+#include <hpx/tuple.hpp>
+#include <hpx/wrap_main.hpp>
 
 void fun1(double x, int y)
 {
     hpx::cout << "hello from fun1" << hpx::endl;
 }
 
-void fun2(hpx::future<hpx::util::tuple<hpx::shared_future<double>,
-          hpx::shared_future<int>>> f)
+void fun2(
+    hpx::future<hpx::tuple<hpx::shared_future<double>, hpx::shared_future<int>>>
+        f)
 {
     hpx::cout << "hello from fun2" << hpx::endl;
 }

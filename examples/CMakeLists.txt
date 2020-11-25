@@ -92,19 +92,16 @@ set(TUTORIAL_DIRS
   04_fibonacci
   05_saxpy
   06_named_pool_executor
-  # if HPX_WITH_CUDA is enabled, then 07 will be included below
-  # 07_cuda_futures
-  #08_sort_test
 )
 
-if (HPX_WITH_CUDA)
-  message("CUDA_LIBRARIES ${CUDA_LIBRARIES}")
-  set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
-    07_cuda_futures
-  )
-  link_directories(${HPX_LIBRARY_DIR})
-  include_directories(${CUDA_TOOLKIT_INCLUDE})
-endif()
+#if (HPX_WITH_CUDA)
+#  message("CUDA_LIBRARIES ${CUDA_LIBRARIES}")
+#  set(TUTORIAL_DIRS ${TUTORIAL_DIRS}
+#    07_cuda_futures
+#  )
+#  link_directories(${HPX_LIBRARY_DIR})
+#  include_directories(${CUDA_TOOLKIT_INCLUDE})
+#endif()
 
 if (HPX_WITH_APEX)
   set(TUTORIAL_DIRS ${TUTORIAL_DIRS}

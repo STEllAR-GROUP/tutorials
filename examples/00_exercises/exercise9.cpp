@@ -1,11 +1,12 @@
-//  Copyright (c) 2019 Mikael Simberg
+//  Copyright (c) 2019-2020 ETH Zurich
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <hpx/hpx_main.hpp>
+#include <hpx/algorithm.hpp>
+#include <hpx/execution.hpp>
 #include <hpx/include/compute.hpp>
-#include <hpx/include/parallel_reduce.hpp>
+#include <hpx/wrap_main.hpp>
 
 // Run the reduction on the GPU.
 //
@@ -25,8 +26,8 @@ int main()
 
     hpx::compute::vector<double, allocator_type> c(1000000, 2.0, alloc);
 
-    hpx::parallel::reduce(hpx::parallel::execution::par.on(exec), std::begin(v),
-        std::end(v), 0.0, std::plus<double>());
+    hpx::reduce(hpx::execution::par.on(exec), std::begin(v), std::end(v), 0.0,
+        std::plus<double>());
 
     return 0;
 }

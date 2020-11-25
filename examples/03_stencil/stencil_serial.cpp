@@ -6,16 +6,15 @@
 #include "stencil.hpp"
 #include "output.hpp"
 
-#include <hpx/hpx_init.hpp>
-#include <hpx/include/util.hpp>
-
-#include <boost/program_options.hpp>
+#include <hpx/chrono.hpp>
+#include <hpx/init.hpp>
+#include <hpx/program_options.hpp>
 
 #include <array>
 #include <vector>
 #include <iostream>
 
-int hpx_main(boost::program_options::variables_map& vm)
+int hpx_main(hpx::program_options::variables_map& vm)
 {
     std::size_t Nx = vm["Nx"].as<std::size_t>();
     std::size_t Ny = vm["Ny"].as<std::size_t>();
@@ -31,7 +30,7 @@ int hpx_main(boost::program_options::variables_map& vm)
 
     init(U, Nx, Ny);
 
-    hpx::util::high_resolution_timer t;
+    hpx::chrono::high_resolution_timer t;
 
     // Construct our column iterators. We want to begin with the second
     // row to avoid out of bound accesses.
@@ -65,7 +64,7 @@ int hpx_main(boost::program_options::variables_map& vm)
 
 int main(int argc, char* argv[])
 {
-    using namespace boost::program_options;
+    using namespace hpx::program_options;
 
     options_description desc_commandline;
     desc_commandline.add_options()
@@ -79,5 +78,8 @@ int main(int argc, char* argv[])
          "Save output to file")
     ;
 
-    return hpx::init(desc_commandline, argc, argv);
+    hpx::init_params init_args;
+    init_args.desc_cmdline = desc_commandline;
+
+    return hpx::init(argc, argv, init_args);
 }

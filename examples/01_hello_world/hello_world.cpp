@@ -8,11 +8,11 @@
 #pragma warning(disable:488)
 #pragma warning(disable:858)
 
-#include <hpx/hpx_main.hpp>
-
-#include <hpx/hpx.hpp>
-#include <hpx/include/parallel_algorithm.hpp>
-#include <hpx/include/iostreams.hpp>
+#include <hpx/algorithm.hpp>
+#include <hpx/execution.hpp>
+#include <hpx/include/actions.hpp>
+#include <hpx/iostream.hpp>
+#include <hpx/wrap_main.hpp>
 
 #include <boost/range/irange.hpp>
 
@@ -27,8 +27,8 @@ void hello_locality()
         << "Hello, I am executed on Locality " << id
         << " (" << name << ")" << std::endl;
 
-    using hpx::parallel::for_loop;
-    using hpx::parallel::execution::par;
+    using hpx::for_loop;
+    using hpx::execution::par;
 
     // Iterate over the range in parallel
     for_loop(

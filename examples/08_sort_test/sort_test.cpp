@@ -21,8 +21,8 @@
 #define SORT_HAS_HPX
 
 #ifdef SORT_HAS_HPX
-# include <hpx/hpx.hpp>
-# include <hpx/include/parallel_sort.hpp>
+#include <hpx/algorithm.hpp>
+#include <hpx/hpx.hpp>
 #endif
 
 #ifdef SORT_HAS_GCC_PARALLEL

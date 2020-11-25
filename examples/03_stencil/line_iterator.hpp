@@ -6,7 +6,7 @@
 #ifndef STENCIL_LINE_ITERATOR_HPP
 #define STENCIL_LINE_ITERATOR_HPP
 
-#include <hpx/util/iterator_facade.hpp>
+#include <hpx/include/util.hpp>
 
 template <typename UpIter, typename MiddleIter = UpIter, typename DownIter = UpIter>
 struct line_iterator

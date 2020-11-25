@@ -7,13 +7,15 @@
 #include "output.hpp"
 #include "communicator.hpp"
 
-#include <hpx/hpx_init.hpp>
-#include <hpx/include/compute.hpp>
-#include <hpx/include/lcos.hpp>
-#include <hpx/include/async.hpp>
+#include <hpx/algorithm.hpp>
+#include <hpx/chrono.hpp>
+#include <hpx/execution.hpp>
+#include <hpx/future.hpp>
 #include <hpx/include/components.hpp>
-#include <hpx/include/parallel_algorithm.hpp>
+#include <hpx/include/compute.hpp>
 #include <hpx/include/util.hpp>
+#include <hpx/init.hpp>
+#include <hpx/program_options.hpp>
 
 #include <array>
 #include <algorithm>
@@ -69,14 +71,14 @@ void worker(
     }
 
     executor_type executor(numa_domains);
-    hpx::util::high_resolution_timer t;
+    hpx::chrono::high_resolution_timer t;
 
     // Construct our column iterators. We want to begin with the second
     // row to avoid out of bound accesses.
     iterator curr(Nx, U[0].begin());
     iterator next(Nx, U[1].begin());
 
-    using namespace hpx::parallel::execution;
+    using namespace hpx::execution;
 
     auto policy = par(task).on(executor);
     hpx::future<void> step_future = hpx::make_ready_future();
@@ -124,16 +126,13 @@ void worker(
 
             // Update our interior spatial domain
             hpx::future<void> interior_future =
-                hpx::parallel::for_loop(policy,
-                    curr + 1, curr + Ny-1,
+                hpx::for_loop(policy, curr + 1, curr + Ny - 1,
                     // We need to advance the result by one row each iteration
                     hpx::parallel::induction(next.middle + Nx, Nx),
-                    [Nx](iterator it, data_type::iterator result)
-                    {
+                    [Nx](iterator it, data_type::iterator result) {
                         hpx::util::annotate_function apex_profiler("line_update (for)");
                         line_update(*it, *it + Nx, result);
-                    }
-                );
+                    });
 
             // Update our lower boundary if we have an interior partition and a
             // neighbor below
@@ -186,7 +185,7 @@ void worker(
         output(output_name + std::to_string(rank), U[0], Nx, Ny);
 }
 
-int hpx_main(boost::program_options::variables_map& vm)
+int hpx_main(hpx::program_options::variables_map& vm)
 {
     std::size_t Nx = vm["Nx"].as<std::size_t>();
     std::size_t Ny_global = vm["Ny"].as<std::size_t>();
@@ -223,7 +222,7 @@ int hpx_main(boost::program_options::variables_map& vm)
 
 int main(int argc, char* argv[])
 {
-    using namespace boost::program_options;
+    using namespace hpx::program_options;
 
     options_description desc_commandline;
     desc_commandline.add_options()
@@ -246,5 +245,9 @@ int main(int argc, char* argv[])
         "hpx.numa_sensitive=2"
     };
 
-    return hpx::init(desc_commandline, argc, argv, cfg);
+    hpx::init_params init_args;
+    init_args.desc_cmdline = desc_commandline;
+    init_args.cfg = cfg;
+
+    return hpx::init(argc, argv, init_args);
 }

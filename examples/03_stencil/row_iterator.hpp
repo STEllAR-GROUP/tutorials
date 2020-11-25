@@ -8,7 +8,7 @@
 
 #include "line_iterator.hpp"
 
-#include <hpx/util/iterator_facade.hpp>
+#include <hpx/include/util.hpp>
 
 template <typename UpIter, typename MiddleIter = UpIter, typename DownIter = UpIter>
 struct row_iterator

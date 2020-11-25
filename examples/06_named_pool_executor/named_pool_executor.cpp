@@ -6,15 +6,13 @@
 // Simple test verifying basic resource partitioner
 // pool and executor
 
-#include <hpx/hpx_init.hpp>
-#include <hpx/include/async.hpp>
-#include <hpx/include/lcos.hpp>
+#include <hpx/algorithm.hpp>
+#include <hpx/execution.hpp>
+#include <hpx/future.hpp>
 #include <hpx/include/resource_partitioner.hpp>
-#include <hpx/include/parallel_execution.hpp>
-#include <hpx/include/parallel_executors.hpp>
-#include <hpx/include/parallel_for_loop.hpp>
-#include <hpx/include/threads.hpp>
-#include <hpx/util/lightweight_test.hpp>
+#include <hpx/init.hpp>
+#include <hpx/modules/testing.hpp>
+#include <hpx/thread.hpp>
 
 #include <cstddef>
 #include <string>
@@ -48,12 +46,12 @@ int hpx_main(int argc, char* argv[])
     // setup executors for different task priorities on the pools
     // segfaults or exceptions in any of the following will cause
     // the test to fail
-    auto exec_0_hp =
-        hpx::parallel::execution::pool_executor("default",
+    auto exec_0_hp = hpx::execution::parallel_executor(
+        &hpx::resource::get_thread_pool("default"),
         hpx::threads::thread_priority_high);
 
-    auto exec_0 =
-        hpx::parallel::execution::pool_executor("default",
+    auto exec_0 = hpx::execution::parallel_executor(
+        &hpx::resource::get_thread_pool("default"),
         hpx::threads::thread_priority_default);
 
     std::vector<hpx::future<void>> lotsa_futures;
@@ -67,19 +65,17 @@ int hpx_main(int argc, char* argv[])
         hpx::async(exec_0, &dummy_task, 3, "Normal default")
     );
 
-    std::vector<hpx::parallel::execution::pool_executor> execs;
-    std::vector<hpx::parallel::execution::pool_executor> execs_hp;
+    std::vector<hpx::execution::parallel_executor> execs;
+    std::vector<hpx::execution::parallel_executor> execs_hp;
     //
     for (int i=0; i<max_threads; ++i) {
         std::string pool_name = "pool:"+std::to_string(i);
-        execs.push_back(
-            hpx::parallel::execution::pool_executor(pool_name,
-            hpx::threads::thread_priority_default)
-        );
-        execs_hp.push_back(
-            hpx::parallel::execution::pool_executor(pool_name,
-            hpx::threads::thread_priority_high)
-        );
+        execs.push_back(hpx::execution::parallel_executor(
+            &hpx::resource::get_thread_pool(pool_name),
+            hpx::threads::thread_priority_default));
+        execs_hp.push_back(hpx::execution::parallel_executor(
+            &hpx::resource::get_thread_pool(pool_name),
+            hpx::threads::thread_priority_high));
     }
 
     for (int i=0; i<max_threads; ++i) {
@@ -91,14 +87,6 @@ int hpx_main(int argc, char* argv[])
             hpx::async(execs_hp[i], &dummy_task, 3, pool_name + " HP")
         );
     }
-
-    // check that the default executor still works
-    hpx::parallel::execution::default_executor large_stack_executor(
-        hpx::threads::thread_stacksize_large);
-
-    lotsa_futures.push_back(
-        hpx::async(large_stack_executor, &dummy_task, 3, "true default + large stack")
-    );
 
     // just wait until everything is done
     hpx::when_all(lotsa_futures).get();
@@ -145,21 +133,12 @@ int main(int argc, char* argv[])
         }
     };
 
-#if HPX_VERSION_FULL <= 0x010401
-    // create the resource partitioner
-    hpx::resource::partitioner rp(argc, argv);
-    rp_callback(rp);
-
-    // now run the test
-    HPX_TEST_EQ(hpx::init(argc, argv), 0);
-#else
     // set the resource partitioner callback
     hpx::init_params i;
     i.rp_callback = rp_callback;
 
     // now run the test
     HPX_TEST_EQ(hpx::init(argc, argv, i), 0);
-#endif
 
     return hpx::util::report_errors();
 }
@@ -187,21 +166,12 @@ int main_2(int argc, char* argv[])
         }
     };
 
-#if HPX_VERSION_FULL <= 0x010401
-    // create the resource partitioner
-    hpx::resource::partitioner rp(argc, argv);
-    rp_callback(rp);
-
-    // now run the test
-    HPX_TEST_EQ(hpx::init(argc, argv), 0);
-#else
     // set the resource partitioner callback
     hpx::init_params i;
     i.rp_callback = rp_callback;
 
     // now run the test
     HPX_TEST_EQ(hpx::init(argc, argv, i), 0);
-#endif
 
     return hpx::util::report_errors();
 }

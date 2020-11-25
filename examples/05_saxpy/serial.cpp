@@ -3,16 +3,15 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <hpx/hpx_init.hpp>
-#include <hpx/include/util.hpp>
-
-#include <boost/program_options.hpp>
+#include <hpx/chrono.hpp>
+#include <hpx/init.hpp>
+#include <hpx/program_options.hpp>
 
 #include <algorithm>
 #include <vector>
 #include <iostream>
 
-int hpx_main(boost::program_options::variables_map& vm)
+int hpx_main(hpx::program_options::variables_map& vm)
 {
     std::size_t N = vm["N"].as<std::size_t>();
     std::size_t steps = vm["steps"].as<std::size_t>();
@@ -22,7 +21,7 @@ int hpx_main(boost::program_options::variables_map& vm)
     std::vector<double> c(N, 2.0);
     double x = 3.0;
 
-    hpx::util::high_resolution_timer t;
+    hpx::chrono::high_resolution_timer t;
     for (std::size_t t = 0; t < steps; ++t)
     {
         std::transform(b.begin(), b.end(), c.begin(), a.begin(),
@@ -42,7 +41,7 @@ int hpx_main(boost::program_options::variables_map& vm)
 
 int main(int argc, char* argv[])
 {
-    using namespace boost::program_options;
+    using namespace hpx::program_options;
 
     options_description desc_commandline;
     desc_commandline.add_options()
@@ -52,5 +51,8 @@ int main(int argc, char* argv[])
          "Number of steps to apply the stencil")
     ;
 
-    return hpx::init(desc_commandline, argc, argv);
+    hpx::init_params init_args;
+    init_args.desc_cmdline = desc_commandline;
+
+    return hpx::init(argc, argv, init_args);
 }

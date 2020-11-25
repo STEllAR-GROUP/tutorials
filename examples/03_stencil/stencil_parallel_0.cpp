@@ -6,16 +6,16 @@
 #include "stencil.hpp"
 #include "output.hpp"
 
-#include <hpx/hpx_init.hpp>
-#include <hpx/include/parallel_algorithm.hpp>
-#include <hpx/include/util.hpp>
+#include <hpx/algorithm.hpp>
+#include <hpx/chrono.hpp>
+#include <hpx/init.hpp>
+#include <hpx/program_options.hpp>
 
 #include <array>
 #include <vector>
 #include <iostream>
 
-
-int hpx_main(boost::program_options::variables_map& vm)
+int hpx_main(hpx::program_options::variables_map& vm)
 {
     std::size_t Nx = vm["Nx"].as<std::size_t>();
     std::size_t Ny = vm["Ny"].as<std::size_t>();
@@ -31,26 +31,23 @@ int hpx_main(boost::program_options::variables_map& vm)
 
     init(U, Nx, Ny);
 
-    hpx::util::high_resolution_timer t;
+    hpx::chrono::high_resolution_timer t;
 
     // Construct our column iterators. We want to begin with the second
     // row to avoid out of bound accesses.
     iterator curr(Nx, U[0].begin());
     iterator next(Nx, U[1].begin());
 
-    auto policy = hpx::parallel::execution::par;
+    auto policy = hpx::execution::par;
     for (std::size_t t = 0; t < steps; ++t)
     {
         // We store the result of our update in the next middle line.
-        hpx::parallel::for_loop(policy,
-            curr + 1, curr + Ny-1,
+        hpx::for_loop(policy, curr + 1, curr + Ny - 1,
             // We need to advance the result by one row each iteration
             hpx::parallel::induction(next.middle + Nx, Nx),
-            [Nx](iterator it, data_type::iterator result)
-            {
+            [Nx](iterator it, data_type::iterator result) {
                 line_update(*it, *it + Nx, result);
-            }
-        );
+            });
         std::swap(curr, next);
     }
     double elapsed = t.elapsed();
@@ -66,7 +63,7 @@ int hpx_main(boost::program_options::variables_map& vm)
 
 int main(int argc, char* argv[])
 {
-    using namespace boost::program_options;
+    using namespace hpx::program_options;
 
     options_description desc_commandline;
     desc_commandline.add_options()
@@ -80,5 +77,8 @@ int main(int argc, char* argv[])
          "Save output to file")
     ;
 
-    return hpx::init(desc_commandline, argc, argv);
+    hpx::init_params init_args;
+    init_args.desc_cmdline = desc_commandline;
+
+    return hpx::init(argc, argv, init_args);
 }

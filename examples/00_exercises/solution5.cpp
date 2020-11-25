@@ -1,17 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
-//  Copyright (c) 2019 Mikael Simberg
+//  Copyright (c) 2019-2020 ETH Zurich
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <hpx/hpx_main.hpp>
-#include <hpx/include/async.hpp>
-#include <hpx/include/iostreams.hpp>
-#include <hpx/include/lcos.hpp>
-#include <hpx/include/parallel_for_loop.hpp>
-#include <hpx/include/parallel_generate.hpp>
-#include <hpx/include/util.hpp>
+#include <hpx/algorithm.hpp>
+#include <hpx/chrono.hpp>
+#include <hpx/execution.hpp>
+#include <hpx/future.hpp>
+#include <hpx/iostream.hpp>
+#include <hpx/wrap_main.hpp>
 
 int main()
 {
@@ -22,14 +21,13 @@ int main()
 
     std::mt19937 gen(0);
     std::uniform_real_distribution<double> dis(0.0, 1.0);
-    hpx::util::high_resolution_timer timer;
+    hpx::chrono::high_resolution_timer timer;
 
     hpx::cout << "generating... " << hpx::flush;
 
     //  We can create a task from a parallel algorithm with the task execution
     // policy.
-    auto f1 = hpx::parallel::generate(
-        hpx::parallel::execution::seq(hpx::parallel::execution::task),
+    auto f1 = hpx::generate(hpx::execution::seq(hpx::execution::task),
         std::begin(v), std::end(v), [&dis, &gen]() { return dis(gen); });
 
     // We can replace a future with a new future. The "generate" task will still
@@ -47,7 +45,7 @@ int main()
     // implicitly creates a task for each chunk of the input range. HPX does not
     // create one task for each index.
     auto f3 = sf2.then([&v, &w](hpx::shared_future<void>&&) {
-        hpx::parallel::for_loop(hpx::parallel::execution::par, 1, n - 1,
+        hpx::for_loop(hpx::execution::par, 1, n - 1,
             [&v, &w](auto i) { w[i] = (v[i - 1] + v[i] + v[i + 1]) / 3.0; });
     });
 

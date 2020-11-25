@@ -1,15 +1,16 @@
 ///////////////////////////////////////////////////////////////////////////////
-//  Copyright (c) 2019 Mikael Simberg
+//  Copyright (c) 2019-2020 ETH Zurich
 //  Copyright (c) 2015 Thomas Heller
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <hpx/hpx_main.hpp>
+#include <hpx/algorithm.hpp>
+#include <hpx/execution.hpp>
 #include <hpx/include/actions.hpp>
-#include <hpx/include/iostreams.hpp>
-#include <hpx/include/parallel_for_loop.hpp>
+#include <hpx/iostream.hpp>
+#include <hpx/wrap_main.hpp>
 
 void hello_locality()
 {
@@ -22,8 +23,7 @@ void hello_locality()
               << ")" << std::endl;
 
     // Iterate over the range in parallel
-    hpx::parallel::for_loop(hpx::parallel::execution::par, 0,
-        hpx::get_os_thread_count(),
+    hpx::for_loop(hpx::execution::par, 0, hpx::get_os_thread_count(),
         // For each element in the range, call the following lambda
         // (anonymous function)
         [id](std::size_t num_thread) {
