@@ -7,14 +7,13 @@
 #include <hpx/util/high_resolution_timer.hpp>
 #include <hpx/include/compute.hpp>
 #include <hpx/include/parallel_transform.hpp>
-
-#include <boost/program_options.hpp>
+#include <hpx/program_options.hpp>
 
 #include <algorithm>
 #include <vector>
 #include <iostream>
 
-int hpx_main(boost::program_options::variables_map& vm)
+int hpx_main(hpx::program_options::variables_map& vm)
 {
     std::size_t N = vm["N"].as<std::size_t>();
     std::size_t steps = vm["steps"].as<std::size_t>();
@@ -55,7 +54,7 @@ int hpx_main(boost::program_options::variables_map& vm)
 
 int main(int argc, char* argv[])
 {
-    using namespace boost::program_options;
+    using namespace hpx::program_options;
 
     options_description desc_commandline;
     desc_commandline.add_options()

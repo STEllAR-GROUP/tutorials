@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     hpx::program_options::options_description desc_commandline(
         "Usage: " HPX_APPLICATION_STRING " [options]");
 
-    using boost::program_options::value;
+    using hpx::program_options::value;
     desc_commandline.add_options()
         ( "n-value", value<std::uint64_t>()->default_value(10),
           "n value for the Fibonacci function")
