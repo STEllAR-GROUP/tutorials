@@ -37,9 +37,10 @@ int hpx_main(int argc, char* argv[])
     HPX_TEST_EQ(std::size_t(0), hpx::resource::get_pool_index("default"));
     HPX_TEST_EQ(std::size_t(0), hpx::resource::get_pool_index("pool:0"));
 
-    for (int i=0; i<max_threads; ++i) {
-        std::string pool_name = "pool:"+std::to_string(i);
-        HPX_TEST_EQ(pool_name , hpx::resource::get_pool_name(i));
+    for (int i = 0; i < max_threads; ++i)
+    {
+        std::string pool_name = "pool:" + std::to_string(i);
+        HPX_TEST_EQ(pool_name, hpx::resource::get_pool_name(i));
         HPX_TEST_EQ(std::size_t(1), hpx::resource::get_num_threads(i));
     }
 
@@ -58,18 +59,17 @@ int hpx_main(int argc, char* argv[])
 
     // use executors to schedule work on pools
     lotsa_futures.push_back(
-        hpx::async(exec_0_hp, &dummy_task, 3, "HP default")
-    );
+        hpx::async(exec_0_hp, &dummy_task, 3, "HP default"));
 
     lotsa_futures.push_back(
-        hpx::async(exec_0, &dummy_task, 3, "Normal default")
-    );
+        hpx::async(exec_0, &dummy_task, 3, "Normal default"));
 
     std::vector<hpx::execution::parallel_executor> execs;
     std::vector<hpx::execution::parallel_executor> execs_hp;
     //
-    for (int i=0; i<max_threads; ++i) {
-        std::string pool_name = "pool:"+std::to_string(i);
+    for (int i = 0; i < max_threads; ++i)
+    {
+        std::string pool_name = "pool:" + std::to_string(i);
         execs.push_back(hpx::execution::parallel_executor(
             &hpx::resource::get_thread_pool(pool_name),
             hpx::threads::thread_priority::default_));
@@ -78,14 +78,13 @@ int hpx_main(int argc, char* argv[])
             hpx::threads::thread_priority::high));
     }
 
-    for (int i=0; i<max_threads; ++i) {
-        std::string pool_name = "pool:"+std::to_string(i);
+    for (int i = 0; i < max_threads; ++i)
+    {
+        std::string pool_name = "pool:" + std::to_string(i);
         lotsa_futures.push_back(
-            hpx::async(execs[i], &dummy_task, 3, pool_name + " normal")
-        );
+            hpx::async(execs[i], &dummy_task, 3, pool_name + " normal"));
         lotsa_futures.push_back(
-            hpx::async(execs_hp[i], &dummy_task, 3, pool_name + " HP")
-        );
+            hpx::async(execs_hp[i], &dummy_task, 3, pool_name + " HP"));
     }
 
     // just wait until everything is done
@@ -98,16 +97,17 @@ int hpx_main(int argc, char* argv[])
 int main(int argc, char* argv[])
 {
     std::vector<std::string> cfg = {
-        "hpx.os_threads=" + std::to_string(max_threads)
-    };
+        "hpx.os_threads=" + std::to_string(max_threads)};
 
-    auto rp_callback = [](hpx::resource::partitioner& rp) {
+    auto rp_callback = [](hpx::resource::partitioner& rp,
+                           hpx::program_options::variables_map const&) {
         // before adding pools - set the default pool name to "pool:0"
         rp.set_default_pool_name("pool:0");
 
         // create N pools
-        for (int i=0; i<max_threads; i++) {
-            std::string pool_name = "pool:"+std::to_string(i);
+        for (int i = 0; i < max_threads; i++)
+        {
+            std::string pool_name = "pool:" + std::to_string(i);
             rp.create_thread_pool(pool_name,
                 hpx::resource::scheduling_policy::local_priority_fifo);
         }
@@ -122,9 +122,10 @@ int main(int argc, char* argv[])
                 {
                     if (thread_count < max_threads)
                     {
-                        std::string pool_name = "pool:" + std::to_string(thread_count);
-                        std::cout << "Added pu " << thread_count
-                                  << " to " << pool_name << "\n";
+                        std::string pool_name =
+                            "pool:" + std::to_string(thread_count);
+                        std::cout << "Added pu " << thread_count << " to "
+                                  << pool_name << "\n";
                         rp.add_resource(p, pool_name);
                         thread_count++;
                     }
@@ -146,10 +147,9 @@ int main(int argc, char* argv[])
 // this test must be run with 4 threads
 int main_2(int argc, char* argv[])
 {
-
     // before adding pools - set the default pool name to "pool:0"
-    auto rp_callback = [](hpx::resource::partitioner& rp)
-    {
+    auto rp_callback = [](hpx::resource::partitioner& rp,
+                           hpx::program_options::variables_map const&) {
         rp.set_default_pool_name("pool:0");
 
         // create N pools
@@ -157,7 +157,7 @@ int main_2(int argc, char* argv[])
         for (const hpx::resource::numa_domain& d : rp.numa_domains())
         {
             // create pool
-            std::string pool_name = "pool:"+std::to_string(numa_count);
+            std::string pool_name = "pool:" + std::to_string(numa_count);
             rp.create_thread_pool(pool_name,
                 hpx::resource::scheduling_policy::local_priority_fifo);
             // add domain to it
