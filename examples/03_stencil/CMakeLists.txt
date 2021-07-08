@@ -17,6 +17,9 @@ hpx_setup_target(stencil_serial)
 add_executable(stencil_parallel_0 stencil_parallel_0.cpp)
 hpx_setup_target(stencil_parallel_0)
 
+add_executable(stencil_parallel_vector stencil_parallel_vector.cpp)
+hpx_setup_target(stencil_parallel_vector)
+
 add_executable(stencil_parallel_1 stencil_parallel_1.cpp)
 hpx_setup_target(stencil_parallel_1)
 
@@ -33,6 +36,7 @@ hpx_setup_target(stencil_parallel_4)
 if (TARGET tutorial)
   add_hpx_pseudo_dependencies(tutorial.stencil stencil_serial)
   add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_0)
+  add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_parallel_vector)
   add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_1)
   add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_2)
   add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_3)
