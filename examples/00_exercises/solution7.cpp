@@ -10,6 +10,7 @@
 #include <hpx/execution.hpp>
 #include <hpx/include/actions.hpp>
 #include <hpx/iostream.hpp>
+#include <hpx/runtime.hpp>
 #include <hpx/wrap_main.hpp>
 
 void hello_locality()

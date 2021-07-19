@@ -6,11 +6,10 @@
 cmake_minimum_required(VERSION 3.0)
 project(NamedPool CXX)
 
-find_package(HPX REQUIRED)
-link_directories(${HPX_LIBRARY_DIR})
+find_package(HPX 1.7.0 REQUIRED)
 
 add_executable(named_pool_executor named_pool_executor.cpp)
-hpx_setup_target(named_pool_executor COMPONENT_DEPENDENCIES iostreams)
+target_link_libraries(named_pool_executor PRIVATE HPX::hpx HPX::wrap_main HPX::iostreams_component)
 
 # for tutorial target
 if (TARGET tutorial)

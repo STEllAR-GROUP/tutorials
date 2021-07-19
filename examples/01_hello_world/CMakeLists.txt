@@ -6,11 +6,11 @@
 cmake_minimum_required(VERSION 3.0)
 project(Hello_World CXX)
 
-find_package(HPX REQUIRED)
+find_package(HPX 1.7.0 REQUIRED)
 link_directories(${HPX_LIBRARY_DIR})
 
 add_executable(hello_world hello_world.cpp)
-hpx_setup_target(hello_world COMPONENT_DEPENDENCIES iostreams)
+target_link_libraries(hello_world PRIVATE HPX::hpx HPX::wrap_main HPX::iostreams_component)
 
 # for tutorial target
 if (TARGET tutorial)

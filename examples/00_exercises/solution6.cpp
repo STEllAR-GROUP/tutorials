@@ -42,7 +42,7 @@ hpx::future<double> tree_transform_reduce(
     hpx::future<double> right_result = hpx::async(
         &tree_transform_reduce<Transformer, Reducer>, n->right, t, r);
 
-    return hpx::dataflow(hpx::util::unwrapping(r), left_result, right_result);
+    return hpx::dataflow(hpx::unwrapping(r), left_result, right_result);
 }
 
 int main()

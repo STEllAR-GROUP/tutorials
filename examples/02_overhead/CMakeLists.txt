@@ -6,11 +6,10 @@
 cmake_minimum_required(VERSION 3.0)
 project(overhead CXX)
 
-find_package(HPX REQUIRED)
-link_directories(${HPX_LIBRARY_DIR})
+find_package(HPX 1.7.0 REQUIRED)
 
 add_executable(future_overhead future_overhead.cpp)
-hpx_setup_target(future_overhead COMPONENT_DEPENDENCIES iostreams)
+target_link_libraries(future_overhead PRIVATE HPX::hpx HPX::wrap_main HPX::iostreams_component)
 
 # for tutorial target
 if (TARGET tutorial)

@@ -33,12 +33,12 @@ int main()
     hpx::shared_future<double> f = hpx::make_ready_future(3.14);
     hpx::shared_future<int> g = hpx::make_ready_future(42);
 
-    // hpx::util::unwrapping and hpx::dataflow are convenient.
+    // hpx::unwrapping and hpx::dataflow are convenient.
     hpx::async(&fun1, 3.14, 42);
     hpx::async(&fun1, f.get(), g.get());
     hpx::when_all(f, g).then(&fun2);
     hpx::dataflow(&fun3, f, g);
-    hpx::dataflow(hpx::util::unwrapping(&fun1), f, g);
+    hpx::dataflow(hpx::unwrapping(&fun1), f, g);
 
     return 0;
 }

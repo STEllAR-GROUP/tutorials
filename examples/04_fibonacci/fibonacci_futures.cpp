@@ -43,11 +43,7 @@ hpx::future<std::uint64_t> fibonacci_futures(std::uint64_t n)
     hpx::future<std::uint64_t> r = fibonacci_futures(n-2);
 
     return hpx::dataflow(hpx::launch::sync,
-        hpx::util::unwrapping(
-            [](std::uint64_t l, std::uint64_t r)
-            {
-                return l + r;
-            }),
+        hpx::unwrapping([](std::uint64_t l, std::uint64_t r) { return l + r; }),
         f, r);
 }
 

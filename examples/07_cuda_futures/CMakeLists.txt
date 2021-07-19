@@ -6,18 +6,13 @@
 cmake_minimum_required(VERSION 3.0)
 project(CublasDemo CXX)
 
-find_package(HPX REQUIRED)
-link_directories(${HPX_LIBRARY_DIR})
-
-include_directories(${CUDA_INCLUDE_DIRS})
+find_package(HPX 1.7.0 REQUIRED)
 
 add_executable(cublas_matmul cublas_matmul.cpp)
-hpx_setup_target(cublas_matmul COMPONENT_DEPENDENCIES iostreams)
-target_link_libraries(cublas_matmul PRIVATE ${CUDA_LIBRARIES} ${CUDA_cublas_LIBRARY})
+target_link_libraries(saxpy_serial PRIVATE HPX::hpx HPX::wrap_main HPX::iostreams_component)
 
-add_hpx_executable(cuda_future SOURCES cuda_future.cpp trivial_demo.cu)
-#hpx_setup_target(cuda_future COMPONENT_DEPENDENCIES iostreams)
-target_link_libraries(cuda_future PRIVATE ${CUDA_LIBRARIES})
+add_executable(cuda_future cuda_future.cpp trivial_demo.cu)
+target_link_libraries(saxpy_serial PRIVATE HPX::hpx HPX::wrap_main HPX::iostreams_component)
 
 # for tutorial target
 if (TARGET tutorial)

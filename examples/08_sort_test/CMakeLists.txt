@@ -6,9 +6,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(SortTest CXX)
 
-find_package(HPX REQUIRED)
-link_directories(${HPX_LIBRARY_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+find_package(HPX 1.7.0 REQUIRED)
 
 #------------------------------------------------------------------------------
 # TBB
@@ -54,9 +52,9 @@ if (SORT_HAS_TBB)
 endif()
 
 if (SORT_HAS_HPX)
-  include_directories(${HPX_INCLUDE_DIRS})
   add_definitions(-DSORT_HAS_HPX)
-  set(BENCHMARK_LIBRARIES ${BENCHMARK_LIBRARIES} ${HPX_LIBRARIES})
+  set(BENCHMARK_LIBRARIES ${BENCHMARK_LIBRARIES} HPX::hpx HPX::wrap_main
+                          HPX::iostreams_component)
 endif()
 
 if (SORT_HAS_GNU)
@@ -67,7 +65,6 @@ endif()
 # setup exe
 #------------------------------------------------------------------------------
 add_executable(sort_test sort_test.cpp)
-hpx_setup_target(sort_test COMPONENT_DEPENDENCIES iostreams)
 target_link_libraries(sort_test PRIVATE ${BENCHMARK_LIBRARIES})
 
 # for tutorial target

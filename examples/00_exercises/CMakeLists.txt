@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(Exercises CXX)
 
-find_package(HPX REQUIRED)
+find_package(HPX 1.7.0 REQUIRED)
 
 set(solutions
   solution1
@@ -29,15 +29,17 @@ set(exercises
   exercise8)
 
 foreach(exercise ${exercises})
-  add_hpx_executable(${exercise}
-    SOURCES ${exercise}.cpp
-    COMPONENT_DEPENDENCIES iostreams partitioned_vector)
+  add_executable(${exercise} ${exercise}.cpp)
+  target_link_libraries(
+    ${exercise} PRIVATE HPX::hpx HPX::wrap_main HPX::iostreams_component
+                        HPX::partitioned_vector_component)
 endforeach()
 
 foreach(solution ${solutions})
-  add_hpx_executable(${solution}
-    SOURCES ${solution}.cpp
-    COMPONENT_DEPENDENCIES iostreams partitioned_vector)
+  add_executable(${solution} ${solution}.cpp)
+  target_link_libraries(
+    ${solution} PRIVATE HPX::hpx HPX::wrap_main HPX::iostreams_component
+                        HPX::partitioned_vector_component)
 endforeach()
 
 if(HPX_WITH_CUDA)

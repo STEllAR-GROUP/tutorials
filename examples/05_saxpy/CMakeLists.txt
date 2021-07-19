@@ -6,23 +6,21 @@
 cmake_minimum_required(VERSION 3.0)
 project(Latency CXX)
 
-find_package(HPX REQUIRED)
-link_directories(${HPX_LIBRARY_DIR})
-include_directories(${CUDA_INCLUDE_DIRS})
+find_package(HPX 1.7.0 REQUIRED)
 
 add_executable(saxpy_serial serial.cpp)
-hpx_setup_target(saxpy_serial)
+target_link_libraries(saxpy_serial PRIVATE HPX::hpx HPX::wrap_main)
 
 add_executable(saxpy_parallel parallel.cpp)
-hpx_setup_target(saxpy_parallel)
+target_link_libraries(saxpy_parallel PRIVATE HPX::hpx HPX::wrap_main)
 
 add_executable(saxpy_parallel_numa parallel_numa.cpp)
-hpx_setup_target(saxpy_parallel_numa)
+target_link_libraries(saxpy_parallel_numa PRIVATE HPX::hpx HPX::wrap_main)
 
 # disabled for the time being
 if (0 AND HPX_WITH_CUDA)
   add_executable(saxpy_parallel_cuda parallel_cuda.cu)
-  hpx_setup_target(saxpy_parallel_cuda)
+  target_link_libraries(saxpy_parallel_cuda PRIVATE HPX::hpx HPX::wrap_main)
   if (TARGET tutorial)
     add_hpx_pseudo_dependencies(tutorial.saxpy saxpy_parallel_cuda)
   endif()

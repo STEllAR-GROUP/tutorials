@@ -7,27 +7,25 @@ cmake_minimum_required(VERSION 2.8)
 
 project(stencil CXX)
 
-find_package(HPX REQUIRED)
-link_directories(${HPX_LIBRARY_DIR})
-include_directories(${CUDA_INCLUDE_DIRS})
+find_package(HPX 1.7.0 REQUIRED)
 
 add_executable(stencil_serial stencil_serial.cpp)
-hpx_setup_target(stencil_serial)
+target_link_libraries(stencil_serial PRIVATE HPX::hpx HPX::wrap_main)
 
 add_executable(stencil_parallel_0 stencil_parallel_0.cpp)
-hpx_setup_target(stencil_parallel_0)
+target_link_libraries(stencil_parallel_0 PRIVATE HPX::hpx HPX::wrap_main)
 
 add_executable(stencil_parallel_1 stencil_parallel_1.cpp)
-hpx_setup_target(stencil_parallel_1)
+target_link_libraries(stencil_parallel_1 PRIVATE HPX::hpx HPX::wrap_main)
 
 add_executable(stencil_parallel_2 stencil_parallel_2.cpp)
-hpx_setup_target(stencil_parallel_2)
+target_link_libraries(stencil_parallel_2 PRIVATE HPX::hpx HPX::wrap_main)
 
 add_executable(stencil_parallel_3 stencil_parallel_3.cpp)
-hpx_setup_target(stencil_parallel_3)
+target_link_libraries(stencil_parallel_3 PRIVATE HPX::hpx HPX::wrap_main)
 
 add_executable(stencil_parallel_4 stencil_parallel_4.cpp)
-hpx_setup_target(stencil_parallel_4)
+target_link_libraries(stencil_parallel_4 PRIVATE HPX::hpx HPX::wrap_main)
 
 # for tutorial target
 if (TARGET tutorial)

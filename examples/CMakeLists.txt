@@ -60,7 +60,7 @@ endif()
 #--------------------------------------------------
 # Find HPX, disable searching in user builds
 #--------------------------------------------------
-find_package(HPX 1.6.0 REQUIRED NO_CMAKE_PACKAGE_REGISTRY)
+find_package(HPX 1.7.0 REQUIRED NO_CMAKE_PACKAGE_REGISTRY)
 message("\n-------\nTutorial using HPX from ${HPX_DIR}\n-------\n")
 
 #--------------------------------------------------

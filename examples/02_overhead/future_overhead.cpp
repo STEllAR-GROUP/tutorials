@@ -232,8 +232,8 @@ void measure_function_futures_limiting_executor(
     // start the clock
     high_resolution_timer walltime;
     {
-        hpx::threads::executors::experimental::limiting_executor<Executor>
-            signal_exec(exec, tasks, tasks + 1000);
+        hpx::execution::experimental::limiting_executor<Executor> signal_exec(
+            exec, tasks, tasks + 1000);
         for (std::uint64_t i = 0; i < count; ++i) {
             hpx::apply(signal_exec, [&](){
                 null_function();

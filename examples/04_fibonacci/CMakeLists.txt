@@ -6,11 +6,10 @@
 cmake_minimum_required(VERSION 3.0)
 project(Fibonacci CXX)
 
-find_package(HPX REQUIRED)
-link_directories(${HPX_LIBRARY_DIR})
+find_package(HPX 1.7.0 REQUIRED)
 
 add_executable(fibonacci_futures fibonacci_futures.cpp)
-hpx_setup_target(fibonacci_futures COMPONENT_DEPENDENCIES iostreams)
+target_link_libraries(fibonacci_futures PRIVATE HPX::hpx HPX::wrap_main HPX::iostreams_component)
 
 # for tutorial target
 if (TARGET tutorial)

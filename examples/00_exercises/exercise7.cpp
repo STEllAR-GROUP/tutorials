@@ -10,6 +10,7 @@
 #include <hpx/execution.hpp>
 #include <hpx/include/actions.hpp>
 #include <hpx/iostream.hpp>
+#include <hpx/runtime.hpp>
 #include <hpx/wrap_main.hpp>
 
 // This program does not compile because hello_locality is not an action, only a
