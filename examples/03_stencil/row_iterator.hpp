@@ -3,18 +3,18 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef STENCIL_ROW_ITERATOR_HPP
-#define STENCIL_ROW_ITERATOR_HPP
+#pragma once
 
 #include "line_iterator.hpp"
 
 #include <hpx/include/util.hpp>
 
-template <typename UpIter, typename MiddleIter = UpIter, typename DownIter = UpIter>
+template <typename UpIter, typename MiddleIter = UpIter,
+    typename DownIter = UpIter>
 struct row_iterator
-    // iterator_facade is a facade class that defines the boilerplate needed for
-    // a proper standard C++ iterator. As a user, we only have to define basic
-    // functions
+  // iterator_facade is a facade class that defines the boilerplate needed for a
+  // proper standard C++ iterator. As a user, we only have to define basic
+  // functions
   : hpx::util::iterator_facade<
         // Our type:
         row_iterator<UpIter, MiddleIter, DownIter>,
@@ -24,17 +24,17 @@ struct row_iterator
         std::random_access_iterator_tag,
         // Since dereferencing should return a new line_iterator, we need to
         // explicitly set the reference type.
-        line_iterator<UpIter, MiddleIter, DownIter>
-    >
+        line_iterator<UpIter, MiddleIter, DownIter>>
 {
-    typedef line_iterator<UpIter, MiddleIter, DownIter> line_iterator_type;
+    using line_iterator_type = line_iterator<UpIter, MiddleIter, DownIter>;
 
     row_iterator(std::size_t Nx, MiddleIter middle_)
-      : up_(middle - Nx)
-      , middle(middle_)
+      : middle(middle_)
+      , up_(middle - Nx)
       , down_(middle + Nx)
       , Nx_(Nx)
-    {}
+    {
+    }
 
     line_iterator<UpIter, MiddleIter, DownIter> line() const
     {
@@ -45,16 +45,16 @@ struct row_iterator
     line_iterator<typename Container::const_iterator, MiddleIter, DownIter>
     top_boundary(Container const& cont) const
     {
-        return line_iterator<typename Container::const_iterator, MiddleIter, DownIter>(
-            cont.begin(), middle, down_);
+        return line_iterator<typename Container::const_iterator, MiddleIter,
+            DownIter>(cont.begin(), middle, down_);
     }
 
     template <typename Container>
     line_iterator<UpIter, MiddleIter, typename Container::const_iterator>
     bottom_boundary(Container const& cont) const
     {
-        return line_iterator<UpIter, MiddleIter, typename Container::const_iterator>(
-            up_, middle, cont.begin());
+        return line_iterator<UpIter, MiddleIter,
+            typename Container::const_iterator>(up_, middle, cont.begin());
     }
 
     MiddleIter middle;
@@ -102,5 +102,3 @@ private:
     DownIter down_;
     std::size_t Nx_;
 };
-
-#endif

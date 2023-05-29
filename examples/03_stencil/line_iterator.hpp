@@ -3,43 +3,40 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef STENCIL_LINE_ITERATOR_HPP
-#define STENCIL_LINE_ITERATOR_HPP
+#pragma once
 
 #include <hpx/include/util.hpp>
 
-template <typename UpIter, typename MiddleIter = UpIter, typename DownIter = UpIter>
+template <typename UpIter, typename MiddleIter = UpIter,
+    typename DownIter = UpIter>
 struct line_iterator
-    // iterator_facade is a facade class that defines the boilerplate needed for
-    // a proper standard C++ iterator. As a user, we only have to define basic
-    // functions
+  // iterator_facade is a facade class that defines the boilerplate needed for a
+  // proper standard C++ iterator. As a user, we only have to define basic
+  // functions
   : hpx::util::iterator_facade<
         // Our type:
         line_iterator<UpIter, MiddleIter, DownIter>,
         // Value type (When dereferencing the iterator)
         double,
         // Our iterator is random access.
-        std::random_access_iterator_tag
-    >
+        std::random_access_iterator_tag>
 {
 private:
-    typedef
-        hpx::util::iterator_facade<
-            // Our type:
-            line_iterator<UpIter, MiddleIter, DownIter>,
-            // Value type (When dereferencing the iterator)
-            double,
-            // Our iterator is random access.
-            std::random_access_iterator_tag
-        >
-        base_type;
+    using base_type = hpx::util::iterator_facade<
+        // Our type:
+        line_iterator<UpIter, MiddleIter, DownIter>,
+        // Value type (When dereferencing the iterator)
+        double,
+        // Our iterator is random access.
+        std::random_access_iterator_tag>;
 
 public:
     line_iterator(UpIter up_, MiddleIter middle_, DownIter down_)
       : up(up_)
       , middle(middle_)
       , down(down_)
-    {}
+    {
+    }
 
     UpIter up;
     MiddleIter middle;
@@ -84,5 +81,3 @@ private:
         return other.middle - middle;
     }
 };
-
-#endif

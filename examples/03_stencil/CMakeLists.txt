@@ -3,11 +3,11 @@
 # Distributed under the Boost Software License, Version 1.0. (See accompanying
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.14)
 
 project(stencil CXX)
 
-find_package(HPX 1.7.0 REQUIRED)
+find_package(HPX 1.9.0 REQUIRED)
 
 add_executable(stencil_serial stencil_serial.cpp)
 target_link_libraries(stencil_serial PRIVATE HPX::hpx HPX::wrap_main)

@@ -3,8 +3,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "stencil.hpp"
 #include "output.hpp"
+#include "stencil.hpp"
 
 #include <hpx/algorithm.hpp>
 #include <hpx/chrono.hpp>
@@ -12,17 +12,17 @@
 #include <hpx/program_options.hpp>
 
 #include <array>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 int hpx_main(hpx::program_options::variables_map& vm)
 {
-    std::size_t Nx = vm["Nx"].as<std::size_t>();
-    std::size_t Ny = vm["Ny"].as<std::size_t>();
-    std::size_t steps = vm["steps"].as<std::size_t>();
+    std::size_t const Nx = vm["Nx"].as<std::size_t>();
+    std::size_t const Ny = vm["Ny"].as<std::size_t>();
+    std::size_t const steps = vm["steps"].as<std::size_t>();
 
-    typedef std::vector<double> data_type;
-    typedef row_iterator<data_type::iterator> iterator;
+    using data_type = std::vector<double>;
+    using iterator = row_iterator<data_type::iterator>;
 
     std::array<data_type, 2> U;
 
@@ -31,28 +31,30 @@ int hpx_main(hpx::program_options::variables_map& vm)
 
     init(U, Nx, Ny);
 
-    hpx::chrono::high_resolution_timer t;
+    hpx::chrono::high_resolution_timer const tim;
 
-    // Construct our column iterators. We want to begin with the second
-    // row to avoid out of bound accesses.
+    // Construct our column iterators. We want to begin with the second row to
+    // avoid out of bound accesses.
     iterator curr(Nx, U[0].begin());
     iterator next(Nx, U[1].begin());
 
     auto policy = hpx::execution::par;
-    for (std::size_t t = 0; t < steps; ++t)
+    for (std::size_t t = 0; t != steps; ++t)
     {
         // We store the result of our update in the next middle line.
-        hpx::for_loop(policy, curr + 1, curr + Ny - 1,
+        hpx::experimental::for_loop(policy, curr + 1, curr + Ny - 1,
             // We need to advance the result by one row each iteration
-            hpx::parallel::induction(next.middle + Nx, Nx),
-            [Nx](iterator it, data_type::iterator result) {
+            hpx::experimental::induction(next.middle + Nx, Nx),
+            [Nx](iterator const& it, data_type::iterator const& result) {
                 line_update(*it, *it + Nx, result);
             });
         std::swap(curr, next);
     }
-    double elapsed = t.elapsed();
 
-    double mlups = (((Nx - 2.) * (Ny - 2.) * steps) / 1e6)/ elapsed;
+    double const elapsed = tim.elapsed();
+    double const mlups =
+        (static_cast<double>((Nx - 2) * (Ny - 2) * steps) / 1e6) / elapsed;
+
     std::cout << "MLUPS: " << mlups << "\n";
 
     if (vm.count("output"))
@@ -65,6 +67,7 @@ int main(int argc, char* argv[])
 {
     using namespace hpx::program_options;
 
+    // clang-format off
     options_description desc_commandline;
     desc_commandline.add_options()
         ("Nx", value<std::size_t>()->default_value(1024),
@@ -76,6 +79,7 @@ int main(int argc, char* argv[])
         ("output", value<std::string>(),
          "Save output to file")
     ;
+    // clang-format on
 
     hpx::init_params init_args;
     init_args.desc_cmdline = desc_commandline;
