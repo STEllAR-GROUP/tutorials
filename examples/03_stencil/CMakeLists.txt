@@ -15,6 +15,9 @@ target_link_libraries(stencil_serial PRIVATE HPX::hpx HPX::wrap_main)
 add_executable(stencil_parallel_0 stencil_parallel_0.cpp)
 target_link_libraries(stencil_parallel_0 PRIVATE HPX::hpx HPX::wrap_main)
 
+add_executable(stencil_parallel_vector stencil_parallel_vector.cpp)
+hpx_setup_target(stencil_parallel_vector)
+
 add_executable(stencil_parallel_1 stencil_parallel_1.cpp)
 target_link_libraries(stencil_parallel_1 PRIVATE HPX::hpx HPX::wrap_main)
 
@@ -31,6 +34,7 @@ target_link_libraries(stencil_parallel_4 PRIVATE HPX::hpx HPX::wrap_main)
 if (TARGET tutorial)
   add_hpx_pseudo_dependencies(tutorial.stencil stencil_serial)
   add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_0)
+  add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_parallel_vector)
   add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_1)
   add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_2)
   add_hpx_pseudo_dependencies(tutorial.stencil stencil_parallel_3)
